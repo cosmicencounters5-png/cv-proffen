@@ -1,15 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import CVPreview from "@/components/CVPreview"
 import { CV } from "@/types/cv"
+import CVPreview from "@/components/CVPreview"
+import ExperienceSection from "@/components/ExperienceSection"
+import EducationSection from "@/components/EducationSection"
+import SkillsSection from "@/components/SkillsSection"
 
 const EMPTY_CV: CV = {
   id: "new",
   personal: {
     firstName: "",
     lastName: "",
-    title: "", // ✅ VIKTIG: profesjonell tittel
+    title: "",
     email: "",
     phone: "",
   },
@@ -22,76 +25,87 @@ export default function CVPage() {
   const [cv, setCV] = useState<CV>(EMPTY_CV)
 
   return (
-    <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      {/* Editor */}
-      <div className="space-y-4">
-        <h1 className="text-xl font-semibold">Rediger CV</h1>
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Editor */}
+        <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          <h1 className="text-xl font-semibold">Bygg CV</h1>
 
-        <input
-          placeholder="Fornavn"
-          value={cv.personal.firstName}
-          onChange={(e) =>
-            setCV({
-              ...cv,
-              personal: { ...cv.personal, firstName: e.target.value },
-            })
-          }
-          className="w-full border rounded px-3 py-2"
-        />
+          {/* Personalia */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Personalia</h2>
 
-        <input
-          placeholder="Etternavn"
-          value={cv.personal.lastName}
-          onChange={(e) =>
-            setCV({
-              ...cv,
-              personal: { ...cv.personal, lastName: e.target.value },
-            })
-          }
-          className="w-full border rounded px-3 py-2"
-        />
+            <input
+              placeholder="Fornavn"
+              value={cv.personal.firstName}
+              onChange={(e) =>
+                setCV({
+                  ...cv,
+                  personal: { ...cv.personal, firstName: e.target.value },
+                })
+              }
+              className="w-full border rounded px-3 py-2"
+            />
 
-        <input
-          placeholder="Tittel / rolle (f.eks. Frontend-utvikler)"
-          value={cv.personal.title}
-          onChange={(e) =>
-            setCV({
-              ...cv,
-              personal: { ...cv.personal, title: e.target.value },
-            })
-          }
-          className="w-full border rounded px-3 py-2"
-        />
+            <input
+              placeholder="Etternavn"
+              value={cv.personal.lastName}
+              onChange={(e) =>
+                setCV({
+                  ...cv,
+                  personal: { ...cv.personal, lastName: e.target.value },
+                })
+              }
+              className="w-full border rounded px-3 py-2"
+            />
 
-        <input
-          placeholder="E-post"
-          value={cv.personal.email}
-          onChange={(e) =>
-            setCV({
-              ...cv,
-              personal: { ...cv.personal, email: e.target.value },
-            })
-          }
-          className="w-full border rounded px-3 py-2"
-        />
+            <input
+              placeholder="Tittel / rolle (f.eks. Frontend-utvikler)"
+              value={cv.personal.title}
+              onChange={(e) =>
+                setCV({
+                  ...cv,
+                  personal: { ...cv.personal, title: e.target.value },
+                })
+              }
+              className="w-full border rounded px-3 py-2"
+            />
 
-        <input
-          placeholder="Telefon"
-          value={cv.personal.phone}
-          onChange={(e) =>
-            setCV({
-              ...cv,
-              personal: { ...cv.personal, phone: e.target.value },
-            })
-          }
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
+            <input
+              placeholder="E-post"
+              value={cv.personal.email}
+              onChange={(e) =>
+                setCV({
+                  ...cv,
+                  personal: { ...cv.personal, email: e.target.value },
+                })
+              }
+              className="w-full border rounded px-3 py-2"
+            />
 
-      {/* Preview */}
-      <div>
-        <CVPreview cv={cv} />
+            <input
+              placeholder="Telefon"
+              value={cv.personal.phone}
+              onChange={(e) =>
+                setCV({
+                  ...cv,
+                  personal: { ...cv.personal, phone: e.target.value },
+                })
+              }
+              className="w-full border rounded px-3 py-2"
+            />
+          </section>
+
+          <ExperienceSection cv={cv} setCV={setCV} />
+          <EducationSection cv={cv} setCV={setCV} />
+          <SkillsSection cv={cv} setCV={setCV} />
+        </div>
+
+        {/* Preview */}
+        <div className="sticky top-6 h-fit">
+          <CVPreview cv={cv} />
+        </div>
       </div>
     </div>
   )
