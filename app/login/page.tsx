@@ -50,6 +50,13 @@ export default function LoginPage() {
           Logg inn
         </button>
 
+<p className="text-sm">
+  Har du ikke konto?{" "}
+  <a href="/signup" className="underline">
+    Registrer deg
+  </a>
+</p>
+
         {message && <p>{message}</p>}
       </form>
     </main>
