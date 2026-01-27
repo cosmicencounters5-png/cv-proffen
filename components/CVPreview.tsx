@@ -8,7 +8,7 @@ import { CV } from "@/types/cv"
 
 export default function CVPreview({ cv }: { cv: CV }) {
   return (
-    <div className="border rounded-xl p-4 bg-gray-50">
+<div className="bg-white border rounded-xl p-8 shadow-sm print:shadow-none print:border-none">
       <h1 className="text-xl font-bold">
         {cv.personal.firstName} {cv.personal.lastName}
       </h1>
