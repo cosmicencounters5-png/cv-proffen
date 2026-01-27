@@ -1,63 +1,98 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { CV } from "@/types/cv"
-import CVSection from "@/components/CVSection"
-import PersonalForm from "@/components/PersonalForm"
-import ExperienceSection from "@/components/ExperienceSection"
-import EducationSection from "@/components/EducationSection"
-import SkillsSection from "@/components/SkillsSection"
+import { useState } from "react"
 import CVPreview from "@/components/CVPreview"
+import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
-  personal: { firstName: "", lastName: "", email: "", phone: "" },
+  id: "new",
+  personal: {
+    firstName: "",
+    lastName: "",
+    title: "", // ✅ VIKTIG: profesjonell tittel
+    email: "",
+    phone: "",
+  },
   experience: [],
   education: [],
   skills: [],
 }
 
 export default function CVPage() {
-  const [cv, setCv] = useState<CV>(EMPTY_CV)
-  const [loaded, setLoaded] = useState(false)
-
-  // 🔹 Last fra localStorage én gang
-  useEffect(() => {
-    const stored = localStorage.getItem("cv")
-    if (stored) {
-      setCv(JSON.parse(stored))
-    }
-    setLoaded(true)
-  }, [])
-
-  // 🔹 Lagre hver gang CV endres
-  useEffect(() => {
-    if (!loaded) return
-    localStorage.setItem("cv", JSON.stringify(cv))
-  }, [cv, loaded])
-
-  if (!loaded) return null
+  const [cv, setCV] = useState<CV>(EMPTY_CV)
 
   return (
-    <div className="grid lg:grid-cols-[1fr_420px] gap-6">
-      <div>
-        <CVSection title="Personalia">
-          <PersonalForm cv={cv} setCv={setCv} />
-        </CVSection>
+    <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      {/* Editor */}
+      <div className="space-y-4">
+        <h1 className="text-xl font-semibold">Rediger CV</h1>
 
-        <CVSection title="Arbeidserfaring">
-          <ExperienceSection cv={cv} setCv={setCv} />
-        </CVSection>
+        <input
+          placeholder="Fornavn"
+          value={cv.personal.firstName}
+          onChange={(e) =>
+            setCV({
+              ...cv,
+              personal: { ...cv.personal, firstName: e.target.value },
+            })
+          }
+          className="w-full border rounded px-3 py-2"
+        />
 
-        <CVSection title="Utdanning">
-          <EducationSection cv={cv} setCv={setCv} />
-        </CVSection>
+        <input
+          placeholder="Etternavn"
+          value={cv.personal.lastName}
+          onChange={(e) =>
+            setCV({
+              ...cv,
+              personal: { ...cv.personal, lastName: e.target.value },
+            })
+          }
+          className="w-full border rounded px-3 py-2"
+        />
 
-        <CVSection title="Ferdigheter">
-          <SkillsSection cv={cv} setCv={setCv} />
-        </CVSection>
+        <input
+          placeholder="Tittel / rolle (f.eks. Frontend-utvikler)"
+          value={cv.personal.title}
+          onChange={(e) =>
+            setCV({
+              ...cv,
+              personal: { ...cv.personal, title: e.target.value },
+            })
+          }
+          className="w-full border rounded px-3 py-2"
+        />
+
+        <input
+          placeholder="E-post"
+          value={cv.personal.email}
+          onChange={(e) =>
+            setCV({
+              ...cv,
+              personal: { ...cv.personal, email: e.target.value },
+            })
+          }
+          className="w-full border rounded px-3 py-2"
+        />
+
+        <input
+          placeholder="Telefon"
+          value={cv.personal.phone}
+          onChange={(e) =>
+            setCV({
+              ...cv,
+              personal: { ...cv.personal, phone: e.target.value },
+            })
+          }
+          className="w-full border rounded px-3 py-2"
+        />
       </div>
 
-      <CVPreview cv={cv} />
+      {/* Preview */}
+      <div>
+        <CVPreview cv={cv} />
+      </div>
     </div>
   )
 }
