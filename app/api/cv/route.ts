@@ -2,8 +2,6 @@ import { NextResponse } from "next/server"
 import { supabaseServer } from "@/lib/supabaseServer"
 import { CV } from "@/types/cv"
 
-// ⚠️ Midlertidig: fast user_id
-// Byttes ut med auth senere
 const USER_ID = "00000000-0000-0000-0000-000000000001"
 
 export async function GET() {
@@ -12,6 +10,8 @@ export async function GET() {
     .select("data")
     .eq("user_id", USER_ID)
     .single()
+
+  console.log("GET CV", { data, error })
 
   if (error || !data) {
     return NextResponse.json(null)
@@ -30,6 +30,8 @@ export async function POST(req: Request) {
       data: cv,
       updated_at: new Date().toISOString(),
     })
+
+  console.log("SAVE CV", { error })
 
   if (error) {
     return NextResponse.json(
