@@ -5,12 +5,16 @@ import { CV } from "@/types/cv"
 import CVSection from "@/components/CVSection"
 import PersonalForm from "@/components/PersonalForm"
 import ExperienceSection from "@/components/ExperienceSection"
+import EducationSection from "@/components/EducationSection"
+import SkillsSection from "@/components/SkillsSection"
 import CVPreview from "@/components/CVPreview"
 
 export default function CVPage() {
   const [cv, setCv] = useState<CV>({
     personal: { firstName: "", lastName: "", email: "", phone: "" },
     experience: [],
+    education: [],
+    skills: [],
   })
 
   return (
@@ -22,6 +26,14 @@ export default function CVPage() {
 
         <CVSection title="Arbeidserfaring">
           <ExperienceSection cv={cv} setCv={setCv} />
+        </CVSection>
+
+        <CVSection title="Utdanning">
+          <EducationSection cv={cv} setCv={setCv} />
+        </CVSection>
+
+        <CVSection title="Ferdigheter">
+          <SkillsSection cv={cv} setCv={setCv} />
         </CVSection>
       </div>
 
