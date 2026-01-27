@@ -6,50 +6,52 @@ import { supabase } from "@/lib/supabaseClient";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    setLoading(false);
-
     if (error) {
-      alert(error.message);
+      setMessage(error.message);
     } else {
-      alert("Innlogget!");
-      window.location.href = "/";
+      setMessage("Innlogging OK 🎉");
     }
   }
 
   return (
-    <form onSubmit={handleLogin}>
-      <h1>Logg inn</h1>
+    <main className="min-h-screen flex items-center justify-center">
+      <form onSubmit={handleLogin} className="space-y-4 w-80">
+        <h1 className="text-2xl font-bold">Logg inn</h1>
 
-      <input
-        type="email"
-        placeholder="E-post"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+        <input
+          type="email"
+          placeholder="E-post"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2"
+          required
+        />
 
-      <input
-        type="password"
-        placeholder="Passord"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+        <input
+          type="password"
+          placeholder="Passord"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border p-2"
+          required
+        />
 
-      <button type="submit" disabled={loading}>
-        {loading ? "Logger inn..." : "Logg inn"}
-      </button>
-    </form>
+        <button className="w-full bg-black text-white p-2">
+          Logg inn
+        </button>
+
+        {message && <p>{message}</p>}
+      </form>
+    </main>
   );
 }
