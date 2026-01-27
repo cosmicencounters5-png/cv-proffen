@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "CV-Proffen",
-  description: "Profesjonelle CV-er og søknader. Kommer snart.",
+  description: "Profesjonelle CV-er og jobbsøknader",
 };
 
 export default function RootLayout({
