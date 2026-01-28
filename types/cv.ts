@@ -7,22 +7,30 @@ export type CV = {
     email: string
     phone: string
   }
-  experience: {
-    id: string
-    role: string
-    company: string
-    from?: string
-    to?: string
-    description?: string
-  }[]
-  education: {
-    id: string
-    school: string
-    degree: string
-    year?: string
-  }[]
-  skills: {
-    id: string
-    name: string
-  }[]
+  experience: Experience[]
+  education: Education[]
+  skills: Skill[]
+}
+
+export type Experience = {
+  id: string
+  role: string
+  company: string
+  from: string
+  to: string
+  description?: string
+}
+
+export type Education = {
+  id: string
+  school: string
+  degree: string
+  from: string
+  to: string
+  description?: string
+}
+
+export type Skill = {
+  id: string
+  name: string
 }
