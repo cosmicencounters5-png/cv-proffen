@@ -84,3 +84,14 @@ export default function CVPage() {
     </div>
   )
 }
+import BuyButton from "@/components/BuyButton"
+
+export default function CVPage() {
+  return (
+    <div className="max-w-3xl mx-auto py-10">
+      {/* CV editor / preview her */}
+
+      <BuyButton packageType="cv_only" />
+    </div>
+  )
+}
