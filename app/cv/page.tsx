@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
+import BuyButton from "@/components/BuyButton"
 
 const EMPTY_CV: CV = {
   id: "",
@@ -72,7 +73,7 @@ export default function CVPage() {
   if (loading) return <p className="p-8">Laster…</p>
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-4">
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
       <button
         onClick={saveCV}
         className="bg-black text-white px-4 py-2 rounded"
@@ -81,16 +82,8 @@ export default function CVPage() {
       </button>
 
       <CVPreview cv={cv} />
-    </div>
-  )
-}
-import BuyButton from "@/components/BuyButton"
 
-export default function CVPage() {
-  return (
-    <div className="max-w-3xl mx-auto py-10">
-      {/* CV editor / preview her */}
-
+      {/* KJØP */}
       <BuyButton packageType="cv_only" />
     </div>
   )
