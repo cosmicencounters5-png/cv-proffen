@@ -2,22 +2,19 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function SignupPage() {
-  const router = useRouter()
-
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  const handleSignup = async (e: React.FormEvent) => {
+  async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
-    const { error } = await supabaseClient.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -25,49 +22,42 @@ export default function SignupPage() {
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      alert(error.message)
       return
     }
 
-    // Etter signup → login
+    alert("Bruker opprettet! Logg inn.")
     router.push("/login")
   }
 
   return (
-    <div className="max-w-md mx-auto py-12">
-      <h1 className="text-2xl font-bold mb-6">Opprett konto</h1>
+    <form
+      onSubmit={handleSignup}
+      className="max-w-md mx-auto p-8 space-y-4"
+    >
+      <h1 className="text-2xl font-bold">Opprett konto</h1>
 
-      <form onSubmit={handleSignup} className="space-y-4">
-        <input
-          type="email"
-          placeholder="E-post"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full border px-3 py-2 rounded"
-        />
+      <input
+        className="w-full border p-2"
+        placeholder="E-post"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <input
-          type="password"
-          placeholder="Passord"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full border px-3 py-2 rounded"
-        />
+      <input
+        type="password"
+        className="w-full border p-2"
+        placeholder="Passord"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-black text-white py-2 rounded"
-        >
-          {loading ? "Oppretter..." : "Opprett konto"}
-        </button>
-      </form>
-    </div>
+      <button
+        disabled={loading}
+        className="w-full bg-black text-white py-2"
+      >
+        {loading ? "Oppretter…" : "Registrer"}
+      </button>
+    </form>
   )
 }
