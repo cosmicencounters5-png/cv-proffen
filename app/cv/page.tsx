@@ -8,9 +8,9 @@ import { CV } from "@/types/cv"
 import { supabase } from "@/lib/supabaseClient"
 
 const EMPTY_CV: CV = {
+  id: "temp",
   personal: {
-    id: "temp",
-firstName: "",
+    firstName: "",
     lastName: "",
     title: "",
     email: "",
