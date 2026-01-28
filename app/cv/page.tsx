@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
 import DownloadPdfButton from "@/components/DownloadPdfButton"
+import GenerateSummaryButton from "@/components/GenerateSummaryButton"
 
 const EMPTY_CV: CV = {
   id: "local",
@@ -45,6 +46,13 @@ export default function CVPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      <GenerateSummaryButton
+        cv={cv}
+        onUpdate={(summary) =>
+          setCv((prev) => ({ ...prev, summary }))
+        }
+      />
+
       <DownloadPdfButton />
       <CVPreview cv={cv} />
     </div>
