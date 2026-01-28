@@ -1,52 +1,50 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { supabaseClient } from "@/lib/supabaseClient"
 
 export default function SignupPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabaseClient.auth.signUp({
       email,
       password,
-    });
+    })
+
+    setLoading(false)
 
     if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
+      setError(error.message)
+      return
     }
 
-    // ✅ Registrert og innlogget
-    router.push("/dashboard");
+    // Etter signup → login
+    router.push("/login")
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <form
-        onSubmit={handleSignup}
-        className="w-full max-w-sm space-y-4"
-      >
-        <h1 className="text-2xl font-bold">Opprett konto</h1>
+    <div className="max-w-md mx-auto py-12">
+      <h1 className="text-2xl font-bold mb-6">Opprett konto</h1>
 
+      <form onSubmit={handleSignup} className="space-y-4">
         <input
           type="email"
           placeholder="E-post"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full border p-2"
+          className="w-full border px-3 py-2 rounded"
         />
 
         <input
@@ -55,19 +53,21 @@ export default function SignupPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full border p-2"
+          className="w-full border px-3 py-2 rounded"
         />
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white py-2"
+          className="w-full bg-black text-white py-2 rounded"
         >
-          {loading ? "Oppretter konto..." : "Registrer"}
+          {loading ? "Oppretter..." : "Opprett konto"}
         </button>
       </form>
-    </main>
-  );
+    </div>
+  )
 }
