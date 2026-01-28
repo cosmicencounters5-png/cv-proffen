@@ -2,21 +2,57 @@ import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
   try {
-    const cv = await req.json()
+    const { cv } = await req.json()
 
-    const name =
-      cv?.personal?.firstName || cv?.personal?.lastName
-        ? `${cv.personal.firstName} ${cv.personal.lastName}`.trim()
-        : "Kandidaten"
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "Missing OPENAI_API_KEY" },
+        { status: 500 }
+      )
+    }
 
-    const title = cv?.personal?.title || "en relevant stilling"
+    const prompt = `
+Skriv et profesjonelt, kort CV-sammendrag på norsk (3–4 setninger).
+Tilpass for jobbsøknad.
 
-    const summary = `${name} søker ${title}. Har erfaring innen relevante områder og er motivert for nye utfordringer. Strukturert, lærevillig og opptatt av å levere kvalitet.`
+Navn: ${cv.personal.firstName} ${cv.personal.lastName}
+Ønsket stilling: ${cv.personal.title}
+
+Arbeidserfaring:
+${cv.experience
+  .map((e: any) => `- ${e.role} hos ${e.company}`)
+  .join("\n")}
+
+Ferdigheter:
+${cv.skills.map((s: any) => `- ${s.name}`).join("\n")}
+`
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Du er en profesjonell karriereveileder." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.4,
+      }),
+    })
+
+    const data = await response.json()
+
+    const summary =
+      data.choices?.[0]?.message?.content?.trim() || ""
 
     return NextResponse.json({ summary })
-  } catch (error) {
+  } catch (err) {
+    console.error("AI SUMMARY ERROR:", err)
     return NextResponse.json(
-      { error: "Kunne ikke generere sammendrag" },
+      { error: "AI error" },
       { status: 500 }
     )
   }
