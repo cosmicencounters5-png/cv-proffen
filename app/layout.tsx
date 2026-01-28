@@ -1,18 +1,13 @@
-import "./globals.css";
-
-export const metadata = {
-  title: "CV-Proffen",
-  description: "Profesjonelle CV-er og jobbsøknader",
-};
+import "./globals.css"
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="no">
-      <body>{children}</body>
+      <body className="bg-gray-100 text-gray-900">{children}</body>
     </html>
-  );
+  )
 }
