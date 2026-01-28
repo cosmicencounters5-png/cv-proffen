@@ -2,23 +2,24 @@
 
 import { CV } from "@/types/cv"
 
-export default function EducationSection({
-  cv,
-  setCV,
-}: {
+type Props = {
   cv: CV
-  setCV: (cv: CV) => void
-}) {
+  onChange: (cv: CV) => void
+}
+
+export default function EducationSection({ cv, onChange }: Props) {
   function addEducation() {
-    setCV({
+    onChange({
       ...cv,
       education: [
         ...cv.education,
         {
           id: crypto.randomUUID(),
-          degree: "",
           school: "",
-          year: "",
+          degree: "",
+          from: "",
+          to: "",
+          description: "",
         },
       ],
     })
@@ -26,10 +27,10 @@ export default function EducationSection({
 
   function updateEducation(
     id: string,
-    field: keyof CV["education"][number],
+    field: string,
     value: string
   ) {
-    setCV({
+    onChange({
       ...cv,
       education: cv.education.map((e) =>
         e.id === id ? { ...e, [field]: value } : e
@@ -37,51 +38,90 @@ export default function EducationSection({
     })
   }
 
+  function removeEducation(id: string) {
+    onChange({
+      ...cv,
+      education: cv.education.filter((e) => e.id !== id),
+    })
+  }
+
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold">Utdanning</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Utdanning</h2>
+        <button
+          onClick={addEducation}
+          className="text-sm text-blue-600"
+        >
+          + Legg til
+        </button>
+      </div>
 
-      {cv.education.map((e) => (
+      {cv.education.length === 0 && (
+        <p className="text-sm text-gray-500">
+          Ingen utdanning lagt til ennå
+        </p>
+      )}
+
+      {cv.education.map((edu) => (
         <div
-          key={e.id}
-          className="border rounded-lg p-4 space-y-2 bg-gray-50"
+          key={edu.id}
+          className="border rounded-lg p-4 space-y-2"
         >
           <input
-            placeholder="Grad / utdanning"
-            value={e.degree}
-            onChange={(ev) =>
-              updateEducation(e.id, "degree", ev.target.value)
-            }
-            className="w-full border rounded px-3 py-2"
-          />
-
-          <input
+            className="border p-2 w-full"
             placeholder="Skole / institusjon"
-            value={e.school}
-            onChange={(ev) =>
-              updateEducation(e.id, "school", ev.target.value)
+            value={edu.school}
+            onChange={(e) =>
+              updateEducation(edu.id, "school", e.target.value)
             }
-            className="w-full border rounded px-3 py-2"
           />
 
           <input
-            placeholder="År (f.eks. 2019–2022)"
-            value={e.year}
-            onChange={(ev) =>
-              updateEducation(e.id, "year", ev.target.value)
+            className="border p-2 w-full"
+            placeholder="Grad / utdanning"
+            value={edu.degree}
+            onChange={(e) =>
+              updateEducation(edu.id, "degree", e.target.value)
             }
-            className="w-full border rounded px-3 py-2"
           />
+
+          <div className="flex gap-2">
+            <input
+              className="border p-2 w-full"
+              placeholder="Fra"
+              value={edu.from}
+              onChange={(e) =>
+                updateEducation(edu.id, "from", e.target.value)
+              }
+            />
+            <input
+              className="border p-2 w-full"
+              placeholder="Til"
+              value={edu.to}
+              onChange={(e) =>
+                updateEducation(edu.id, "to", e.target.value)
+              }
+            />
+          </div>
+
+          <textarea
+            className="border p-2 w-full"
+            placeholder="Beskrivelse (valgfritt)"
+            value={edu.description}
+            onChange={(e) =>
+              updateEducation(edu.id, "description", e.target.value)
+            }
+          />
+
+          <button
+            onClick={() => removeEducation(edu.id)}
+            className="text-sm text-red-600"
+          >
+            Fjern
+          </button>
         </div>
       ))}
-
-      <button
-        type="button"
-        onClick={addEducation}
-        className="text-sm text-blue-600 hover:underline"
-      >
-        + Legg til utdanning
-      </button>
     </section>
   )
 }
