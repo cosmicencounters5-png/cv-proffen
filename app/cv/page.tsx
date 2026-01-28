@@ -6,6 +6,7 @@ import CVPreview from "@/components/CVPreview"
 
 const EMPTY_CV: CV = {
   id: crypto.randomUUID(),
+  summary: "",
   personal: {
     firstName: "",
     lastName: "",
