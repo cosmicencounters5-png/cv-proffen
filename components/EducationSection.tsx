@@ -8,8 +8,8 @@ type Props = {
 }
 
 export default function EducationSection({ cv, setCv }: Props) {
-  const addEducation = () => {
-    const newItem: Education = {
+  function addEducation() {
+    const newEducation: Education = {
       id: crypto.randomUUID(),
       school: "",
       degree: "",
@@ -19,71 +19,43 @@ export default function EducationSection({ cv, setCv }: Props) {
 
     setCv({
       ...cv,
-      education: [...cv.education, newItem],
-    })
-  }
-
-  const updateEducation = (
-    id: string,
-    field: keyof Education,
-    value: string
-  ) => {
-    setCv({
-      ...cv,
-      education: cv.education.map((e) =>
-        e.id === id ? { ...e, [field]: value } : e
-      ),
+      education: [...cv.education, newEducation],
     })
   }
 
   return (
-    <section className="space-y-4">
-      <h2 className="font-semibold text-lg">Utdanning</h2>
+    <section className="mt-6">
+      <h2 className="font-semibold mb-2">Utdanning</h2>
 
-      {cv.education.map((e) => (
-        <div key={e.id} className="border rounded p-3 space-y-2">
+      {cv.education.map((e, index) => (
+        <div key={e.id} className="mb-3">
           <input
-            placeholder="Skole / Institusjon"
-            className="w-full border p-2 rounded"
+            className="border p-2 w-full mb-1"
+            placeholder="Skole"
             value={e.school}
-            onChange={(ev) =>
-              updateEducation(e.id, "school", ev.target.value)
-            }
+            onChange={(ev) => {
+              const updated = [...cv.education]
+              updated[index] = { ...e, school: ev.target.value }
+              setCv({ ...cv, education: updated })
+            }}
           />
 
           <input
-            placeholder="Grad / Utdanning"
-            className="w-full border p-2 rounded"
+            className="border p-2 w-full mb-1"
+            placeholder="Grad / linje"
             value={e.degree}
-            onChange={(ev) =>
-              updateEducation(e.id, "degree", ev.target.value)
-            }
+            onChange={(ev) => {
+              const updated = [...cv.education]
+              updated[index] = { ...e, degree: ev.target.value }
+              setCv({ ...cv, education: updated })
+            }}
           />
-
-          <div className="flex gap-2">
-            <input
-              placeholder="Fra"
-              className="w-full border p-2 rounded"
-              value={e.from}
-              onChange={(ev) =>
-                updateEducation(e.id, "from", ev.target.value)
-              }
-            />
-            <input
-              placeholder="Til"
-              className="w-full border p-2 rounded"
-              value={e.to}
-              onChange={(ev) =>
-                updateEducation(e.id, "to", ev.target.value)
-              }
-            />
-          </div>
         </div>
       ))}
 
       <button
         onClick={addEducation}
-        className="px-4 py-2 border rounded hover:bg-gray-50"
+        className="mt-2 border px-3 py-1"
       >
         + Legg til utdanning
       </button>
