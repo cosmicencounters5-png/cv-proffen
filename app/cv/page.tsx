@@ -6,6 +6,7 @@ import CVPreview from "@/components/CVPreview"
 import DownloadPdfButton from "@/components/DownloadPdfButton"
 import ExperienceSection from "@/components/ExperienceSection"
 import EducationSection from "@/components/EducationSection"
+import SkillsSection from "@/components/SkillsSection"
 
 const EMPTY_CV: CV = {
   id: "local",
