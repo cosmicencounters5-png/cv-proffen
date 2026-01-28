@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import CVPreview from "@/components/CVPreview"
 import { CV } from "@/types/cv"
 
@@ -21,121 +21,32 @@ const EMPTY_CV: CV = {
 
 export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
-  const [loadingAI, setLoadingAI] = useState(false)
 
-  const generateSummary = async () => {
-    try {
-      setLoadingAI(true)
+  // 🔹 HENT CV VED LOAD
+  useEffect(() => {
+    fetch("/api/cv")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.cv) setCv(data.cv)
+      })
+  }, [])
 
-      const res = await fetch("/api/ai/summary", {
+  // 🔹 AUTO-SAVE (500ms debounce)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetch("/api/cv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cv),
       })
+    }, 500)
 
-      const data = await res.json()
-
-      if (data.summary) {
-        setCv((prev) => ({
-          ...prev,
-          summary: data.summary,
-        }))
-      }
-    } catch (err) {
-      console.error("AI error", err)
-      alert("Kunne ikke generere sammendrag")
-    } finally {
-      setLoadingAI(false)
-    }
-  }
+    return () => clearTimeout(timeout)
+  }, [cv])
 
   return (
-    <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-      {/* ===== LEFT: FORM ===== */}
-      <div>
-        <h1 className="text-xl font-bold mb-4">Rediger CV</h1>
-
-        {/* PERSONLIG */}
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Fornavn"
-          value={cv.personal.firstName}
-          onChange={(e) =>
-            setCv({
-              ...cv,
-              personal: { ...cv.personal, firstName: e.target.value },
-            })
-          }
-        />
-
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Etternavn"
-          value={cv.personal.lastName}
-          onChange={(e) =>
-            setCv({
-              ...cv,
-              personal: { ...cv.personal, lastName: e.target.value },
-            })
-          }
-        />
-
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Ønsket stilling"
-          value={cv.personal.title}
-          onChange={(e) =>
-            setCv({
-              ...cv,
-              personal: { ...cv.personal, title: e.target.value },
-            })
-          }
-        />
-
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="E-post"
-          value={cv.personal.email}
-          onChange={(e) =>
-            setCv({
-              ...cv,
-              personal: { ...cv.personal, email: e.target.value },
-            })
-          }
-        />
-
-        <input
-          className="border p-2 w-full mb-4"
-          placeholder="Telefon"
-          value={cv.personal.phone}
-          onChange={(e) =>
-            setCv({
-              ...cv,
-              personal: { ...cv.personal, phone: e.target.value },
-            })
-          }
-        />
-
-        {/* AI BUTTON */}
-        <button
-          type="button"
-          onClick={generateSummary}
-          disabled={loadingAI}
-          className="bg-black text-white px-4 py-2 mb-4"
-        >
-          {loadingAI ? "Genererer..." : "✨ Generer sammendrag med AI"}
-        </button>
-
-        {/* SUMMARY EDIT */}
-        <textarea
-          className="border p-2 w-full h-32"
-          placeholder="Sammendrag"
-          value={cv.summary}
-          onChange={(e) => setCv({ ...cv, summary: e.target.value })}
-        />
-      </div>
-
-      {/* ===== RIGHT: PREVIEW ===== */}
+    <div className="max-w-3xl mx-auto p-6">
+      {/* HER har du dine skjema-komponenter senere */}
       <CVPreview cv={cv} />
     </div>
   )
