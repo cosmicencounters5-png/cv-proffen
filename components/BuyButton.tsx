@@ -1,15 +1,9 @@
 "use client"
 
-export default function BuyButton({
-  packageType,
-}: {
-  packageType: "cv_only" | "cv_and_application"
-}) {
+export default function BuyButton() {
   const handleBuy = async () => {
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ package: packageType }),
     })
 
     const data = await res.json()
@@ -17,16 +11,16 @@ export default function BuyButton({
     if (data.url) {
       window.location.href = data.url
     } else {
-      alert("Noe gikk galt med betaling")
+      alert("Noe gikk galt med betalingen")
     }
   }
 
   return (
     <button
       onClick={handleBuy}
-      className="mt-6 bg-black text-white px-6 py-3 rounded-lg"
+      className="bg-black text-white px-6 py-3 rounded text-sm"
     >
-      Kjøp og fullfør
+      Kjøp CV (test)
     </button>
   )
 }
