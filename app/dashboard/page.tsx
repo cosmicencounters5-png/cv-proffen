@@ -1,42 +1,46 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
-import { supabaseClient } from "@/lib/supabaseClient"
 
 export default function DashboardPage() {
+  const [cvs, setCvs] = useState<any[]>([])
   const router = useRouter()
-  const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabaseClient.auth.getUser()
-
-      if (!data.user) {
-        router.push("/login")
-        return
-      }
-
-      setEmail(data.user.email ?? null)
-    }
-
-    loadUser()
-  }, [router])
+    fetch("/api/cv")
+      .then((res) => res.json())
+      .then(setCvs)
+  }, [])
 
   return (
-    <div className="max-w-xl mx-auto py-12">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-
-      {email && (
-        <p className="mt-2 text-gray-600">
-          Innlogget som <strong>{email}</strong>
-        </p>
-      )}
+    <div className="p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold">Mine CV-er</h1>
 
       <button
-        className="mt-6 bg-black text-white px-4 py-2 rounded"
+        onClick={() => router.push("/cv")}
+        className="mt-4 bg-black text-white px-4 py-2 rounded"
+      >
+        Ny CV
+      </button>
+
+      <ul className="mt-6 space-y-4">
+        {cvs.map((cv) => (
+          <li
+            key={cv.id}
+            className="border p-4 rounded cursor-pointer hover:bg-gray-50"
+            onClick={() => router.push("/cv")}
+          >
+            Lagret CV – {new Date(cv.created_at).toLocaleString()}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        className="mt-10 text-sm underline"
         onClick={async () => {
-          await supabaseClient.auth.signOut()
+          await supabase.auth.signOut()
           router.push("/login")
         }}
       >
