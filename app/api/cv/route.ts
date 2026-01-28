@@ -1,70 +1,39 @@
 import { NextResponse } from "next/server"
 import { supabaseServer } from "@/lib/supabaseServer"
-import { createClient } from "@supabase/supabase-js"
 
-export async function GET(req: Request) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: req.headers.get("authorization")!,
-        },
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: "Not logged in" }, { status: 401 })
-  }
-
-  const { data, error } = await supabaseServer
-    .from("cvs")
-    .select("data")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single()
-
-  if (error) {
-    return NextResponse.json(null)
-  }
-
-  return NextResponse.json(data.data)
-}
+const USER_ID = "00000000-0000-0000-0000-000000000001"
 
 export async function POST(req: Request) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: req.headers.get("authorization")!,
-        },
-      },
+  try {
+    const body = await req.json()
+
+    const { error } = await supabaseServer
+      .from("cvs")
+      .insert({
+        user_id: USER_ID,
+        data: body,
+      })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
-  )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: "Server error" }, { status: 500 })
+  }
+}
 
-  if (!user) {
-    return NextResponse.json({ error: "Not logged in" }, { status: 401 })
+export async function GET() {
+  const { data, error } = await supabaseServer
+    .from("cvs")
+    .select("*")
+    .eq("user_id", USER_ID)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const body = await req.json()
-
-  await supabaseServer.from("cvs").insert({
-    user_id: user.id,
-    data: body,
-  })
-
-  return NextResponse.json({ success: true })
+  return NextResponse.json(data)
 }
