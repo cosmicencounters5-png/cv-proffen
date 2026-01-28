@@ -1,93 +1,99 @@
-import { Experience } from "@/types/cv"
+"use client"
 
-export default function ExperienceSection({
-  experience,
-  onChange,
-}: {
-  experience: Experience[]
-  onChange: (exp: Experience[]) => void
-}) {
-  function addExperience() {
-    onChange([
-      ...experience,
-      {
-        id: crypto.randomUUID(),
-        role: "",
-        company: "",
-        from: "",
-        to: "",
-        description: "",
-      },
-    ])
+import { CV, Experience } from "@/types/cv"
+
+type Props = {
+  cv: CV
+  setCv: (cv: CV) => void
+}
+
+export default function ExperienceSection({ cv, setCv }: Props) {
+  const addExperience = () => {
+    const newItem: Experience = {
+      id: crypto.randomUUID(),
+      role: "",
+      company: "",
+      from: "",
+      to: "",
+      description: "",
+    }
+
+    setCv({
+      ...cv,
+      experience: [...cv.experience, newItem],
+    })
+  }
+
+  const updateExperience = (
+    id: string,
+    field: keyof Experience,
+    value: string
+  ) => {
+    setCv({
+      ...cv,
+      experience: cv.experience.map((e) =>
+        e.id === id ? { ...e, [field]: value } : e
+      ),
+    })
   }
 
   return (
-    <section className="mt-6">
-      <h2 className="font-semibold mb-2">Arbeidserfaring</h2>
+    <section className="space-y-4">
+      <h2 className="font-semibold text-lg">Arbeidserfaring</h2>
 
-      {experience.map((e, index) => (
-        <div key={e.id} className="mb-4 border p-3 rounded">
+      {cv.experience.map((e) => (
+        <div key={e.id} className="border rounded p-3 space-y-2">
           <input
-            className="w-full mb-1 border p-1"
             placeholder="Stilling"
+            className="w-full border p-2 rounded"
             value={e.role}
-            onChange={(ev) => {
-              const copy = [...experience]
-              copy[index].role = ev.target.value
-              onChange(copy)
-            }}
+            onChange={(ev) =>
+              updateExperience(e.id, "role", ev.target.value)
+            }
           />
 
           <input
-            className="w-full mb-1 border p-1"
             placeholder="Bedrift"
+            className="w-full border p-2 rounded"
             value={e.company}
-            onChange={(ev) => {
-              const copy = [...experience]
-              copy[index].company = ev.target.value
-              onChange(copy)
-            }}
+            onChange={(ev) =>
+              updateExperience(e.id, "company", ev.target.value)
+            }
           />
 
-          <input
-            className="w-full mb-1 border p-1"
-            placeholder="Fra"
-            value={e.from}
-            onChange={(ev) => {
-              const copy = [...experience]
-              copy[index].from = ev.target.value
-              onChange(copy)
-            }}
-          />
-
-          <input
-            className="w-full mb-1 border p-1"
-            placeholder="Til"
-            value={e.to}
-            onChange={(ev) => {
-              const copy = [...experience]
-              copy[index].to = ev.target.value
-              onChange(copy)
-            }}
-          />
+          <div className="flex gap-2">
+            <input
+              placeholder="Fra"
+              className="w-full border p-2 rounded"
+              value={e.from}
+              onChange={(ev) =>
+                updateExperience(e.id, "from", ev.target.value)
+              }
+            />
+            <input
+              placeholder="Til"
+              className="w-full border p-2 rounded"
+              value={e.to}
+              onChange={(ev) =>
+                updateExperience(e.id, "to", ev.target.value)
+              }
+            />
+          </div>
 
           <textarea
-            className="w-full border p-1"
             placeholder="Beskrivelse av rollen"
+            className="w-full border p-2 rounded h-20"
             value={e.description}
-            onChange={(ev) => {
-              const copy = [...experience]
-              copy[index].description = ev.target.value
-              onChange(copy)
-            }}
+            onChange={(ev) =>
+              updateExperience(e.id, "description", ev.target.value)
+            }
           />
         </div>
       ))}
 
       <button
-        type="button"
         onClick={addExperience}
-        className="px-3 py-1 border rounded text-sm"
+        className="px-4 py-2 border rounded hover:bg-gray-50"
       >
         + Legg til erfaring
       </button>
