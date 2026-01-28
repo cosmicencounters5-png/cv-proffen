@@ -1,29 +1,27 @@
 "use client"
 
-import { CV } from "@/types/cv"
+import { CV, Skill } from "@/types/cv"
 
-export default function SkillsSection({
-  cv,
-  setCV,
-}: {
+type Props = {
   cv: CV
-  setCV: (cv: CV) => void
-}) {
-  function addSkill() {
-    setCV({
+  setCv: (cv: CV) => void
+}
+
+export default function SkillsSection({ cv, setCv }: Props) {
+  const addSkill = () => {
+    const newSkill: Skill = {
+      id: crypto.randomUUID(),
+      name: "",
+    }
+
+    setCv({
       ...cv,
-      skills: [
-        ...cv.skills,
-        {
-          id: crypto.randomUUID(),
-          name: "",
-        },
-      ],
+      skills: [...cv.skills, newSkill],
     })
   }
 
-  function updateSkill(id: string, value: string) {
-    setCV({
+  const updateSkill = (id: string, value: string) => {
+    setCv({
       ...cv,
       skills: cv.skills.map((s) =>
         s.id === id ? { ...s, name: value } : s
@@ -31,8 +29,8 @@ export default function SkillsSection({
     })
   }
 
-  function removeSkill(id: string) {
-    setCV({
+  const removeSkill = (id: string) => {
+    setCv({
       ...cv,
       skills: cv.skills.filter((s) => s.id !== id),
     })
@@ -40,34 +38,29 @@ export default function SkillsSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold">Ferdigheter</h2>
+      <h2 className="font-semibold text-lg">Ferdigheter</h2>
 
       {cv.skills.map((s) => (
-        <div
-          key={s.id}
-          className="flex items-center gap-2"
-        >
+        <div key={s.id} className="flex gap-2">
           <input
-            placeholder="Ferdighet (f.eks. Kundeservice, React, Excel)"
+            placeholder="F.eks. Truckførerbevis, Excel, Kundeservice"
+            className="w-full border p-2 rounded"
             value={s.name}
-            onChange={(ev) => updateSkill(s.id, ev.target.value)}
-            className="flex-1 border rounded px-3 py-2"
+            onChange={(e) => updateSkill(s.id, e.target.value)}
           />
 
           <button
-            type="button"
             onClick={() => removeSkill(s.id)}
-            className="text-sm text-red-600 hover:underline"
+            className="px-3 border rounded text-red-500 hover:bg-red-50"
           >
-            Fjern
+            ✕
           </button>
         </div>
       ))}
 
       <button
-        type="button"
         onClick={addSkill}
-        className="text-sm text-blue-600 hover:underline"
+        className="px-4 py-2 border rounded hover:bg-gray-50"
       >
         + Legg til ferdighet
       </button>
