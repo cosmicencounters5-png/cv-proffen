@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabaseClient } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabaseClient"
 import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
 
@@ -27,12 +27,10 @@ export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const router = useRouter()
 
-  // 🔹 HENT CV VED LOAD
   useEffect(() => {
     const fetchCV = async () => {
-      const { data, error } = await supabaseClient
+      const { data } = await supabase
         .from("cvs")
         .select("id, data")
         .eq("user_id", USER_ID)
@@ -48,11 +46,10 @@ export default function CVPage() {
     fetchCV()
   }, [])
 
-  // 🔹 LAGRE CV (UPSERT)
   const saveCV = async () => {
     setSaving(true)
 
-    const { error } = await supabaseClient
+    await supabase
       .from("cvs")
       .upsert(
         {
@@ -63,20 +60,12 @@ export default function CVPage() {
       )
 
     setSaving(false)
-
-    if (error) {
-      alert("Feil ved lagring av CV")
-      console.error(error)
-    }
   }
 
-  if (loading) {
-    return <p className="p-8">Laster CV…</p>
-  }
+  if (loading) return <p className="p-8">Laster CV…</p>
 
   return (
     <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* VENSTRE: ENKEL INPUT */}
       <div className="space-y-4">
         <h1 className="text-xl font-bold">Rediger CV</h1>
 
@@ -118,21 +107,19 @@ export default function CVPage() {
 
         <textarea
           className="w-full border p-2 rounded"
-          placeholder="Kort sammendrag"
+          placeholder="Sammendrag"
           value={cv.summary}
           onChange={(e) => setCv({ ...cv, summary: e.target.value })}
         />
 
         <button
           onClick={saveCV}
-          disabled={saving}
           className="bg-black text-white px-4 py-2 rounded"
         >
-          {saving ? "Lagrer…" : "Lagre CV"}
+          Lagre CV
         </button>
       </div>
 
-      {/* HØYRE: PREVIEW */}
       <CVPreview cv={cv} />
     </div>
   )
