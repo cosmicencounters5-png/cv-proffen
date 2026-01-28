@@ -21,6 +21,7 @@ export type Skill = {
 
 export type CV = {
   id: string
+  summary: string
   personal: {
     firstName: string
     lastName: string
