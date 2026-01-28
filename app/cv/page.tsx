@@ -28,6 +28,7 @@ export default function CVPage() {
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
+  const [daysLeft, setDaysLeft] = useState<number | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -48,6 +49,15 @@ export default function CVPage() {
 
       setHasAccess(accessJson.access)
       setExpiresAt(accessJson.expiresAt)
+
+      // regn ut dager igjen
+      if (accessJson.expiresAt) {
+        const now = new Date()
+        const expiry = new Date(accessJson.expiresAt)
+        const diffMs = expiry.getTime() - now.getTime()
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+        setDaysLeft(diffDays > 0 ? diffDays : 0)
+      }
 
       // 2️⃣ last CV kun hvis tilgang
       if (accessJson.access) {
@@ -104,11 +114,12 @@ export default function CVPage() {
   // ✅ TILGANG → CV
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-4">
-      {expiresAt && (
-        <p className="text-sm text-gray-500">
-          Tilgang utløper:{" "}
-          {new Date(expiresAt).toLocaleDateString("no-NO")}
-        </p>
+      {daysLeft !== null && (
+        <div className="rounded bg-yellow-100 text-yellow-800 px-4 py-2 text-sm">
+          {daysLeft === 0
+            ? "Tilgangen din utløper i dag"
+            : `Du har ${daysLeft} dag${daysLeft > 1 ? "er" : ""} igjen av tilgangen`}
+        </div>
       )}
 
       <button
