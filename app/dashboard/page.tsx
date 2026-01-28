@@ -13,7 +13,7 @@ export default function DashboardPage() {
     async function checkAuth() {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await supabaseClient.auth.getUser()
 
       if (!user) {
         // ❌ Ikke innlogget → send til login
