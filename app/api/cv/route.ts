@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server"
 import { supabaseServer } from "@/lib/supabaseServer"
-import { CV } from "@/types/cv"
 
-const USER_ID = "demo-user" // midlertidig, auth kommer senere
+const USER_ID = "00000000-0000-0000-0000-000000000001"
 
 export async function POST(req: Request) {
   try {
-    const cv: CV = await req.json()
+    const body = await req.json()
 
     const { error } = await supabaseServer
       .from("cvs")
       .insert({
         user_id: USER_ID,
-        data: cv,
+        data: body,
       })
 
     if (error) {
@@ -23,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Server error" },
       { status: 500 }
