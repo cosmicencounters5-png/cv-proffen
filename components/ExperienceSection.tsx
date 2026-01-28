@@ -8,8 +8,8 @@ type Props = {
 }
 
 export default function ExperienceSection({ cv, setCv }: Props) {
-  const addExperience = () => {
-    const newItem: Experience = {
+  function addExperience() {
+    const newExperience: Experience = {
       id: crypto.randomUUID(),
       role: "",
       company: "",
@@ -20,80 +20,54 @@ export default function ExperienceSection({ cv, setCv }: Props) {
 
     setCv({
       ...cv,
-      experience: [...cv.experience, newItem],
-    })
-  }
-
-  const updateExperience = (
-    id: string,
-    field: keyof Experience,
-    value: string
-  ) => {
-    setCv({
-      ...cv,
-      experience: cv.experience.map((e) =>
-        e.id === id ? { ...e, [field]: value } : e
-      ),
+      experience: [...cv.experience, newExperience],
     })
   }
 
   return (
-    <section className="space-y-4">
-      <h2 className="font-semibold text-lg">Arbeidserfaring</h2>
+    <section className="mt-6">
+      <h2 className="font-semibold mb-2">Arbeidserfaring</h2>
 
-      {cv.experience.map((e) => (
-        <div key={e.id} className="border rounded p-3 space-y-2">
+      {cv.experience.map((e, index) => (
+        <div key={e.id} className="mb-4">
           <input
+            className="border p-2 w-full mb-1"
             placeholder="Stilling"
-            className="w-full border p-2 rounded"
             value={e.role}
-            onChange={(ev) =>
-              updateExperience(e.id, "role", ev.target.value)
-            }
+            onChange={(ev) => {
+              const updated = [...cv.experience]
+              updated[index] = { ...e, role: ev.target.value }
+              setCv({ ...cv, experience: updated })
+            }}
           />
 
           <input
+            className="border p-2 w-full mb-1"
             placeholder="Bedrift"
-            className="w-full border p-2 rounded"
             value={e.company}
-            onChange={(ev) =>
-              updateExperience(e.id, "company", ev.target.value)
-            }
+            onChange={(ev) => {
+              const updated = [...cv.experience]
+              updated[index] = { ...e, company: ev.target.value }
+              setCv({ ...cv, experience: updated })
+            }}
           />
-
-          <div className="flex gap-2">
-            <input
-              placeholder="Fra"
-              className="w-full border p-2 rounded"
-              value={e.from}
-              onChange={(ev) =>
-                updateExperience(e.id, "from", ev.target.value)
-              }
-            />
-            <input
-              placeholder="Til"
-              className="w-full border p-2 rounded"
-              value={e.to}
-              onChange={(ev) =>
-                updateExperience(e.id, "to", ev.target.value)
-              }
-            />
-          </div>
 
           <textarea
-            placeholder="Beskrivelse av rollen"
-            className="w-full border p-2 rounded h-20"
+            className="border p-2 w-full"
+            placeholder="Beskrivelse av arbeidsoppgaver"
             value={e.description}
-            onChange={(ev) =>
-              updateExperience(e.id, "description", ev.target.value)
-            }
+            onChange={(ev) => {
+              const updated = [...cv.experience]
+              updated[index] = { ...e, description: ev.target.value }
+              setCv({ ...cv, experience: updated })
+            }}
           />
         </div>
       ))}
 
       <button
         onClick={addExperience}
-        className="px-4 py-2 border rounded hover:bg-gray-50"
+        className="border px-3 py-1"
       >
         + Legg til erfaring
       </button>
