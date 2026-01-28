@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
 import DownloadPdfButton from "@/components/DownloadPdfButton"
+import ExperienceSection from "@/components/ExperienceSection"
 
 const EMPTY_CV: CV = {
   id: "local",
