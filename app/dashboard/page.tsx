@@ -1,52 +1,47 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { supabaseClient } from "@/lib/supabaseClient"
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState<string | null>(null);
+  const router = useRouter()
+  const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    async function checkAuth() {
-      const {
-        data: { user },
-      } = await supabaseClient.auth.getUser()
+    const loadUser = async () => {
+      const { data } = await supabaseClient.auth.getUser()
 
-      if (!user) {
-        // ❌ Ikke innlogget → send til login
-        router.push("/login");
-        return;
+      if (!data.user) {
+        router.push("/login")
+        return
       }
 
-      // ✅ Innlogget
-      setEmail(user.email ?? null);
-      setLoading(false);
+      setEmail(data.user.email ?? null)
     }
 
-    checkAuth();
-  }, [router]);
-
-  if (loading) {
-    return <p>Laster...</p>;
-  }
+    loadUser()
+  }, [router])
 
   return (
-    <main className="min-h-screen p-6">
+    <div className="max-w-xl mx-auto py-12">
       <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="mt-2">Innlogget som: {email}</p>
+
+      {email && (
+        <p className="mt-2 text-gray-600">
+          Innlogget som <strong>{email}</strong>
+        </p>
+      )}
 
       <button
-        className="mt-6 bg-black text-white px-4 py-2"
+        className="mt-6 bg-black text-white px-4 py-2 rounded"
         onClick={async () => {
-          await supabase.auth.signOut();
-          router.push("/login");
+          await supabaseClient.auth.signOut()
+          router.push("/login")
         }}
       >
         Logg ut
       </button>
-    </main>
-  );
+    </div>
+  )
 }
