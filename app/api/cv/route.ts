@@ -1,40 +1,86 @@
 import { NextResponse } from "next/server"
 import { supabaseServer } from "@/lib/supabaseServer"
-
-const USER_ID = "00000000-0000-0000-0000-000000000001"
+import { createClient } from "@supabase/supabase-js"
 
 export async function POST(req: Request) {
-  try {
-    const cv = await req.json()
+  const authHeader = req.headers.get("authorization")
 
-    const { error } = await supabaseServer
-      .from("cvs")
-      .upsert({
-        user_id: USER_ID,
-        data: cv,
-        updated_at: new Date().toISOString(),
-      })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
+  if (!authHeader) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
+
+  const supabaseAuth = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "No user" }, { status: 401 })
+  }
+
+  const body = await req.json()
+
+  const { error } = await supabaseServer
+    .from("cvs")
+    .upsert(
+      {
+        user_id: user.id,
+        data: body,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    )
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const authHeader = req.headers.get("authorization")
+
+  if (!authHeader) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+  }
+
+  const supabaseAuth = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: { Authorization: authHeader },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "No user" }, { status: 401 })
+  }
+
   const { data, error } = await supabaseServer
     .from("cvs")
     .select("data")
-    .eq("user_id", USER_ID)
+    .eq("user_id", user.id)
     .single()
 
-  if (error || !data) {
-    return NextResponse.json({ cv: null })
+  if (error) {
+    return NextResponse.json({ data: null })
   }
 
-  return NextResponse.json({ cv: data.data })
+  return NextResponse.json({ data: data.data })
 }
