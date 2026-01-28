@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import CVPreview from "@/components/CVPreview"
 import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
@@ -21,51 +20,34 @@ const EMPTY_CV: CV = {
 
 export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
-  const [loading, setLoading] = useState(false)
-
-  async function generateSummary() {
-    setLoading(true)
-
-    const res = await fetch("/api/ai/summary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        role: cv.personal.title,
-        experience: cv.experience
-          .map((e) => `${e.role} hos ${e.company}`)
-          .join(", "),
-      }),
-    })
-
-    const data = await res.json()
-
-    setCv({ ...cv, summary: data.summary })
-    setLoading(false)
-  }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="p-8 max-w-xl mx-auto">
+      <h1 className="text-xl font-bold mb-4">Ny CV</h1>
+
       <input
-        placeholder="Ønsket stilling"
-        className="border p-2 w-full"
-        value={cv.personal.title}
+        className="border w-full mb-2 p-2"
+        placeholder="Fornavn"
+        value={cv.personal.firstName}
         onChange={(e) =>
           setCv({
             ...cv,
-            personal: { ...cv.personal, title: e.target.value },
+            personal: { ...cv.personal, firstName: e.target.value },
           })
         }
       />
 
-      <button
-        onClick={generateSummary}
-        disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded"
-      >
-        {loading ? "Genererer..." : "Generer sammendrag med AI"}
-      </button>
-
-      <CVPreview cv={cv} />
+      <input
+        className="border w-full mb-2 p-2"
+        placeholder="Etternavn"
+        value={cv.personal.lastName}
+        onChange={(e) =>
+          setCv({
+            ...cv,
+            personal: { ...cv.personal, lastName: e.target.value },
+          })
+        }
+      />
     </div>
   )
 }
