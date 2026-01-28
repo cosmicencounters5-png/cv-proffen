@@ -1,77 +1,62 @@
 "use client"
 
 import { useState } from "react"
-import { supabaseClient } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  async function handleLogin() {
-    const { error } = await supabaseClient.auth.signInWithPassword({
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      router.push("/cv")
-    }
-  }
-
-  async function handleSignup() {
-    const { error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-    })
+    setLoading(false)
 
     if (error) {
-      setError(error.message)
-    } else {
-      router.push("/cv")
+      alert(error.message)
+      return
     }
+
+    router.push("/dashboard")
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-bold">Logg inn</h1>
+    <form
+      onSubmit={handleLogin}
+      className="max-w-md mx-auto p-8 space-y-4"
+    >
+      <h1 className="text-2xl font-bold">Logg inn</h1>
 
-        <input
-          className="border p-2 w-full rounded"
-          placeholder="E-post"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <input
+        className="w-full border p-2"
+        placeholder="E-post"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <input
-          className="border p-2 w-full rounded"
-          type="password"
-          placeholder="Passord"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      <input
+        type="password"
+        className="w-full border p-2"
+        placeholder="Passord"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-
-        <button
-          onClick={handleLogin}
-          className="w-full bg-black text-white py-2 rounded"
-        >
-          Logg inn
-        </button>
-
-        <button
-          onClick={handleSignup}
-          className="w-full border py-2 rounded"
-        >
-          Registrer deg
-        </button>
-      </div>
-    </div>
+      <button
+        disabled={loading}
+        className="w-full bg-black text-white py-2"
+      >
+        {loading ? "Logger inn…" : "Logg inn"}
+      </button>
+    </form>
   )
 }
