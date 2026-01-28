@@ -1,3 +1,24 @@
+export type Experience = {
+  id: string
+  role: string
+  company: string
+  from: string
+  to: string
+}
+
+export type Education = {
+  id: string
+  school: string
+  degree: string
+  from: string
+  to: string
+}
+
+export type Skill = {
+  id: string
+  name: string
+}
+
 export type CV = {
   id: string
   personal: {
@@ -8,22 +29,7 @@ export type CV = {
     phone: string
   }
   summary?: string
-  experience: {
-    id: string
-    role: string
-    company: string
-    from: string
-    to: string
-  }[]
-  education: {
-    id: string
-    school: string
-    degree: string
-    from: string
-    to: string
-  }[]
-  skills: {
-    id: string
-    name: string
-  }[]
+  experience: Experience[]
+  education: Education[]
+  skills: Skill[]
 }
