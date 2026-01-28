@@ -5,42 +5,67 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 
 export default function SignupPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  async function handleSignup() {
+  const handleSignup = async () => {
+    setLoading(true)
+    setError(null)
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    if (!error) router.push("/dashboard")
-    else alert(error.message)
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    router.push("/cv")
   }
 
   return (
-    <div className="p-8 max-w-sm mx-auto">
-      <h1 className="text-xl font-bold mb-4">Registrer deg</h1>
-      <input
-        className="border w-full mb-2 p-2"
-        placeholder="E-post"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border w-full mb-4 p-2"
-        type="password"
-        placeholder="Passord"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        onClick={handleSignup}
-        className="bg-black text-white px-4 py-2 w-full"
-      >
-        Opprett konto
-      </button>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm border p-6 rounded-xl space-y-4">
+        <h1 className="text-xl font-bold text-center">Opprett konto</h1>
+
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="E-post"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          className="w-full border p-2 rounded"
+          placeholder="Passord"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+
+        <button
+          onClick={handleSignup}
+          disabled={loading}
+          className="w-full bg-black text-white py-2 rounded"
+        >
+          {loading ? "Oppretter…" : "Opprett konto"}
+        </button>
+
+        <p className="text-sm text-center">
+          Har du allerede konto?{" "}
+          <a href="/login" className="underline">
+            Logg inn
+          </a>
+        </p>
+      </div>
     </div>
   )
 }
