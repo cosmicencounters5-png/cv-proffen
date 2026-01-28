@@ -1,87 +1,83 @@
+"use client"
+
 import { CV, Education } from "@/types/cv"
 
 type Props = {
   cv: CV
-  setCV: (cv: CV) => void
+  onChange: (education: Education[]) => void
 }
 
-export default function EducationSection({ cv, setCV }: Props) {
-  function addEducation() {
-    const newEducation: Education = {
-      id: crypto.randomUUID(),
-      school: "",
-      degree: "",
-      from: "",
-      to: "",
-    }
-
-    setCV({
-      ...cv,
-      education: [...cv.education, newEducation],
-    })
-  }
-
-  function updateEducation(
-    id: string,
-    field: keyof Education,
-    value: string
-  ) {
-    setCV({
-      ...cv,
-      education: cv.education.map((e) =>
-        e.id === id ? { ...e, [field]: value } : e
-      ),
-    })
+export default function EducationSection({ cv, onChange }: Props) {
+  const addEducation = () => {
+    onChange([
+      ...cv.education,
+      {
+        id: crypto.randomUUID(),
+        school: "",
+        degree: "",
+        from: "",
+        to: "",
+      },
+    ])
   }
 
   return (
-    <section className="mt-6">
+    <section>
       <h2 className="font-semibold mb-2">Utdanning</h2>
 
-      {cv.education.map((e) => (
-        <div key={e.id} className="mb-4 grid gap-2">
+      {cv.education.map((e, index) => (
+        <div key={e.id} className="mb-3 space-y-2">
           <input
+            className="border p-2 w-full"
             placeholder="Skole"
             value={e.school}
-            onChange={(ev) =>
-              updateEducation(e.id, "school", ev.target.value)
-            }
-            className="border p-2 rounded"
+            onChange={(ev) => {
+              const copy = [...cv.education]
+              copy[index] = { ...copy[index], school: ev.target.value }
+              onChange(copy)
+            }}
           />
 
           <input
-            placeholder="Grad / studie"
+            className="border p-2 w-full"
+            placeholder="Grad"
             value={e.degree}
-            onChange={(ev) =>
-              updateEducation(e.id, "degree", ev.target.value)
-            }
-            className="border p-2 rounded"
+            onChange={(ev) => {
+              const copy = [...cv.education]
+              copy[index] = { ...copy[index], degree: ev.target.value }
+              onChange(copy)
+            }}
           />
 
           <div className="flex gap-2">
             <input
+              className="border p-2 w-full"
               placeholder="Fra"
               value={e.from}
-              onChange={(ev) =>
-                updateEducation(e.id, "from", ev.target.value)
-              }
-              className="border p-2 rounded w-1/2"
+              onChange={(ev) => {
+                const copy = [...cv.education]
+                copy[index] = { ...copy[index], from: ev.target.value }
+                onChange(copy)
+              }}
             />
             <input
+              className="border p-2 w-full"
               placeholder="Til"
               value={e.to}
-              onChange={(ev) =>
-                updateEducation(e.id, "to", ev.target.value)
-              }
-              className="border p-2 rounded w-1/2"
+              onChange={(ev) => {
+                const copy = [...cv.education]
+                copy[index] = { ...copy[index], to: ev.target.value }
+                onChange(copy)
+              }}
             />
           </div>
         </div>
       ))}
 
       <button
+        type="button"
         onClick={addEducation}
-        className="text-sm text-blue-600 underline"
+        className="mt-2 border px-3 py-1 text-sm"
       >
         + Legg til utdanning
       </button>
