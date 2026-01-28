@@ -5,40 +5,32 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const { packageType } = await req.json()
-
-    const priceId =
-      packageType === "cv_only"
-        ? process.env.STRIPE_PRICE_CV_ONLY
-        : process.env.STRIPE_PRICE_CV_AND_APPLICATION
-
-    if (!priceId) {
-      return NextResponse.json(
-        { error: "Missing price ID" },
-        { status: 400 }
-      )
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: "nok",
+            product_data: {
+              name: "CV-pakke (test)",
+            },
+            unit_amount: 4900, // 49.00 NOK
+          },
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv`,
+      success_url: "https://www.cv-proffen.no/success",
+      cancel_url: "https://www.cv-proffen.no/cancel",
     })
 
     return NextResponse.json({ url: session.url })
-  } catch (err: any) {
-    console.error("STRIPE ERROR:", err)
+  } catch (error) {
+    console.error("STRIPE ERROR:", error)
     return NextResponse.json(
-      { error: err.message },
+      { error: "Stripe checkout failed" },
       { status: 500 }
     )
   }
