@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
 import ExperienceSection from "@/components/ExperienceSection"
+import EducationSection from "@/components/EducationSection"
 
 function createEmptyCV(): CV {
   return {
@@ -47,7 +48,8 @@ export default function CVPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 space-y-10">
+      {/* PERSONALIA */}
       <section className="space-y-2">
         <h1 className="text-xl font-bold">CV</h1>
 
@@ -61,6 +63,21 @@ export default function CVPage() {
               personal: {
                 ...cv.personal,
                 firstName: e.target.value,
+              },
+            })
+          }
+        />
+
+        <input
+          className="border p-2 w-full"
+          placeholder="Etternavn"
+          value={cv.personal.lastName}
+          onChange={(e) =>
+            saveCV({
+              ...cv,
+              personal: {
+                ...cv.personal,
+                lastName: e.target.value,
               },
             })
           }
@@ -82,8 +99,13 @@ export default function CVPage() {
         />
       </section>
 
+      {/* ARBEIDSERFARING */}
       <ExperienceSection cv={cv} onChange={saveCV} />
 
+      {/* UTDANNING */}
+      <EducationSection cv={cv} onChange={saveCV} />
+
+      {/* PREVIEW */}
       <CVPreview cv={cv} />
 
       {saving && (
