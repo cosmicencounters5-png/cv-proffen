@@ -2,21 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== PRINT (PDF) ===== */
+/* ---------- PRINT / PDF ---------- */
 @media print {
   body {
     background: white;
   }
 
-  /* Skjul alt som ikke er CV */
   .print-hidden {
     display: none !important;
   }
 
-  /* CV fyller siden */
-  .print-cv {
+  .print-page {
+    margin: 0;
+    padding: 0;
     box-shadow: none !important;
     border: none !important;
-    padding: 0 !important;
   }
 }
