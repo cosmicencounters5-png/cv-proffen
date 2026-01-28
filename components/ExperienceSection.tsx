@@ -2,15 +2,14 @@
 
 import { CV } from "@/types/cv"
 
-export default function ExperienceSection({
-  cv,
-  setCV,
-}: {
+type Props = {
   cv: CV
-  setCV: (cv: CV) => void
-}) {
+  onChange: (cv: CV) => void
+}
+
+export default function ExperienceSection({ cv, onChange }: Props) {
   function addExperience() {
-    setCV({
+    onChange({
       ...cv,
       experience: [
         ...cv.experience,
@@ -28,10 +27,10 @@ export default function ExperienceSection({
 
   function updateExperience(
     id: string,
-    field: keyof CV["experience"][number],
+    field: string,
     value: string
   ) {
-    setCV({
+    onChange({
       ...cv,
       experience: cv.experience.map((e) =>
         e.id === id ? { ...e, [field]: value } : e
@@ -39,71 +38,90 @@ export default function ExperienceSection({
     })
   }
 
+  function removeExperience(id: string) {
+    onChange({
+      ...cv,
+      experience: cv.experience.filter((e) => e.id !== id),
+    })
+  }
+
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold">Arbeidserfaring</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Arbeidserfaring</h2>
+        <button
+          onClick={addExperience}
+          className="text-sm text-blue-600"
+        >
+          + Legg til
+        </button>
+      </div>
 
-      {cv.experience.map((e) => (
+      {cv.experience.length === 0 && (
+        <p className="text-sm text-gray-500">
+          Ingen arbeidserfaring lagt til ennå
+        </p>
+      )}
+
+      {cv.experience.map((exp) => (
         <div
-          key={e.id}
-          className="border rounded-lg p-4 space-y-2 bg-gray-50"
+          key={exp.id}
+          className="border rounded-lg p-4 space-y-2"
         >
           <input
+            className="border p-2 w-full"
             placeholder="Stilling"
-            value={e.role}
-            onChange={(ev) =>
-              updateExperience(e.id, "role", ev.target.value)
+            value={exp.role}
+            onChange={(e) =>
+              updateExperience(exp.id, "role", e.target.value)
             }
-            className="w-full border rounded px-3 py-2"
           />
 
           <input
+            className="border p-2 w-full"
             placeholder="Arbeidsgiver"
-            value={e.company}
-            onChange={(ev) =>
-              updateExperience(e.id, "company", ev.target.value)
+            value={exp.company}
+            onChange={(e) =>
+              updateExperience(exp.id, "company", e.target.value)
             }
-            className="w-full border rounded px-3 py-2"
           />
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex gap-2">
             <input
-              placeholder="Fra (f.eks. 2021)"
-              value={e.from}
-              onChange={(ev) =>
-                updateExperience(e.id, "from", ev.target.value)
+              className="border p-2 w-full"
+              placeholder="Fra"
+              value={exp.from}
+              onChange={(e) =>
+                updateExperience(exp.id, "from", e.target.value)
               }
-              className="w-full border rounded px-3 py-2"
             />
-
             <input
-              placeholder="Til (f.eks. 2024 eller Nå)"
-              value={e.to}
-              onChange={(ev) =>
-                updateExperience(e.id, "to", ev.target.value)
+              className="border p-2 w-full"
+              placeholder="Til"
+              value={exp.to}
+              onChange={(e) =>
+                updateExperience(exp.id, "to", e.target.value)
               }
-              className="w-full border rounded px-3 py-2"
             />
           </div>
 
           <textarea
-            placeholder="Beskrivelse (valgfritt)"
-            value={e.description || ""}
-            onChange={(ev) =>
-              updateExperience(e.id, "description", ev.target.value)
+            className="border p-2 w-full"
+            placeholder="Beskrivelse"
+            value={exp.description}
+            onChange={(e) =>
+              updateExperience(exp.id, "description", e.target.value)
             }
-            className="w-full border rounded px-3 py-2"
           />
+
+          <button
+            onClick={() => removeExperience(exp.id)}
+            className="text-sm text-red-600"
+          >
+            Fjern
+          </button>
         </div>
       ))}
-
-      <button
-        type="button"
-        onClick={addExperience}
-        className="text-sm text-blue-600 hover:underline"
-      >
-        + Legg til arbeidserfaring
-      </button>
     </section>
   )
 }
