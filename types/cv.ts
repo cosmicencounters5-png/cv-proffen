@@ -7,6 +7,7 @@ export type CV = {
     email: string
     phone: string
   }
+  summary: string
   experience: Experience[]
   education: Education[]
   skills: Skill[]
@@ -18,7 +19,7 @@ export type Experience = {
   company: string
   from: string
   to: string
-  description?: string
+  description: string
 }
 
 export type Education = {
@@ -27,7 +28,6 @@ export type Education = {
   degree: string
   from: string
   to: string
-  description?: string
 }
 
 export type Skill = {
