@@ -27,7 +27,7 @@ export default function EducationSection({ cv, onChange }: Props) {
 
   function updateEducation(
     id: string,
-    field: string,
+    field: keyof CV["education"][number],
     value: string
   ) {
     onChange({
@@ -57,12 +57,6 @@ export default function EducationSection({ cv, onChange }: Props) {
         </button>
       </div>
 
-      {cv.education.length === 0 && (
-        <p className="text-sm text-gray-500">
-          Ingen utdanning lagt til ennå
-        </p>
-      )}
-
       {cv.education.map((edu) => (
         <div
           key={edu.id}
@@ -70,7 +64,7 @@ export default function EducationSection({ cv, onChange }: Props) {
         >
           <input
             className="border p-2 w-full"
-            placeholder="Skole / institusjon"
+            placeholder="Skole"
             value={edu.school}
             onChange={(e) =>
               updateEducation(edu.id, "school", e.target.value)
