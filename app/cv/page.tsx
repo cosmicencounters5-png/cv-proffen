@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import CVPreview from "@/components/CVPreview"
 import { CV } from "@/types/cv"
+import CVPreview from "@/components/CVPreview"
+import DownloadPdfButton from "@/components/DownloadPdfButton"
 
 const EMPTY_CV: CV = {
   id: "local",
@@ -22,7 +23,6 @@ const EMPTY_CV: CV = {
 export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
 
-  // 🔹 HENT CV VED LOAD
   useEffect(() => {
     fetch("/api/cv")
       .then((res) => res.json())
@@ -31,7 +31,6 @@ export default function CVPage() {
       })
   }, [])
 
-  // 🔹 AUTO-SAVE (500ms debounce)
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetch("/api/cv", {
@@ -46,7 +45,7 @@ export default function CVPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      {/* HER har du dine skjema-komponenter senere */}
+      <DownloadPdfButton />
       <CVPreview cv={cv} />
     </div>
   )
