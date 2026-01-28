@@ -4,6 +4,7 @@ export type Experience = {
   company: string
   from: string
   to: string
+  description: string
 }
 
 export type Education = {
