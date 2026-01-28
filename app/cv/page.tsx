@@ -1,14 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
-import ExperienceSection from "@/components/ExperienceSection"
-import EducationSection from "@/components/EducationSection"
+import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
   id: "local",
-  summary: "",
   personal: {
     firstName: "",
     lastName: "",
@@ -16,23 +13,32 @@ const EMPTY_CV: CV = {
     email: "",
     phone: "",
   },
+  summary: "",
   experience: [],
   education: [],
   skills: [],
 }
 
 export default function CVPage() {
-  const [cv, setCV] = useState<CV>(EMPTY_CV)
+  const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
 
-  // 🔁 Hent CV ved refresh
   useEffect(() => {
-    fetch("/api/cv/get")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.cv) setCV(data.cv)
+    async function loadCV() {
+      try {
+        const res = await fetch("/api/cv")
+        if (res.ok) {
+          const data = await res.json()
+          if (data) setCv(data)
+        }
+      } catch (err) {
+        console.error("Failed to load CV", err)
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+
+    loadCV()
   }, [])
 
   async function saveCV() {
@@ -44,11 +50,13 @@ export default function CVPage() {
     alert("CV lagret")
   }
 
-  if (loading) return <p>Laster…</p>
+  if (loading) {
+    return <p className="p-8">Laster CV…</p>
+  }
 
   return (
-    <div className="grid grid-cols-2 gap-8">
-      <div>
+    <div className="flex gap-8 p-8">
+      <div className="w-1/2">
         <button
           onClick={saveCV}
           className="mb-4 px-4 py-2 bg-black text-white rounded"
@@ -56,20 +64,15 @@ export default function CVPage() {
           Lagre CV
         </button>
 
-        <ExperienceSection
-          experience={cv.experience}
-          onChange={(experience) =>
-            setCV({ ...cv, experience })
-          }
-        />
-
-        <EducationSection
-          cv={cv}
-          setCV={setCV}
-        />
+        {/* Her kommer editor senere */}
+        <p className="text-sm text-gray-500">
+          (Editor kommer i neste steg)
+        </p>
       </div>
 
-      <CVPreview cv={cv} />
+      <div className="w-1/2">
+        <CVPreview cv={cv} />
+      </div>
     </div>
   )
 }
