@@ -27,7 +27,7 @@ export default function CVPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const init = async () => {
+    const load = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -37,16 +37,49 @@ export default function CVPage() {
         return
       }
 
+      const res = await fetch("/api/cv", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      const json = await res.json()
+      if (json?.data) setCv(json.data)
+
       setLoading(false)
     }
 
-    init()
+    load()
   }, [router])
+
+  const saveCV = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) return
+
+    await fetch("/api/cv", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(cv),
+    })
+  }
 
   if (loading) return <p className="p-8">Laster…</p>
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6 space-y-4">
+      <button
+        onClick={saveCV}
+        className="bg-black text-white px-4 py-2 rounded"
+      >
+        Lagre CV
+      </button>
+
       <CVPreview cv={cv} />
     </div>
   )
