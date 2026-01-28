@@ -1,64 +1,77 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState } from "react"
+import { supabaseClient } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const router = useRouter()
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-
-    const { error } = await supabase.auth.signInWithPassword({
+  async function handleLogin() {
+    const { error } = await supabaseClient.auth.signInWithPassword({
       email,
       password,
-    });
+    })
 
     if (error) {
-      setMessage(error.message);
+      setError(error.message)
     } else {
-      setMessage("Innlogging OK 🎉");
+      router.push("/cv")
+    }
+  }
+
+  async function handleSignup() {
+    const { error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      router.push("/cv")
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleLogin} className="space-y-4 w-80">
-        <h1 className="text-2xl font-bold">Logg inn</h1>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm space-y-4">
+        <h1 className="text-xl font-bold">Logg inn</h1>
 
         <input
-          type="email"
+          className="border p-2 w-full rounded"
           placeholder="E-post"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2"
-          required
         />
 
         <input
+          className="border p-2 w-full rounded"
           type="password"
           placeholder="Passord"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2"
-          required
         />
 
-        <button className="w-full bg-black text-white p-2">
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-black text-white py-2 rounded"
+        >
           Logg inn
         </button>
 
-<p className="text-sm">
-  Har du ikke konto?{" "}
-  <a href="/signup" className="underline">
-    Registrer deg
-  </a>
-</p>
-
-        {message && <p>{message}</p>}
-      </form>
-    </main>
-  );
+        <button
+          onClick={handleSignup}
+          className="w-full border py-2 rounded"
+        >
+          Registrer deg
+        </button>
+      </div>
+    </div>
+  )
 }
