@@ -1,58 +1,36 @@
 import { NextResponse } from "next/server"
+import OpenAI from "openai"
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 export async function POST(req: Request) {
   try {
-    const { cv } = await req.json()
-
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "Missing OPENAI_API_KEY" },
-        { status: 500 }
-      )
-    }
+    const { role, experience } = await req.json()
 
     const prompt = `
-Skriv et profesjonelt, kort CV-sammendrag på norsk (3–4 setninger).
-Tilpass for jobbsøknad.
-
-Navn: ${cv.personal.firstName} ${cv.personal.lastName}
-Ønsket stilling: ${cv.personal.title}
-
-Arbeidserfaring:
-${cv.experience
-  .map((e: any) => `- ${e.role} hos ${e.company}`)
-  .join("\n")}
-
-Ferdigheter:
-${cv.skills.map((s: any) => `- ${s.name}`).join("\n")}
+Skriv et profesjonelt CV-sammendrag på norsk.
+Ønsket stilling: ${role}
+Erfaring: ${experience}
+Hold det kort, konkret og jobb-fokusert.
 `
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "Du er en profesjonell karriereveileder." },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.4,
-      }),
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Du er en profesjonell CV-rådgiver." },
+        { role: "user", content: prompt },
+      ],
     })
 
-    const data = await response.json()
-
-    const summary =
-      data.choices?.[0]?.message?.content?.trim() || ""
-
-    return NextResponse.json({ summary })
-  } catch (err) {
-    console.error("AI SUMMARY ERROR:", err)
+    return NextResponse.json({
+      summary: completion.choices[0].message.content,
+    })
+  } catch (error) {
+    console.error("AI error:", error)
     return NextResponse.json(
-      { error: "AI error" },
+      { error: "AI-feil" },
       { status: 500 }
     )
   }
