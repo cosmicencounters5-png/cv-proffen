@@ -5,13 +5,14 @@ const USER_ID = "00000000-0000-0000-0000-000000000001"
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const cv = await req.json()
 
     const { error } = await supabaseServer
       .from("cvs")
-      .insert({
+      .upsert({
         user_id: USER_ID,
-        data: body,
+        data: cv,
+        updated_at: new Date().toISOString(),
       })
 
     if (error) {
@@ -27,13 +28,13 @@ export async function POST(req: Request) {
 export async function GET() {
   const { data, error } = await supabaseServer
     .from("cvs")
-    .select("*")
+    .select("data")
     .eq("user_id", USER_ID)
-    .order("created_at", { ascending: false })
+    .single()
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error || !data) {
+    return NextResponse.json({ cv: null })
   }
 
-  return NextResponse.json(data)
+  return NextResponse.json({ cv: data.data })
 }
