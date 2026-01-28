@@ -7,57 +7,40 @@ import { supabase } from "@/lib/supabaseClient"
 export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-
+  async function handleSignup() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    setLoading(false)
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    alert("Bruker opprettet! Logg inn.")
-    router.push("/login")
+    if (!error) router.push("/dashboard")
+    else alert(error.message)
   }
 
   return (
-    <form
-      onSubmit={handleSignup}
-      className="max-w-md mx-auto p-8 space-y-4"
-    >
-      <h1 className="text-2xl font-bold">Opprett konto</h1>
-
+    <div className="p-8 max-w-sm mx-auto">
+      <h1 className="text-xl font-bold mb-4">Registrer deg</h1>
       <input
-        className="w-full border p-2"
+        className="border w-full mb-2 p-2"
         placeholder="E-post"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-
       <input
+        className="border w-full mb-4 p-2"
         type="password"
-        className="w-full border p-2"
         placeholder="Passord"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-
       <button
-        disabled={loading}
-        className="w-full bg-black text-white py-2"
+        onClick={handleSignup}
+        className="bg-black text-white px-4 py-2 w-full"
       >
-        {loading ? "Oppretter…" : "Registrer"}
+        Opprett konto
       </button>
-    </form>
+    </div>
   )
 }
