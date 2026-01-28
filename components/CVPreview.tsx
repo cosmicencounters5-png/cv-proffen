@@ -1,6 +1,14 @@
 import { CV } from "@/types/cv"
 
 export default function CVPreview({ cv }: { cv: CV }) {
+  if (!cv || !cv.personal) {
+    return (
+      <div className="bg-white border rounded-xl p-8 shadow-sm">
+        <p className="text-sm text-gray-500">Ingen CV-data ennå</p>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white border rounded-xl p-8 shadow-sm">
       <h1 className="text-xl font-bold">
