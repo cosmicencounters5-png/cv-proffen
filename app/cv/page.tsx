@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
 import CVPreview from "@/components/CVPreview"
 import BuyButton from "@/components/BuyButton"
 import { CV } from "@/types/cv"
-import { supabase } from "@/lib/supabaseClient"
+
+type Access = {
+  active: boolean
+  package: "cv_only" | "cv_and_application"
+  expires_at: string
+}
 
 const EMPTY_CV: CV = {
-  id: "temp",
+  id: "",
   personal: {
     firstName: "",
     lastName: "",
@@ -25,8 +31,8 @@ const EMPTY_CV: CV = {
 export default function CVPage() {
   const router = useRouter()
   const [cv, setCv] = useState<CV>(EMPTY_CV)
+  const [access, setAccess] = useState<Access | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -39,22 +45,25 @@ export default function CVPage() {
         return
       }
 
-      const res = await fetch("/api/cv", {
+      // 1️⃣ hent CV
+      const cvRes = await fetch("/api/cv", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       })
 
-      const json = await res.json()
+      const cvJson = await cvRes.json()
+      if (cvJson?.data) setCv(cvJson.data)
 
-      if (json?.data) {
-        setCv(json.data)
+      // 2️⃣ hent tilgang
+      const accessRes = await fetch("/api/access", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
 
-        const expiresAt = new Date(json.expires_at)
-        const now = new Date()
-
-        setIsExpired(now > expiresAt)
-      }
+      const accessJson = await accessRes.json()
+      setAccess(accessJson)
 
       setLoading(false)
     }
@@ -63,8 +72,6 @@ export default function CVPage() {
   }, [router])
 
   const saveCV = async () => {
-    if (isExpired) return
-
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -83,33 +90,36 @@ export default function CVPage() {
 
   if (loading) return <p className="p-8">Laster…</p>
 
+  const canUseApplication =
+    access?.active && access.package === "cv_and_application"
+
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
-      {isExpired && (
-        <div className="border border-red-400 bg-red-50 p-4 rounded">
-          <p className="font-semibold text-red-700">
-            Tilgangen din er utløpt
-          </p>
-          <p className="text-sm text-red-600 mt-1">
-            Du kan se CV-en, men må kjøpe på nytt for å redigere eller laste ned.
-          </p>
-
-          <div className="mt-4">
-            <BuyButton packageType="cv_only" />
-          </div>
-        </div>
-      )}
-
-      {!isExpired && (
-        <button
-          onClick={saveCV}
-          className="bg-black text-white px-4 py-2 rounded"
-        >
-          Lagre CV
-        </button>
-      )}
+      <button
+        onClick={saveCV}
+        className="bg-black text-white px-4 py-2 rounded"
+      >
+        Lagre CV
+      </button>
 
       <CVPreview cv={cv} />
+
+      {/* 🔒 Søknad */}
+      <div className="border-t pt-6">
+        {canUseApplication ? (
+          <p className="text-green-700 font-medium">
+            ✅ Du har tilgang til søknad og AI
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <p className="font-semibold">🔒 Søknad er låst</p>
+            <p className="text-sm text-gray-600">
+              Oppgrader for å få AI-generert søknad tilpasset stillingen.
+            </p>
+            <BuyButton packageType="cv_and_application" />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
