@@ -1,12 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { CV } from "@/types/cv"
 import CVPreview from "@/components/CVPreview"
-import DownloadPdfButton from "@/components/DownloadPdfButton"
-import ExperienceSection from "@/components/ExperienceSection"
-import EducationSection from "@/components/EducationSection"
-import SkillsSection from "@/components/SkillsSection"
+import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
   id: "local",
@@ -25,123 +21,51 @@ const EMPTY_CV: CV = {
 
 export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
+  const [loading, setLoading] = useState(false)
+
+  async function generateSummary() {
+    setLoading(true)
+
+    const res = await fetch("/api/ai/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: cv.personal.title,
+        experience: cv.experience
+          .map((e) => `${e.role} hos ${e.company}`)
+          .join(", "),
+      }),
+    })
+
+    const data = await res.json()
+
+    setCv({ ...cv, summary: data.summary })
+    setLoading(false)
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* ===================== */}
-      {/* EDITOR (VENSTRE) */}
-      {/* ===================== */}
-      <div className="space-y-6">
-        <h1 className="text-xl font-bold">Rediger CV</h1>
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <input
+        placeholder="Ønsket stilling"
+        className="border p-2 w-full"
+        value={cv.personal.title}
+        onChange={(e) =>
+          setCv({
+            ...cv,
+            personal: { ...cv.personal, title: e.target.value },
+          })
+        }
+      />
 
-        {/* PERSONALIA */}
-        <section className="space-y-2">
-          <h2 className="font-semibold">Personalia</h2>
+      <button
+        onClick={generateSummary}
+        disabled={loading}
+        className="bg-black text-white px-4 py-2 rounded"
+      >
+        {loading ? "Genererer..." : "Generer sammendrag med AI"}
+      </button>
 
-          <input
-            placeholder="Fornavn"
-            className="w-full border p-2 rounded"
-            value={cv.personal.firstName}
-            onChange={(e) =>
-              setCv({
-                ...cv,
-                personal: { ...cv.personal, firstName: e.target.value },
-              })
-            }
-          />
-
-          <input
-            placeholder="Etternavn"
-            className="w-full border p-2 rounded"
-            value={cv.personal.lastName}
-            onChange={(e) =>
-              setCv({
-                ...cv,
-                personal: { ...cv.personal, lastName: e.target.value },
-              })
-            }
-          />
-
-          <input
-            placeholder="Ønsket stilling"
-            className="w-full border p-2 rounded"
-            value={cv.personal.title}
-            onChange={(e) =>
-              setCv({
-                ...cv,
-                personal: { ...cv.personal, title: e.target.value },
-              })
-            }
-          />
-
-          <input
-            placeholder="E-post"
-            className="w-full border p-2 rounded"
-            value={cv.personal.email}
-            onChange={(e) =>
-              setCv({
-                ...cv,
-                personal: { ...cv.personal, email: e.target.value },
-              })
-            }
-          />
-
-          <input
-            placeholder="Telefon"
-            className="w-full border p-2 rounded"
-            value={cv.personal.phone}
-            onChange={(e) =>
-              setCv({
-                ...cv,
-                personal: { ...cv.personal, phone: e.target.value },
-              })
-            }
-          />
-        </section>
-
-        {/* SAMMENDRAG */}
-        <section>
-          <h2 className="font-semibold mb-1">Sammendrag</h2>
-          <textarea
-            placeholder="Kort profesjonelt sammendrag"
-            className="w-full border p-2 rounded h-24"
-            value={cv.summary}
-            onChange={(e) => setCv({ ...cv, summary: e.target.value })}
-          />
-        </section>
-
-        {/* FERDIGHETER */}
-        <section>
-          <h2 className="font-semibold mb-1">Ferdigheter</h2>
-
-          <input
-            placeholder="F.eks. Kundeservice"
-            className="w-full border p-2 rounded"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                const value = (e.target as HTMLInputElement).value
-                if (!value) return
-
-                setCv({
-                  ...cv,
-                  skills: [...cv.skills, { id: crypto.randomUUID(), name: value }],
-                })
-
-                ;(e.target as HTMLInputElement).value = ""
-              }
-            }}
-          />
-        </section>
-      </div>
-
-      {/* ===================== */}
-      {/* PREVIEW (HØYRE) */}
-      {/* ===================== */}
-      <div>
-        <DownloadPdfButton />
-        <CVPreview cv={cv} />
-      </div>
+      <CVPreview cv={cv} />
     </div>
   )
 }
