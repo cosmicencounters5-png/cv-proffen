@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
-import BuyButton from "@/components/BuyButton"
 import CVPreview from "@/components/CVPreview"
+import BuyButton from "@/components/BuyButton"
 import { CV } from "@/types/cv"
+import { supabase } from "@/lib/supabaseClient"
 
 const EMPTY_CV: CV = {
-  id: "",
   personal: {
     firstName: "",
     lastName: "",
@@ -26,9 +25,7 @@ export default function CVPage() {
   const router = useRouter()
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
-  const [hasAccess, setHasAccess] = useState(false)
-  const [expiresAt, setExpiresAt] = useState<string | null>(null)
-  const [daysLeft, setDaysLeft] = useState<number | null>(null)
+  const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -41,34 +38,21 @@ export default function CVPage() {
         return
       }
 
-      // 1️⃣ sjekk tilgang
-      const accessRes = await fetch(
-        `/api/access?userId=${session.user.id}`
-      )
-      const accessJson = await accessRes.json()
+      const res = await fetch("/api/cv", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
 
-      setHasAccess(accessJson.access)
-      setExpiresAt(accessJson.expiresAt)
+      const json = await res.json()
 
-      // regn ut dager igjen
-      if (accessJson.expiresAt) {
+      if (json?.data) {
+        setCv(json.data)
+
+        const expiresAt = new Date(json.expires_at)
         const now = new Date()
-        const expiry = new Date(accessJson.expiresAt)
-        const diffMs = expiry.getTime() - now.getTime()
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-        setDaysLeft(diffDays > 0 ? diffDays : 0)
-      }
 
-      // 2️⃣ last CV kun hvis tilgang
-      if (accessJson.access) {
-        const res = await fetch("/api/cv", {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        })
-
-        const json = await res.json()
-        if (json?.data) setCv(json.data)
+        setIsExpired(now > expiresAt)
       }
 
       setLoading(false)
@@ -78,6 +62,8 @@ export default function CVPage() {
   }, [router])
 
   const saveCV = async () => {
+    if (isExpired) return
+
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -94,40 +80,33 @@ export default function CVPage() {
     })
   }
 
-  if (loading) {
-    return <p className="p-8">Laster…</p>
-  }
+  if (loading) return <p className="p-8">Laster…</p>
 
-  // ❌ INGEN TILGANG → KJØP
-  if (!hasAccess) {
-    return (
-      <div className="max-w-xl mx-auto p-8 text-center space-y-4">
-        <h1 className="text-2xl font-bold">Fullfør kjøp</h1>
-        <p>
-          Du må ha aktiv tilgang for å redigere og laste ned CV-en din.
-        </p>
-        <BuyButton packageType="cv_only" />
-      </div>
-    )
-  }
-
-  // ✅ TILGANG → CV
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-4">
-      {daysLeft !== null && (
-        <div className="rounded bg-yellow-100 text-yellow-800 px-4 py-2 text-sm">
-          {daysLeft === 0
-            ? "Tilgangen din utløper i dag"
-            : `Du har ${daysLeft} dag${daysLeft > 1 ? "er" : ""} igjen av tilgangen`}
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
+      {isExpired && (
+        <div className="border border-red-400 bg-red-50 p-4 rounded">
+          <p className="font-semibold text-red-700">
+            Tilgangen din er utløpt
+          </p>
+          <p className="text-sm text-red-600 mt-1">
+            Du kan se CV-en, men må kjøpe på nytt for å redigere eller laste ned.
+          </p>
+
+          <div className="mt-4">
+            <BuyButton packageType="cv_only" />
+          </div>
         </div>
       )}
 
-      <button
-        onClick={saveCV}
-        className="bg-black text-white px-4 py-2 rounded"
-      >
-        Lagre CV
-      </button>
+      {!isExpired && (
+        <button
+          onClick={saveCV}
+          className="bg-black text-white px-4 py-2 rounded"
+        >
+          Lagre CV
+        </button>
+      )}
 
       <CVPreview cv={cv} />
     </div>
