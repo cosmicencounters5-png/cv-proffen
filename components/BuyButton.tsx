@@ -8,27 +8,29 @@ type Props = {
 
 export default function BuyButton({ packageType }: Props) {
   const handleBuy = async () => {
+    // 1️⃣ Hent session
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
     if (!session) {
-      alert("Du må være logget inn")
+      alert("Du må være innlogget for å kjøpe")
       return
     }
 
+    // 2️⃣ Start checkout med token
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        packageType,
-        userId: session.user.id,
-      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`, // ← KRITISK
+      },
+      body: JSON.stringify({ packageType }),
     })
 
     const data = await res.json()
 
-    if (data?.url) {
+    if (data.url) {
       window.location.href = data.url
     } else {
       alert("Klarte ikke å starte betaling (API-feil)")
