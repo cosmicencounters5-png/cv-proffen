@@ -23,17 +23,13 @@ export async function POST(req: Request) {
 
     const session = await stripe.checkout.sessions.create({
   mode: "payment",
-  line_items: [
-    {
-      price: priceId,
-      quantity: 1,
-    },
-  ],
+  line_items: [{ price: priceId, quantity: 1 }],
+  success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
+  cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
   metadata: {
-    package_type: packageType, // 🔥 VIKTIG
+    user_id: userId,
+    package: packageType,
   },
-  success_url: "https://www.cv-proffen.no/success?session_id={CHECKOUT_SESSION_ID}",
-  cancel_url: "https://www.cv-proffen.no/cv",
 })
 
     return NextResponse.json({ url: session.url })
