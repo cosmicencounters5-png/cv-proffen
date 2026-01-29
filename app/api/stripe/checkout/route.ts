@@ -26,20 +26,15 @@ export async function POST(req: Request) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      client_reference_id: userId, // 🔑 BETALINGSREFERANSE
-      metadata: {
-        packageType,
-      },
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: "https://www.cv-proffen.no/success",
-      cancel_url: "https://www.cv-proffen.no/pricing",
-    })
+  mode: "payment",
+  line_items: [{ price: priceId, quantity: 1 }],
+  success_url: "https://www.cv-proffen.no/success",
+  cancel_url: "https://www.cv-proffen.no/pricing",
+  metadata: {
+    user_id: userId,
+    package_type: packageType,
+  },
+})
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
