@@ -1,28 +1,88 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
+
 export default function SuccessPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const finalizePurchase = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.push("/login")
+        return
+      }
+
+      const userId = session.user.id
+
+      // 3 dager tilgang
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 3)
+
+      const { error } = await supabase
+        .from("purchases")
+        .upsert({
+          user_id: userId,
+          package: "cv_only", // evt endres senere
+          expires_at: expiresAt.toISOString(),
+        })
+
+      if (error) {
+        console.error("❌ PURCHASE SAVE ERROR:", error)
+        setError("Noe gikk galt ved aktivering av pakken.")
+        setLoading(false)
+        return
+      }
+
+      setLoading(false)
+    }
+
+    finalizePurchase()
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center">
+        <h1 className="text-2xl font-semibold">Aktiverer kjøpet ditt…</h1>
+        <p className="mt-2 text-gray-600">Dette tar bare et øyeblikk</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center">
+        <h1 className="text-2xl font-semibold text-red-600">
+          Noe gikk galt
+        </h1>
+        <p className="mt-2 text-gray-600">{error}</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-3xl mx-auto py-20 px-6 text-center">
-      <h1 className="text-3xl font-bold mb-4">
-        Betaling fullført 🎉
+    <div className="max-w-xl mx-auto py-16 text-center space-y-6">
+      <h1 className="text-3xl font-bold text-green-600">
+        🎉 Betaling fullført!
       </h1>
 
-      <p className="text-gray-600 mb-8">
-        Takk for kjøpet! Du har nå full tilgang til tjenesten.
+      <p className="text-gray-700">
+        Takk for kjøpet! Du har nå tilgang til CV-byggeren i 3 dager.
       </p>
 
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
-        <p className="text-sm">
-          ✅ Tilgang aktiv i <strong>3 dager</strong><br />
-          ✅ Lag og rediger CV (og søknad hvis valgt)<br />
-          ✅ Last ned PDF
-        </p>
-      </div>
-
-      <a
-        href="/cv"
-        className="inline-block bg-black text-white px-6 py-3 rounded"
+      <button
+        onClick={() => router.push("/cv")}
+        className="bg-black text-white px-6 py-3 rounded text-sm hover:opacity-90"
       >
         Gå til CV-en min
-      </a>
+      </button>
     </div>
   )
 }
