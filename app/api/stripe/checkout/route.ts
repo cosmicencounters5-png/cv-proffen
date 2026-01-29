@@ -1,3 +1,7 @@
+console.log("PRICE ENV CHECK", {
+  cvOnly: process.env.STRIPE_PRICE_CV_ONLY,
+  cvAndApp: process.env.STRIPE_PRICE_CV_AND_APPLICATION,
+})
 export const runtime = "nodejs"
 
 import { NextResponse } from "next/server"
