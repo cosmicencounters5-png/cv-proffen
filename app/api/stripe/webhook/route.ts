@@ -7,64 +7,52 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 export async function POST(req: Request) {
-  const body = await req.text()
   const sig = req.headers.get("stripe-signature")
-
-  if (!sig) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 })
-  }
+  const body = await req.text()
 
   let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
-      sig,
+      sig!,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
-  } catch (err: any) {
-    console.error("❌ Webhook signature verification failed:", err.message)
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
+  } catch (err) {
+    console.error("❌ Webhook signature error", err)
+    return new NextResponse("Webhook error", { status: 400 })
   }
 
-  // 🎯 VI BRYR OSS BARE OM FULLFØRT BETALING
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session
 
     const userId = session.client_reference_id
+    const priceId = session.line_items?.data?.[0]?.price?.id
 
     if (!userId) {
-      console.error("❌ Mangler client_reference_id (userId)")
-      return NextResponse.json({ error: "Missing userId" }, { status: 400 })
+      console.error("❌ Mangler client_reference_id")
+      return NextResponse.json({ received: true })
     }
-
-    // 🧠 Finn ut hva som ble kjøpt
-    const priceId =
-      session.line_items?.data?.[0]?.price?.id ??
-      (session.metadata?.price_id as string | undefined)
 
     const hasApplication =
       priceId === process.env.STRIPE_PRICE_CV_AND_APPLICATION
 
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 3)
-
+    // ⬇️ HER ER DET KRITISKE
     const { error } = await supabaseAdmin
       .from("user_entitlements")
       .upsert({
         user_id: userId,
         has_cv: true,
         has_application: hasApplication,
-        expires_at: expiresAt.toISOString(),
+        expires_at: new Date(
+          Date.now() + 3 * 24 * 60 * 60 * 1000
+        ).toISOString(),
         updated_at: new Date().toISOString(),
       })
 
     if (error) {
       console.error("❌ Supabase insert error:", error)
-      return NextResponse.json({ error: "DB error" }, { status: 500 })
     }
-
-    console.log("✅ Entitlement opprettet for user:", userId)
   }
 
   return NextResponse.json({ received: true })
