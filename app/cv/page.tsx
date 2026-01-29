@@ -28,43 +28,55 @@ export default function CVPage() {
 
   useEffect(() => {
     const load = async () => {
-      // 1️⃣ Sjekk innlogging
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      try {
+        // 1️⃣ Sjekk innlogging
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
 
-      if (!session) {
-        router.push("/login")
-        return
+        if (!session) {
+          router.replace("/login")
+          return
+        }
+
+        const userId = session.user.id
+
+        // 2️⃣ Sjekk aktiv pakke
+        const { data: purchase, error } = await supabase
+          .from("purchases")
+          .select("id, expires_at")
+          .eq("user_id", userId)
+          .gt("expires_at", new Date().toISOString())
+          .maybeSingle()
+
+        if (error) {
+          console.error("Purchase check error:", error)
+          router.replace("/cv")
+          return
+        }
+
+        if (!purchase) {
+          // ❌ Ikke betalt → send til kjøp
+          router.replace("/pricing")
+          return
+        }
+
+        // 3️⃣ Last CV
+        const res = await fetch("/api/cv", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        })
+
+        const json = await res.json()
+        if (json?.data) {
+          setCv(json.data)
+        }
+      } catch (err) {
+        console.error("CV load error:", err)
+      } finally {
+        setLoading(false)
       }
-
-      const userId = session.user.id
-
-      // 2️⃣ Sjekk aktiv pakke
-      const { data: purchase } = await supabase
-        .from("purchases") // ← bruk ditt faktiske tabellnavn
-        .select("id")
-        .eq("user_id", userId)
-        .gt("expires_at", new Date().toISOString())
-        .maybeSingle()
-
-      if (!purchase) {
-        // ❌ Ingen aktiv pakke → kjøp
-        router.push("/cv")
-        return
-      }
-
-      // 3️⃣ Last CV
-      const res = await fetch("/api/cv", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      })
-
-      const json = await res.json()
-      if (json?.data) setCv(json.data)
-
-      setLoading(false)
     }
 
     load()
