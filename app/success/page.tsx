@@ -41,7 +41,32 @@ export default function SuccessPage() {
 
         // 3️⃣ Finn siste kjøpte pakke (fra Stripe-flowen din)
         // Midlertidig: default til cv_only (kan utvides senere)
-        const packageType: "cv_only" | "cv_and_application" = "cv_only"
+// 3️⃣ Hent Stripe session_id fra URL
+const url = new URL(window.location.href)
+const sessionId = url.searchParams.get("session_id")
+
+if (!sessionId) {
+  setError("Mangler betalingsreferanse.")
+  return
+}
+
+// 4️⃣ Hent Stripe-session fra backend
+const res = await fetch("/api/stripe/session", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ sessionId }),
+})
+
+const data = await res.json()
+
+if (!data?.packageType) {
+  setError("Kunne ikke finne kjøpt pakke.")
+  return
+}
+
+const packageType = data.packageType as
+  | "cv_only"
+  | "cv_and_application"
 
         // 4️⃣ Sett utløp (3 dager)
         const expiresAt = new Date()
