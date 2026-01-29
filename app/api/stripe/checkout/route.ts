@@ -30,9 +30,16 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: "https://www.cv-proffen.no/success",
-      cancel_url: "https://www.cv-proffen.no/pricing",
+
+      // ⭐ VIKTIGSTE LINJE (fikser betalingsreferanse-problemet)
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
     })
+
+    if (!session.url) {
+      throw new Error("Stripe session mangler URL")
+    }
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
