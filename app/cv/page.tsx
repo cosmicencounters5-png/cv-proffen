@@ -28,6 +28,7 @@ export default function CVPage() {
 
   useEffect(() => {
     const load = async () => {
+      // 1️⃣ Auth
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -37,21 +38,20 @@ export default function CVPage() {
         return
       }
 
-      // 🔐 SJEKK TILGANG
-      const accessRes = await fetch("/api/access", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      })
+      // 2️⃣ Aktiv pakke?
+      const { data: purchase } = await supabase
+        .from("purchases")
+        .select("package, expires_at")
+        .eq("user_id", session.user.id)
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle()
 
-      const accessJson = await accessRes.json()
-
-      if (!accessJson.access) {
+      if (!purchase) {
         router.push("/pricing")
         return
       }
 
-      // 📄 LAST CV
+      // 3️⃣ CV er lov for begge pakker → last CV
       const res = await fetch("/api/cv", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
