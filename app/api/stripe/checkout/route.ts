@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 
+export const runtime = "nodejs"
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
@@ -30,21 +32,20 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-
-      // ⭐ VIKTIGSTE LINJE (fikser betalingsreferanse-problemet)
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+      success_url: "https://www.cv-proffen.no/success",
+      cancel_url: "https://www.cv-proffen.no/pricing",
     })
 
     if (!session.url) {
-      throw new Error("Stripe session mangler URL")
+      return NextResponse.json(
+        { error: "Mangler Stripe URL" },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error("❌ STRIPE CHECKOUT ERROR:", error)
-
     return NextResponse.json(
       { error: "Stripe checkout feilet" },
       { status: 500 }
