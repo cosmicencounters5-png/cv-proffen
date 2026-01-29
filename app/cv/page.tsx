@@ -50,7 +50,7 @@ export default function CVPage() {
 
       if (!purchase) {
         // ❌ Ingen aktiv pakke → kjøp
-        router.push("/pricing")
+        router.push("/cv")
         return
       }
 
