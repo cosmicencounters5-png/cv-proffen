@@ -40,15 +40,14 @@ export default function CVPage() {
 
       const userId = session.user.id
 
-      // 2️⃣ Sjekk tilgang (Riktig tabell)
+      // 2️⃣ Sjekk tilgang (Riktig kolonne!)
       const { data: entitlement, error } = await supabase
         .from("user_entitlements")
-        .select("expires_at")
+        .select("has_cv")
         .eq("user_id", userId)
-        .gt("expires_at", new Date().toISOString())
         .maybeSingle()
 
-      if (error || !entitlement) {
+      if (error || !entitlement || !entitlement.has_cv) {
         router.replace("/pricing")
         return
       }
