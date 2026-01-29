@@ -7,57 +7,32 @@ const supabase = createClient(
 )
 
 export async function POST(req: Request) {
-  try {
-    const authHeader = req.headers.get("authorization")
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: "Mangler auth" },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.replace("Bearer ", "")
-    const {
-      data: { user },
-    } = await supabase.auth.getUser(token)
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Ikke logget inn" },
-        { status: 401 }
-      )
-    }
-
-    const { packageType } = await req.json()
-
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 3)
-
-    const { error } = await supabase
-      .from("purchases")
-      .upsert(
-        {
-          user_id: user.id,
-          package: packageType,
-          expires_at: expiresAt.toISOString(),
-        },
-        { onConflict: "user_id" }
-      )
-
-    if (error) {
-      console.error("❌ PURCHASE UPSERT ERROR:", error)
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (err: any) {
-    console.error("❌ ACTIVATE ROUTE ERROR:", err)
-    return NextResponse.json(
-      { error: "Serverfeil" },
-      { status: 500 }
-    )
+  const auth = req.headers.get("authorization")
+  if (!auth) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const token = auth.replace("Bearer ", "")
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token)
+
+  if (!user) {
+    return NextResponse.json({ error: "No user" }, { status: 401 })
+  }
+
+  // Sikker fallback: aktiver siste purchase (test-mode)
+  const { error } = await supabase.from("purchases").insert({
+    user_id: user.id,
+    package_type: "cv_only",
+    expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+  })
+
+  if (error) {
+    console.error("activate-purchase error:", error)
+    return NextResponse.json({ error: "DB error" }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
 }
