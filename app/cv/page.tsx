@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { getActivePackage } from "@/lib/entitlements"
 import CVPreview from "@/components/CVPreview"
 import { CV } from "@/types/cv"
 
@@ -29,6 +28,7 @@ export default function CVPage() {
 
   useEffect(() => {
     const load = async () => {
+      // 1️⃣ Sjekk login
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -40,13 +40,20 @@ export default function CVPage() {
 
       const userId = session.user.id
 
-      const activePackage = await getActivePackage(userId)
+      // 2️⃣ Sjekk tilgang (Riktig tabell)
+      const { data: entitlement, error } = await supabase
+        .from("user_entitlements")
+        .select("expires_at")
+        .eq("user_id", userId)
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle()
 
-      if (!activePackage) {
+      if (error || !entitlement) {
         router.replace("/pricing")
         return
       }
 
+      // 3️⃣ Last CV
       const res = await fetch("/api/cv", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
