@@ -1,52 +1,54 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 
-export default function SuccessPage() {
+export default function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
 
-  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading")
-
-  useEffect(() => {
-    if (!sessionId) {
-      setStatus("error")
-      return
-    }
-
-    const verify = async () => {
-      try {
-        const res = await fetch("/api/stripe/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        })
-
-        if (!res.ok) throw new Error("Verify failed")
-
-        setStatus("ok")
-      } catch (err) {
-        console.error(err)
-        setStatus("error")
-      }
-    }
-
-    verify()
-  }, [sessionId])
-
-  if (status === "loading") {
-    return <p className="p-8">Bekrefter betaling…</p>
-  }
-
-  if (status === "error") {
-    return <p className="p-8 text-red-600">Noe gikk galt 😕</p>
-  }
-
   return (
-    <div className="max-w-xl mx-auto p-8 text-center">
-      <h1 className="text-2xl font-bold mb-4">🎉 Betaling fullført</h1>
-      <p>Du har nå tilgang til pakken din.</p>
+    <div className="max-w-2xl mx-auto py-16 px-6 text-center space-y-6">
+      <div className="text-5xl">🎉</div>
+
+      <h1 className="text-3xl font-bold">
+        Betaling fullført!
+      </h1>
+
+      <p className="text-gray-700 text-lg">
+        Takk for kjøpet. Du har nå fått tilgang til CV-tjenesten.
+      </p>
+
+      <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-600">
+        <p>
+          ✅ Tilgangen er aktiv i <strong>3 dager</strong>
+        </p>
+        <p>
+          📄 Du kan redigere, forbedre og generere CV med AI
+        </p>
+        <p>
+          💬 Eventuelle endringer lagres automatisk
+        </p>
+      </div>
+
+      {sessionId && (
+        <p className="text-xs text-gray-400">
+          Referanse: {sessionId}
+        </p>
+      )}
+
+      <div className="pt-6">
+        <Link
+          href="/cv"
+          className="inline-block bg-black text-white px-6 py-3 rounded text-sm"
+        >
+          Gå til min CV
+        </Link>
+      </div>
+
+      <p className="text-xs text-gray-400 pt-8">
+        Har du spørsmål? Kontakt oss på support@cv-proffen.no
+      </p>
     </div>
   )
 }
