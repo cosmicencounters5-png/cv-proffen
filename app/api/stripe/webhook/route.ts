@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server"
 import Stripe from "stripe"
+import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -25,12 +22,11 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     )
   } catch (err: any) {
-    console.error("❌ Webhook signature failed", err.message)
+    console.error("❌ Invalid webhook signature", err.message)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
   try {
-    // ✅ Betaling fullført
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session
 
@@ -38,13 +34,12 @@ export async function POST(req: Request) {
       const packageType = session.metadata?.package_type
 
       if (!userId || !packageType) {
-        throw new Error("Manglende metadata (user_id / package_type)")
+        throw new Error("Manglende metadata")
       }
 
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 3)
 
-      // 🔐 Opprett / oppdater tilgang
       await supabaseAdmin.from("user_entitlements").upsert({
         user_id: userId,
         has_cv: true,
@@ -56,7 +51,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true })
   } catch (err) {
-    console.error("❌ Webhook processing error:", err)
+    console.error("❌ Webhook processing error", err)
     return NextResponse.json({ error: "Webhook error" }, { status: 500 })
   }
 }
