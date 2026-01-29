@@ -1,85 +1,81 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 
 export default function SuccessPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const finalizePurchase = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+    const activate = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
 
-      if (!session) {
-        router.push("/login")
-        return
-      }
+        if (!session) {
+          router.push("/login")
+          return
+        }
 
-      const userId = session.user.id
+        const packageType =
+          searchParams.get("package") ?? "cv_only"
 
-      // 3 dager tilgang
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 3)
-
-      const { error } = await supabase
-        .from("purchases")
-        .upsert({
-          user_id: userId,
-          package: "cv_only", // evt endres senere
-          expires_at: expiresAt.toISOString(),
+        const res = await fetch("/api/activate-purchase", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ packageType }),
         })
 
-      if (error) {
-        console.error("❌ PURCHASE SAVE ERROR:", error)
-        setError("Noe gikk galt ved aktivering av pakken.")
-        setLoading(false)
-        return
-      }
+        const json = await res.json()
 
-      setLoading(false)
+        if (!res.ok) {
+          throw new Error(json.error || "Aktivering feilet")
+        }
+
+        setLoading(false)
+      } catch (err: any) {
+        console.error("❌ ACTIVATE ERROR:", err)
+        setError(err.message)
+        setLoading(false)
+      }
     }
 
-    finalizePurchase()
-  }, [router])
+    activate()
+  }, [router, searchParams])
 
   if (loading) {
-    return (
-      <div className="max-w-xl mx-auto py-16 text-center">
-        <h1 className="text-2xl font-semibold">Aktiverer kjøpet ditt…</h1>
-        <p className="mt-2 text-gray-600">Dette tar bare et øyeblikk</p>
-      </div>
-    )
+    return <p className="p-8 text-center">Aktiverer pakken din…</p>
   }
 
   if (error) {
     return (
-      <div className="max-w-xl mx-auto py-16 text-center">
-        <h1 className="text-2xl font-semibold text-red-600">
+      <div className="max-w-xl mx-auto p-8 text-center space-y-4">
+        <h1 className="text-2xl font-bold text-red-600">
           Noe gikk galt
         </h1>
-        <p className="mt-2 text-gray-600">{error}</p>
+        <p>{error}</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-xl mx-auto py-16 text-center space-y-6">
-      <h1 className="text-3xl font-bold text-green-600">
-        🎉 Betaling fullført!
-      </h1>
-
-      <p className="text-gray-700">
-        Takk for kjøpet! Du har nå tilgang til CV-byggeren i 3 dager.
+    <div className="max-w-xl mx-auto p-8 text-center space-y-6">
+      <h1 className="text-3xl font-bold">🎉 Betaling fullført</h1>
+      <p>
+        Pakken din er aktivert. Du har nå full tilgang til CV-verktøyet.
       </p>
 
       <button
         onClick={() => router.push("/cv")}
-        className="bg-black text-white px-6 py-3 rounded text-sm hover:opacity-90"
+        className="bg-black text-white px-6 py-3 rounded"
       >
         Gå til CV-en min
       </button>
