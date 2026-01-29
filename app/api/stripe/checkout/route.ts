@@ -38,17 +38,15 @@ export async function POST(req: Request) {
 
     // ✅ HER SKAL client_reference_id SETTES
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      client_reference_id: user.id, // ← KRITISK
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: "https://www.cv-proffen.no/success",
-      cancel_url: "https://www.cv-proffen.no/pricing",
-    })
+  mode: "payment",
+  client_reference_id: user.id,
+  metadata: {
+    packageType, // ← VIKTIG
+  },
+  line_items: [{ price: priceId, quantity: 1 }],
+  success_url: "https://www.cv-proffen.no/success",
+  cancel_url: "https://www.cv-proffen.no/pricing",
+})
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
