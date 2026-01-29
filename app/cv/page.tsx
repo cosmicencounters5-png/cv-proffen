@@ -28,55 +28,40 @@ export default function CVPage() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        // 1️⃣ Sjekk innlogging
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
-        if (!session) {
-          router.replace("/login")
-          return
-        }
-
-        const userId = session.user.id
-
-        // 2️⃣ Sjekk aktiv pakke
-        const { data: purchase, error } = await supabase
-          .from("purchases")
-          .select("id, expires_at")
-          .eq("user_id", userId)
-          .gt("expires_at", new Date().toISOString())
-          .maybeSingle()
-
-        if (error) {
-          console.error("Purchase check error:", error)
-          router.replace("/cv")
-          return
-        }
-
-        if (!purchase) {
-          // ❌ Ikke betalt → send til kjøp
-          router.replace("/pricing")
-          return
-        }
-
-        // 3️⃣ Last CV
-        const res = await fetch("/api/cv", {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        })
-
-        const json = await res.json()
-        if (json?.data) {
-          setCv(json.data)
-        }
-      } catch (err) {
-        console.error("CV load error:", err)
-      } finally {
-        setLoading(false)
+      if (!session) {
+        router.push("/login")
+        return
       }
+
+      // 🔐 SJEKK TILGANG
+      const accessRes = await fetch("/api/access", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      const accessJson = await accessRes.json()
+
+      if (!accessJson.access) {
+        router.push("/pricing")
+        return
+      }
+
+      // 📄 LAST CV
+      const res = await fetch("/api/cv", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      const json = await res.json()
+      if (json?.data) setCv(json.data)
+
+      setLoading(false)
     }
 
     load()
