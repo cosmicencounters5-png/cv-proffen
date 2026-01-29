@@ -10,122 +10,41 @@ export default function SuccessPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const activatePackage = async () => {
-      try {
-        // 1️⃣ Sjekk innlogging
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
+    const activate = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
-        if (sessionError || !session) {
-          router.push("/login")
-          return
-        }
-
-        const userId = session.user.id
-
-        // 2️⃣ Sjekk om bruker allerede har aktiv pakke
-        const { data: existingPurchase } = await supabase
-          .from("purchases")
-          .select("id")
-          .eq("user_id", userId)
-          .gt("expires_at", new Date().toISOString())
-          .maybeSingle()
-
-        if (existingPurchase) {
-          // Allerede aktiv → rett til CV
-          router.push("/cv")
-          return
-        }
-
-        // 3️⃣ Finn siste kjøpte pakke (fra Stripe-flowen din)
-        // Midlertidig: default til cv_only (kan utvides senere)
-// 3️⃣ Hent Stripe session_id fra URL
-const url = new URL(window.location.href)
-const sessionId = url.searchParams.get("session_id")
-
-if (!sessionId) {
-  setError("Mangler betalingsreferanse.")
-  return
-}
-
-// 4️⃣ Hent Stripe-session fra backend
-const res = await fetch("/api/stripe/session", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ sessionId }),
-})
-
-const data = await res.json()
-
-if (!data?.packageType) {
-  setError("Kunne ikke finne kjøpt pakke.")
-  return
-}
-
-const packageType = data.packageType as
-  | "cv_only"
-  | "cv_and_application"
-
-        // 4️⃣ Sett utløp (3 dager)
-        const expiresAt = new Date()
-        expiresAt.setDate(expiresAt.getDate() + 3)
-
-        // 5️⃣ Opprett purchase
-        const { error: insertError } = await supabase
-          .from("purchases")
-          .insert({
-            user_id: userId,
-            package_type: packageType,
-            expires_at: expiresAt.toISOString(),
-          })
-
-        if (insertError) {
-          console.error(insertError)
-          setError("Noe gikk galt ved aktivering av pakken.")
-          return
-        }
-
-        // 6️⃣ Ferdig → CV
-        router.push("/cv")
-      } catch (err) {
-        console.error(err)
-        setError("Noe gikk galt. Prøv igjen.")
-      } finally {
-        setLoading(false)
+      if (!session) {
+        router.replace("/login")
+        return
       }
+
+      const res = await fetch("/api/activate-purchase", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (!res.ok) {
+        setError("Noe gikk galt ved aktivering av pakken.")
+        setLoading(false)
+        return
+      }
+
+      router.replace("/cv")
     }
 
-    activatePackage()
+    activate()
   }, [router])
 
   if (loading) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center">
-        <h1 className="text-xl font-semibold">Aktiverer pakken din…</h1>
-        <p className="text-gray-600 mt-2">
-          Dette tar bare et øyeblikk
-        </p>
-      </div>
-    )
+    return <p className="p-8">Aktiverer pakken din…</p>
   }
 
   if (error) {
-    return (
-      <div className="max-w-xl mx-auto py-20 text-center">
-        <h1 className="text-xl font-semibold text-red-600">
-          Noe gikk galt
-        </h1>
-        <p className="text-gray-700 mt-3">{error}</p>
-        <button
-          onClick={() => router.push("/pricing")}
-          className="mt-6 bg-black text-white px-6 py-3 rounded"
-        >
-          Gå til priser
-        </button>
-      </div>
-    )
+    return <p className="p-8 text-red-600">{error}</p>
   }
 
   return null
