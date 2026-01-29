@@ -1,48 +1,44 @@
 "use client"
 
+import { supabase } from "@/lib/supabaseClient"
+
 type Props = {
   packageType: "cv_only" | "cv_and_application"
 }
 
 export default function BuyButton({ packageType }: Props) {
   const handleBuy = async () => {
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ packageType }),
-      })
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-      // 👇 NYTT: hvis API feiler, vis faktisk feil
-      if (!res.ok) {
-        const text = await res.text()
-        console.error("Checkout API feilet:", text)
-        alert("Klarte ikke å starte betaling (API-feil)")
-        return
-      }
+    if (!session) {
+      alert("Du må være logget inn")
+      return
+    }
 
-      const data = await res.json()
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        packageType,
+        userId: session.user.id,
+      }),
+    })
 
-      if (!data?.url) {
-        console.error("Ingen Stripe URL:", data)
-        alert("Stripe returnerte ingen betalingslenke")
-        return
-      }
+    const data = await res.json()
 
-      // ✅ GÅR TIL STRIPE
+    if (data?.url) {
       window.location.href = data.url
-    } catch (err) {
-      console.error("Checkout klikk-feil:", err)
-      alert("Uventet feil ved betaling")
+    } else {
+      alert("Klarte ikke å starte betaling (API-feil)")
     }
   }
 
   return (
     <button
       onClick={handleBuy}
-      className="bg-black text-white px-6 py-3 rounded text-sm"
+      className="bg-black text-white px-6 py-3 rounded"
     >
       Kjøp nå
     </button>
