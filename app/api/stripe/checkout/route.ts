@@ -33,8 +33,18 @@ export async function POST(req: Request) {
 })
 
     return NextResponse.json({ url: session.url })
-  } catch (err) {
-    console.error("❌ STRIPE CHECKOUT ERROR:", err)
-    return NextResponse.json({ error: "Stripe error" }, { status: 500 })
-  }
+  } catch (err: any) {
+  console.error("❌ STRIPE CHECKOUT ERROR", {
+    message: err?.message,
+    type: err?.type,
+    code: err?.code,
+    raw: err?.raw,
+  })
+
+  return NextResponse.json(
+    {
+      error: err?.message || "Stripe error",
+    },
+    { status: 500 }
+  )
 }
