@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
-
-export const runtime = "nodejs"
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -9,12 +8,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    const { packageType, userId } = await req.json()
+    const { packageType } = await req.json()
 
-    if (!userId) {
-      return NextResponse.json({ error: "Mangler userId" }, { status: 400 })
+    // 🔐 Hent innlogget bruker (server-side)
+    const authHeader = req.headers.get("authorization")
+    if (!authHeader) {
+      return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 })
     }
 
+    const token = authHeader.replace("Bearer ", "")
+    const {
+      data: { user },
+    } = await supabaseAdmin.auth.getUser(token)
+
+    if (!user) {
+      return NextResponse.json({ error: "Ugyldig bruker" }, { status: 401 })
+    }
+
+    // 💰 Velg riktig pris
     let priceId: string
 
     if (packageType === "cv_only") {
@@ -25,20 +36,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Ugyldig pakke" }, { status: 400 })
     }
 
+    // ✅ HER SKAL client_reference_id SETTES
     const session = await stripe.checkout.sessions.create({
-  mode: "payment",
-  line_items: [{ price: priceId, quantity: 1 }],
-  success_url: "https://www.cv-proffen.no/success",
-  cancel_url: "https://www.cv-proffen.no/pricing",
-  metadata: {
-    user_id: userId,
-    package_type: packageType,
-  },
-})
+      mode: "payment",
+      client_reference_id: user.id, // ← KRITISK
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: "https://www.cv-proffen.no/success",
+      cancel_url: "https://www.cv-proffen.no/pricing",
+    })
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    console.error("❌ STRIPE CHECKOUT ERROR", err)
-    return NextResponse.json({ error: "Stripe-feil" }, { status: 500 })
+    console.error("❌ Stripe checkout error:", err)
+    return NextResponse.json(
+      { error: "Klarte ikke å starte betaling" },
+      { status: 500 }
+    )
   }
 }
