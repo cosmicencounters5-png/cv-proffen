@@ -1,3 +1,5 @@
+export async function POST(req: Request) {
+  console.log("🔥 STRIPE CHECKOUT ROUTE HIT")
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 
@@ -37,7 +39,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
+console.error("❌ STRIPE ERROR FULL:", err)
     console.error("STRIPE CHECKOUT ERROR:", err)
-    return NextResponse.json({ error: "Stripe error" }, { status: 500 })
+    console.log("✅ STRIPE SESSION URL:", session.url)
+return NextResponse.json({ error: "Stripe error" }, { status: 500 })
   }
 }
