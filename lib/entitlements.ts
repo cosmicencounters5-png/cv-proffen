@@ -6,12 +6,10 @@ export async function getActivePackage(userId: string) {
     .select("package_type, expires_at")
     .eq("user_id", userId)
     .gt("expires_at", new Date().toISOString())
-    .order("expires_at", { ascending: false })
-    .limit(1)
     .maybeSingle()
 
   if (error) {
-    console.error("ENTITLEMENT ERROR:", error)
+    console.error("getActivePackage error:", error)
     return null
   }
 
