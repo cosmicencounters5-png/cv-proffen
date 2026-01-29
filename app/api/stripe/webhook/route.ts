@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server"
-import { headers } from "next/headers"
-import { stripe } from "@/lib/stripe"
+import Stripe from "stripe"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
+export const runtime = "nodejs"
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2023-10-16",
+})
+
 export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature")!
   const body = await req.text()
-  const sig = headers().get("stripe-signature")
 
-  if (!sig) {
-    return new NextResponse("Missing signature", { status: 400 })
-  }
-
-  let event
+  let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -21,28 +22,26 @@ export async function POST(req: Request) {
     )
   } catch (err) {
     console.error("❌ Webhook signature error", err)
-    return new NextResponse("Webhook error", { status: 400 })
+    return new NextResponse("Invalid signature", { status: 400 })
   }
 
-  // ✅ Kun ferdig betaling
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as any
+    const session = event.data.object as Stripe.Checkout.Session
 
-    const userId = session.metadata?.user_id
-    const packageType = session.metadata?.package
+    const userId = session.client_reference_id
+    const packageType = session.metadata?.packageType
 
     if (!userId || !packageType) {
-      console.error("❌ Mangler metadata", session.metadata)
-      return NextResponse.json({ ok: false })
+      console.error("❌ Mangler data i Stripe-session")
+      return NextResponse.json({ error: "Manglende data" }, { status: 400 })
     }
 
-    // ⏱ 3 dager tilgang
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 3)
 
-    await supabaseAdmin.from("entitlements").insert({
+    await supabaseAdmin.from("purchases").insert({
       user_id: userId,
-      package: packageType,
+      package_type: packageType,
       expires_at: expiresAt.toISOString(),
     })
   }
