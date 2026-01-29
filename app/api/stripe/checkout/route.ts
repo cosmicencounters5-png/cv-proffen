@@ -9,7 +9,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    const { packageType } = await req.json()
+    const { packageType, userId } = await req.json()
+
+    if (!userId) {
+      return NextResponse.json({ error: "Mangler userId" }, { status: 400 })
+    }
 
     let priceId: string
 
@@ -18,14 +22,15 @@ export async function POST(req: Request) {
     } else if (packageType === "cv_and_application") {
       priceId = process.env.STRIPE_PRICE_CV_AND_APPLICATION!
     } else {
-      return NextResponse.json(
-        { error: "Ugyldig pakke" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Ugyldig pakke" }, { status: 400 })
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      client_reference_id: userId, // 🔑 BETALINGSREFERANSE
+      metadata: {
+        packageType,
+      },
       line_items: [
         {
           price: priceId,
@@ -36,19 +41,9 @@ export async function POST(req: Request) {
       cancel_url: "https://www.cv-proffen.no/pricing",
     })
 
-    if (!session.url) {
-      return NextResponse.json(
-        { error: "Mangler Stripe URL" },
-        { status: 500 }
-      )
-    }
-
     return NextResponse.json({ url: session.url })
-  } catch (error) {
-    console.error("❌ STRIPE CHECKOUT ERROR:", error)
-    return NextResponse.json(
-      { error: "Stripe checkout feilet" },
-      { status: 500 }
-    )
+  } catch (err) {
+    console.error("❌ STRIPE CHECKOUT ERROR", err)
+    return NextResponse.json({ error: "Stripe-feil" }, { status: 500 })
   }
 }
