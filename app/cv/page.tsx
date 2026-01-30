@@ -1,5 +1,6 @@
 "use client"
 
+import LogoutButton from "@/components/LogoutButton"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
