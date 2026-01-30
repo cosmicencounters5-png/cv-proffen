@@ -40,14 +40,22 @@ export default function CVPage() {
 
       const userId = session.user.id
 
-      // 2️⃣ Sjekk tilgang (Riktig kolonne!)
+      // 2️⃣ Sjekk tilgang (has_cv + expires_at)
       const { data: entitlement, error } = await supabase
         .from("user_entitlements")
-        .select("has_cv")
+        .select("has_cv, expires_at")
         .eq("user_id", userId)
         .maybeSingle()
 
-      if (error || !entitlement || !entitlement.has_cv) {
+      console.log("ENTITLEMENT FRONTEND:", entitlement)
+
+      if (
+        error ||
+        !entitlement ||
+        !entitlement.has_cv ||
+        !entitlement.expires_at ||
+        new Date(entitlement.expires_at) < new Date()
+      ) {
         router.replace("/pricing")
         return
       }
@@ -60,7 +68,9 @@ export default function CVPage() {
       })
 
       const json = await res.json()
-      if (json?.data) setCv(json.data)
+      if (json?.data) {
+        setCv(json.data)
+      }
 
       setLoading(false)
     }
