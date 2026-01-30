@@ -89,3 +89,12 @@ export default function CVPage() {
     </div>
   )
 }
+return (
+  <div className="max-w-5xl mx-auto p-6 space-y-4">
+    <div className="flex justify-end">
+      <LogoutButton />
+    </div>
+
+    <CVPreview cv={cv} />
+  </div>
+)
