@@ -41,9 +41,14 @@ export async function POST(req: Request) {
   mode: "payment",
   client_reference_id: user.id,
   metadata: {
-    packageType, // ← VIKTIG
+    packageType, // ← 🔥 OBLIGATORISK
   },
-  line_items: [{ price: priceId, quantity: 1 }],
+  line_items: [
+    {
+      price: priceId,
+      quantity: 1,
+    },
+  ],
   success_url: "https://www.cv-proffen.no/success",
   cancel_url: "https://www.cv-proffen.no/pricing",
 })
