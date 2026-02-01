@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
 
-const USER_ID = "00000000-0000-0000-0000-000000000001"
+export async function POST(req: Request) {
+  const supabase = createClient()
 
-export async function GET() {
-  const { data, error } = await supabaseServer
-    .from("cvs")
-    .select("data")
-    .eq("user_id", USER_ID)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (error || !data) {
-    return NextResponse.json({ cv: null })
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  return NextResponse.json({ cv: data.data })
+  const body = await req.json()
+
+  const { data, error } = await supabase
+    .from("cvs")
+    .insert({
+      user_id: user.id,
+      title: body.title ?? "Min CV",
+      content: body.content,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error("CV insert error:", error)
+    return NextResponse.json({ error: "Database error" }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
 }
