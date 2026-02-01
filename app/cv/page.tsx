@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabaseBrowser"
 import LogoutButton from "@/components/LogoutButton"
@@ -27,7 +27,7 @@ const EMPTY_CV: CV = {
 
 export default function CVPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
@@ -48,7 +48,7 @@ export default function CVPage() {
       setSessionToken(session.access_token)
       const userId = session.user.id
 
-      // 2️⃣ Entitlement (KRITISK)
+      // 2️⃣ Entitlement
       const { data: entitlement, error } = await supabase
         .from("user_entitlements")
         .select("has_cv")
@@ -74,6 +74,7 @@ export default function CVPage() {
       }
 
       const data = await res.json()
+
       if (Array.isArray(data) && data.length > 0) {
         setCv(data[0])
       } else {
@@ -86,7 +87,6 @@ export default function CVPage() {
     load()
   }, [router, supabase])
 
-  // 💾 Lagre CV
   const saveCv = async (updatedCv: CV) => {
     if (!sessionToken) return
 
@@ -118,41 +118,39 @@ export default function CVPage() {
         <LogoutButton />
       </div>
 
-      {/* ✍️ REDIGERING */}
       <section className="space-y-6">
         <EditableTextSection
           title="Profil / Sammendrag"
           value={cv.summary}
-          onSave={newText =>
+          onSave={summary =>
             saveCv({
               ...cv,
-              summary: newText,
+              summary,
             })
           }
         />
 
         <EditableExperience
           value={cv.experience}
-          onSave={items =>
+          onSave={experience =>
             saveCv({
               ...cv,
-              experience: items,
+              experience,
             })
           }
         />
 
         <EditableEducation
           value={cv.education}
-          onSave={items =>
+          onSave={education =>
             saveCv({
               ...cv,
-              education: items,
+              education,
             })
           }
         />
       </section>
 
-      {/* 👀 FORHÅNDSVISNING */}
       <section>
         <h2 className="font-semibold mb-2">Forhåndsvisning</h2>
         <CVPreview cv={cv} />
