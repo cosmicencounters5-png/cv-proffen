@@ -1,44 +1,66 @@
 "use client"
 
 import { useState } from "react"
+import { Skill } from "@/types/cv"
 
-type Props = {
-  value: string[]
-  onSave: (skills: string[]) => void
+interface EditableSkillsProps {
+  value: Skill[]
+  onSave: (skills: Skill[]) => void
 }
 
-export default function EditableSkills({ value, onSave }: Props) {
-  const [skills, setSkills] = useState<string[]>(value ?? [])
+export default function EditableSkills({
+  value,
+  onSave,
+}: EditableSkillsProps) {
+  const [skills, setSkills] = useState<Skill[]>(value)
   const [input, setInput] = useState("")
 
   const addSkill = () => {
     if (!input.trim()) return
-    const updated = [...skills, input.trim()]
-    setSkills(updated)
-    onSave(updated)
+
+    setSkills([...skills, { name: input.trim() }])
     setInput("")
   }
 
   const removeSkill = (index: number) => {
-    const updated = skills.filter((_, i) => i !== index)
-    setSkills(updated)
-    onSave(updated)
+    setSkills(skills.filter((_, i) => i !== index))
+  }
+
+  const save = () => {
+    onSave(skills)
   }
 
   return (
     <div className="border rounded p-4 space-y-3">
       <h3 className="font-semibold">Ferdigheter</h3>
 
+      <div className="flex gap-2">
+        <input
+          className="flex-1 border rounded px-2 py-1 text-sm"
+          placeholder="Legg til ferdighet (f.eks. React, Excel, Salg)"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addSkill()}
+        />
+
+        <button
+          onClick={addSkill}
+          className="px-3 py-1 bg-black text-white rounded text-sm"
+        >
+          Legg til
+        </button>
+      </div>
+
       <div className="flex flex-wrap gap-2">
-        {skills.map((skill, i) => (
+        {skills.map((skill, index) => (
           <span
-            key={i}
-            className="bg-gray-200 text-sm px-3 py-1 rounded flex items-center gap-2"
+            key={index}
+            className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm"
           >
-            {skill}
+            {skill.name}
             <button
-              onClick={() => removeSkill(i)}
-              className="text-gray-500 hover:text-black"
+              onClick={() => removeSkill(index)}
+              className="text-red-500"
             >
               ×
             </button>
@@ -46,20 +68,12 @@ export default function EditableSkills({ value, onSave }: Props) {
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Legg til ferdighet"
-          className="border rounded px-2 py-1 flex-1"
-        />
-        <button
-          onClick={addSkill}
-          className="px-3 py-1 rounded bg-black text-white text-sm"
-        >
-          Legg til
-        </button>
-      </div>
+      <button
+        onClick={save}
+        className="text-sm text-blue-600 hover:underline"
+      >
+        Lagre ferdigheter
+      </button>
     </div>
   )
 }
