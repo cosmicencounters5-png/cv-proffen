@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabaseBrowser"
 import CVPreview from "@/components/CVPreview"
 import LogoutButton from "@/components/LogoutButton"
 import { CV } from "@/types/cv"
+import EditableSection from "@/components/EditableSection"
 
 const EMPTY_CV: CV = {
   id: "",
