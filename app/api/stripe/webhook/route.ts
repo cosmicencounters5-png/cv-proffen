@@ -37,6 +37,7 @@ function mapPackageToEntitlements(packageType: string) {
 }
 
 export async function POST(req: Request) {
+console.log("🔥 STRIPE WEBHOOK HIT", new Date().toISOString())
   const body = await req.text()
   const sig = headers().get("stripe-signature")
 
