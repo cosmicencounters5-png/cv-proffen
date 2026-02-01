@@ -9,6 +9,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 })
 
+/**
+ * Oversetter Stripe packageType → app-entitlements
+ * Dette er grensa mellom Stripe og domenelogikken din
+ */
+function mapPackageToEntitlements(packageType: string) {
+  switch (packageType) {
+    case "cv_and_application":
+      return {
+        has_cv: true,
+        has_application: true,
+      }
+    case "cv":
+      return {
+        has_cv: true,
+        has_application: false,
+      }
+    default:
+      return {
+        has_cv: false,
+        has_application: false,
+      }
+  }
+}
+
 export async function POST(req: Request) {
   const body = await req.text()
   const sig = headers().get("stripe-signature")
@@ -41,27 +65,32 @@ export async function POST(req: Request) {
   const packageType = session.metadata?.packageType
 
   if (!userId || !packageType) {
-    console.error("❌ Missing data", { userId, packageType })
+    console.error("❌ Missing session data", { userId, packageType })
     return new NextResponse("Invalid session data", { status: 400 })
   }
 
-  const hasApplication = packageType === "cv_and_application"
+  const entitlements = mapPackageToEntitlements(packageType)
 
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + 3)
 
-  const { error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("user_entitlements")
-    .upsert({
-      user_id: userId,
-      has_cv: true,
-      has_application: hasApplication,
-      expires_at: expiresAt.toISOString(),
-      updated_at: new Date().toISOString(),
-    })
+    .upsert(
+      {
+        user_id: userId,
+        ...entitlements,
+        expires_at: expiresAt.toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    )
+    .select()
+
+  console.log("🧾 ENTITLEMENT UPSERT RESULT", data, error)
 
   if (error) {
-    console.error("❌ Supabase insert failed", error)
+    console.error("❌ Supabase upsert failed", error)
     return new NextResponse("Database error", { status: 500 })
   }
 
