@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabaseBrowser"
-import CVPreview from "@/components/CVPreview"
 import LogoutButton from "@/components/LogoutButton"
+import CVPreview from "@/components/CVPreview"
 import EditableSection from "@/components/EditableSection"
-import { CV } from "@/types/cv"
 import EditableExperience from "@/components/EditableExperience"
 import EditableEducation from "@/components/EditableEducation"
+import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
   id: "",
@@ -33,9 +33,9 @@ export default function CVPage() {
   const [loading, setLoading] = useState(true)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
 
+  // 🔐 Last session + CV
   useEffect(() => {
     const load = async () => {
-      // 1️⃣ Hent session
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -47,7 +47,6 @@ export default function CVPage() {
 
       setSessionToken(session.access_token)
 
-      // 2️⃣ Hent CV
       const res = await fetch("/api/cv/get", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -72,9 +71,10 @@ export default function CVPage() {
     }
 
     load()
-  }, [router, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router])
 
-  // 3️⃣ Lagre oppdatert CV (brukes av EditableSection)
+  // 💾 Lagre CV (brukes av alle editorer)
   const saveCv = async (updatedCv: CV) => {
     if (!sessionToken) return
 
@@ -101,40 +101,50 @@ export default function CVPage() {
   }
 
   return (
-  <div className="max-w-5xl mx-auto p-6 space-y-8">
-    <div className="flex justify-end">
-      <LogoutButton />
+    <div className="max-w-5xl mx-auto p-6 space-y-8">
+      <div className="flex justify-end">
+        <LogoutButton />
+      </div>
+
+      {/* ✍️ REDIGERING */}
+      <section className="space-y-6">
+        <EditableSection
+          title="Profil / Sammendrag"
+          value={cv.summary}
+          onSave={newText =>
+            saveCv({
+              ...cv,
+              summary: newText,
+            })
+          }
+        />
+
+        <EditableExperience
+          value={cv.experience}
+          onSave={items =>
+            saveCv({
+              ...cv,
+              experience: items,
+            })
+          }
+        />
+
+        <EditableEducation
+          value={cv.education}
+          onSave={items =>
+            saveCv({
+              ...cv,
+              education: items,
+            })
+          }
+        />
+      </section>
+
+      {/* 👀 FORHÅNDSVISNING */}
+      <section>
+        <h2 className="font-semibold mb-2">Forhåndsvisning</h2>
+        <CVPreview cv={cv} />
+      </section>
     </div>
-
-    {/* ✍️ REDIGERING */}
-    <section className="space-y-6">
-      <EditableSection
-        title="Profil / Sammendrag"
-        value={cv.summary}
-        onSave={newText =>
-          saveCv({
-            ...cv,
-            summary: newText,
-          })
-        }
-      />
-
-      <EditableExperience
-        value={cv.experience}
-        onSave={items =>
-          saveCv({
-            ...cv,
-            experience: items,
-          })
-        }
-      />
-    </section>
-
-    {/* 👀 FORHÅNDSVISNING */}
-    <section>
-      <h2 className="font-semibold mb-2">Forhåndsvisning</h2>
-      <CVPreview cv={cv} />
-    </section>
-  </div>
-)
+  )
 }
