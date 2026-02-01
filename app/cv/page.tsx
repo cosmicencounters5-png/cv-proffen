@@ -7,6 +7,7 @@ import CVPreview from "@/components/CVPreview"
 import LogoutButton from "@/components/LogoutButton"
 import EditableSection from "@/components/EditableSection"
 import { CV } from "@/types/cv"
+import EditableExperience from "@/components/EditableExperience"
 
 const EMPTY_CV: CV = {
   id: "",
