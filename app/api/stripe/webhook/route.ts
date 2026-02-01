@@ -20,12 +20,15 @@ function mapPackageToEntitlements(packageType: string) {
         has_cv: true,
         has_application: true,
       }
-    case "cv":
+
+    case "cv_only": // 👈 DENNE MANGLER
       return {
         has_cv: true,
         has_application: false,
       }
+
     default:
+      console.error("❌ Unknown packageType:", packageType)
       return {
         has_cv: false,
         has_application: false,
