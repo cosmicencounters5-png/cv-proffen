@@ -16,14 +16,20 @@ export default function EditableSkills({
   const [input, setInput] = useState("")
 
   const addSkill = () => {
-    if (!input.trim()) return
+    const name = input.trim()
+    if (!name) return
 
-    setSkills([...skills, { name: input.trim() }])
+    const newSkill: Skill = {
+      id: crypto.randomUUID(), // ✅ KRITISK
+      name,
+    }
+
+    setSkills([...skills, newSkill])
     setInput("")
   }
 
-  const removeSkill = (index: number) => {
-    setSkills(skills.filter((_, i) => i !== index))
+  const removeSkill = (id: string) => {
+    setSkills(skills.filter(skill => skill.id !== id))
   }
 
   const save = () => {
@@ -52,14 +58,14 @@ export default function EditableSkills({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {skills.map((skill, index) => (
+        {skills.map(skill => (
           <span
-            key={index}
+            key={skill.id}
             className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm"
           >
             {skill.name}
             <button
-              onClick={() => removeSkill(index)}
+              onClick={() => removeSkill(skill.id)}
               className="text-red-500"
             >
               ×
