@@ -33,9 +33,9 @@ export default function CVPage() {
   const [loading, setLoading] = useState(true)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
 
-  // 🔐 Last session + CV
   useEffect(() => {
     const load = async () => {
+      // 1️⃣ Session
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -46,7 +46,21 @@ export default function CVPage() {
       }
 
       setSessionToken(session.access_token)
+      const userId = session.user.id
 
+      // 2️⃣ Entitlement (KRITISK)
+      const { data: entitlement, error } = await supabase
+        .from("user_entitlements")
+        .select("has_cv")
+        .eq("user_id", userId)
+        .maybeSingle()
+
+      if (error || !entitlement || !entitlement.has_cv) {
+        router.replace("/pricing")
+        return
+      }
+
+      // 3️⃣ Last CV
       const res = await fetch("/api/cv/get", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -60,7 +74,6 @@ export default function CVPage() {
       }
 
       const data = await res.json()
-
       if (Array.isArray(data) && data.length > 0) {
         setCv(data[0])
       } else {
@@ -71,10 +84,9 @@ export default function CVPage() {
     }
 
     load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router])
+  }, [router, supabase])
 
-  // 💾 Lagre CV (brukes av alle editorer)
+  // 💾 Lagre CV
   const saveCv = async (updatedCv: CV) => {
     if (!sessionToken) return
 
@@ -108,7 +120,7 @@ export default function CVPage() {
 
       {/* ✍️ REDIGERING */}
       <section className="space-y-6">
-        <EditableSection
+        <EditableTextSection
           title="Profil / Sammendrag"
           value={cv.summary}
           onSave={newText =>
