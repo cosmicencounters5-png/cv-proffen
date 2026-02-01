@@ -1,12 +1,14 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabaseBrowser"
 
 export default function LoginForm() {
   const supabase = createClient()
+  const router = useRouter()
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -16,8 +18,9 @@ export default function LoginForm() {
       return
     }
 
-    // viktig
-    window.location.href = "/cv"
+    // 🔑 VIKTIG I APP ROUTER
+    router.refresh()
+    router.push("/cv")
   }
 
   return (
