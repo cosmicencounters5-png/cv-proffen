@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabaseServer"
+import { createClient } from "@/lib/supabaseServer"
 
 export async function GET(req: Request) {
   const auth = req.headers.get("authorization")
