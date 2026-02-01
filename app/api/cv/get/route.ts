@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabaseServer"
+import { createClient } from "@/lib/supabaseServer"
 
 const USER_ID = "00000000-0000-0000-0000-000000000001"
 
