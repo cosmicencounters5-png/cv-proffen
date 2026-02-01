@@ -100,12 +100,13 @@ export default function CVPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="flex justify-end">
-        <LogoutButton />
-      </div>
+  <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="flex justify-end">
+      <LogoutButton />
+    </div>
 
-      {/* ✍️ REDIGERBAR SEKSJON MED AI */}
+    {/* ✍️ REDIGERING */}
+    <section className="space-y-6">
       <EditableSection
         title="Profil / Sammendrag"
         value={cv.summary}
@@ -117,8 +118,22 @@ export default function CVPage() {
         }
       />
 
-      {/* 👀 FORHÅNDSVISNING */}
+      <EditableExperience
+        value={cv.experience}
+        onSave={items =>
+          saveCv({
+            ...cv,
+            experience: items,
+          })
+        }
+      />
+    </section>
+
+    {/* 👀 FORHÅNDSVISNING */}
+    <section>
+      <h2 className="font-semibold mb-2">Forhåndsvisning</h2>
       <CVPreview cv={cv} />
-    </div>
-  )
+    </section>
+  </div>
+)
 }
