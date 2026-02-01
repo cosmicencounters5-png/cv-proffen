@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabaseBrowser"
 import CVPreview from "@/components/CVPreview"
 import LogoutButton from "@/components/LogoutButton"
-import { CV } from "@/types/cv"
 import EditableSection from "@/components/EditableSection"
+import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
   id: "",
@@ -29,10 +29,11 @@ export default function CVPage() {
 
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
-      // 1️⃣ Session fra RIKTIG browser-client
+      // 1️⃣ Hent session
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -42,7 +43,9 @@ export default function CVPage() {
         return
       }
 
-      // 2️⃣ Last CV fra riktig endpoint
+      setSessionToken(session.access_token)
+
+      // 2️⃣ Hent CV
       const res = await fetch("/api/cv/get", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -51,17 +54,15 @@ export default function CVPage() {
 
       if (!res.ok) {
         console.error("CV fetch failed", res.status)
-        router.replace("/pricing")
+        setLoading(false)
         return
       }
 
       const data = await res.json()
 
-      // API returnerer array
       if (Array.isArray(data) && data.length > 0) {
         setCv(data[0])
       } else {
-        // Ingen CV enda → tom mal
         setCv(EMPTY_CV)
       }
 
@@ -71,16 +72,51 @@ export default function CVPage() {
     load()
   }, [router, supabase])
 
+  // 3️⃣ Lagre oppdatert CV (brukes av EditableSection)
+  const saveCv = async (updatedCv: CV) => {
+    if (!sessionToken) return
+
+    const res = await fetch("/api/cv", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify(updatedCv),
+    })
+
+    if (!res.ok) {
+      alert("Kunne ikke lagre CV")
+      return
+    }
+
+    const saved = await res.json()
+    setCv(saved)
+  }
+
   if (loading) {
     return <p className="p-8">Laster CV…</p>
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-4">
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div className="flex justify-end">
         <LogoutButton />
       </div>
 
+      {/* ✍️ REDIGERBAR SEKSJON MED AI */}
+      <EditableSection
+        title="Profil / Sammendrag"
+        value={cv.summary}
+        onSave={newText =>
+          saveCv({
+            ...cv,
+            summary: newText,
+          })
+        }
+      />
+
+      {/* 👀 FORHÅNDSVISNING */}
       <CVPreview cv={cv} />
     </div>
   )
