@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
 
-export async function POST(req: Request) {
+export async function GET() {
   const supabase = createClient()
 
   const {
@@ -12,20 +12,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const body = await req.json()
-
   const { data, error } = await supabase
     .from("cvs")
-    .insert({
-      user_id: user.id,
-      title: body.title ?? "Min CV",
-      content: body.content,
-    })
-    .select()
-    .single()
+    .select("*")
+    .order("created_at", { ascending: false })
 
   if (error) {
-    console.error("CV insert error:", error)
+    console.error("CV fetch error:", error)
     return NextResponse.json({ error: "Database error" }, { status: 500 })
   }
 
