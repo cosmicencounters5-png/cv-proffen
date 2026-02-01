@@ -10,7 +10,7 @@ export default async function CvLayout({
 }) {
   const supabase = createClient()
 
-  // 1️⃣ Hent innlogget bruker
+  // 1️⃣ Hent bruker
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -26,7 +26,7 @@ export default async function CvLayout({
     .single()
 
   if (error) {
-    console.error("Entitlement fetch error:", error)
+    console.error("Entitlement error:", error)
     redirect("/pricing")
   }
 
