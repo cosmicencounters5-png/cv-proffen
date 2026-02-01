@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabaseBrowser"
 import CVPreview from "@/components/CVPreview"
 import LogoutButton from "@/components/LogoutButton"
 import { CV } from "@/types/cv"
@@ -24,12 +24,14 @@ const EMPTY_CV: CV = {
 
 export default function CVPage() {
   const router = useRouter()
+  const supabase = createClient()
+
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
-      // 1️⃣ Sjekk innlogging
+      // 1️⃣ Session fra RIKTIG browser-client
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -39,35 +41,34 @@ export default function CVPage() {
         return
       }
 
-      const userId = session.user.id
-
-      // 2️⃣ Sjekk tilgang
-      const { data: entitlement, error } = await supabase
-        .from("user_entitlements")
-        .select("has_cv")
-        .eq("user_id", userId)
-        .maybeSingle()
-
-      if (error || !entitlement || !entitlement.has_cv) {
-        router.replace("/pricing")
-        return
-      }
-
-      // 3️⃣ Last CV
-      const res = await fetch("/api/cv", {
+      // 2️⃣ Last CV fra riktig endpoint
+      const res = await fetch("/api/cv/get", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       })
 
-      const json = await res.json()
-      if (json?.data) setCv(json.data)
+      if (!res.ok) {
+        console.error("CV fetch failed", res.status)
+        router.replace("/pricing")
+        return
+      }
+
+      const data = await res.json()
+
+      // API returnerer array
+      if (Array.isArray(data) && data.length > 0) {
+        setCv(data[0])
+      } else {
+        // Ingen CV enda → tom mal
+        setCv(EMPTY_CV)
+      }
 
       setLoading(false)
     }
 
     load()
-  }, [router])
+  }, [router, supabase])
 
   if (loading) {
     return <p className="p-8">Laster CV…</p>
