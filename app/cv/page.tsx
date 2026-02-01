@@ -8,6 +8,7 @@ import CVPreview from "@/components/CVPreview"
 import EditableTextSection from "@/components/EditableTextSection"
 import EditableExperience from "@/components/EditableExperience"
 import EditableEducation from "@/components/EditableEducation"
+import EditableSkills from "@/components/EditableSkills" // ⬅️ NY
 import { CV } from "@/types/cv"
 
 const EMPTY_CV: CV = {
@@ -32,6 +33,7 @@ export default function CVPage() {
   const [cv, setCv] = useState<CV>(EMPTY_CV)
   const [loading, setLoading] = useState(true)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -87,6 +89,7 @@ export default function CVPage() {
     load()
   }, [router, supabase])
 
+  // 💾 Lagre CV
   const saveCv = async (updatedCv: CV) => {
     if (!sessionToken) return
 
@@ -108,17 +111,52 @@ export default function CVPage() {
     setCv(saved)
   }
 
+  // 🤖 Forbedre hele CV-en (klar for API)
+  const improveWholeCvWithAI = async () => {
+    if (!sessionToken) return
+    setAiLoading(true)
+
+    try {
+      const res = await fetch("/api/ai/improve-cv", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({ cv }),
+      })
+
+      if (!res.ok) throw new Error("AI failed")
+
+      const improved = await res.json()
+      setCv(improved)
+    } catch (e) {
+      alert("AI-forbedring feilet")
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   if (loading) {
     return <p className="p-8">Laster CV…</p>
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
-      <div className="flex justify-end">
+    <div className="max-w-5xl mx-auto p-6 space-y-10">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={improveWholeCvWithAI}
+          disabled={aiLoading}
+          className="text-sm px-4 py-2 rounded bg-black text-white disabled:opacity-50"
+        >
+          {aiLoading ? "Forbedrer CV…" : "🤖 Forbedre hele CV-en"}
+        </button>
+
         <LogoutButton />
       </div>
 
-      <section className="space-y-6">
+      {/* ✍️ REDIGERING */}
+      <section className="space-y-8">
         <EditableTextSection
           title="Profil / Sammendrag"
           value={cv.summary}
@@ -149,8 +187,19 @@ export default function CVPage() {
             })
           }
         />
+
+        <EditableSkills
+          value={cv.skills}
+          onSave={skills =>
+            saveCv({
+              ...cv,
+              skills,
+            })
+          }
+        />
       </section>
 
+      {/* 👀 FORHÅNDSVISNING */}
       <section>
         <h2 className="font-semibold mb-2">Forhåndsvisning</h2>
         <CVPreview cv={cv} />
