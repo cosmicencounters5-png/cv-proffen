@@ -7,10 +7,7 @@ import { useRouter } from "next/navigation";
 type Mode = "cv" | "application";
 
 /**
- * Enkel, defensiv formattering:
- * - Leser linje for linje
- * - Gir seksjonsfølelse
- * - Ingen JSX-triks som kan knekke build
+ * Enkel, defensiv formattering
  */
 function formatText(text: string) {
   const lines = text.split("\n").filter(Boolean);
@@ -74,11 +71,17 @@ export default function CvPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, has_application")
+        .select("has_cv, has_application, expires_at")
         .eq("user_id", user.id)
         .single();
 
-      if (!data?.has_cv) {
+      const now = new Date();
+
+      if (
+        !data?.has_cv ||
+        !data.expires_at ||
+        new Date(data.expires_at) <= now
+      ) {
         router.push("/pricing");
         return;
       }
