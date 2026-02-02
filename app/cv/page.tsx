@@ -45,7 +45,7 @@ export default function CvPage() {
     }
 
     checkAccess();
-  }, []);
+  }, [router, supabase]);
 
   async function generateCv(formData: FormData) {
     setGenerating(true);
@@ -130,13 +130,76 @@ export default function CvPage() {
             padding: "2rem",
             borderRadius: "8px",
             boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            whiteSpace: "pre-wrap",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <h2>Resultat</h2>
-          {result ? result : "CV-en vises her etter generering."}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <h2>Resultat</h2>
+
+            {result && (
+              <button
+                onClick={() => window.print()}
+                style={{
+                  padding: "0.4rem 0.75rem",
+                  fontSize: "0.9rem",
+                  background: "#111",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Last ned PDF
+              </button>
+            )}
+          </div>
+
+          <div
+            id="cv-print"
+            style={{
+              whiteSpace: "pre-wrap",
+              lineHeight: 1.6,
+            }}
+          >
+            {result ? result : "CV-en vises her etter generering."}
+          </div>
         </div>
       </div>
+
+      {/* PRINT CSS */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+
+          #cv-print,
+          #cv-print * {
+            visibility: visible;
+          }
+
+          #cv-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 2cm;
+            font-size: 12pt;
+          }
+
+          button {
+            display: none;
+          }
+        }
+      `}</style>
     </main>
   );
 }
