@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 
+type Mode = "cv" | "application";
+
 export default function CvPage() {
   const router = useRouter();
   const supabase = createBrowserClient(
@@ -15,6 +17,7 @@ export default function CvPage() {
 
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -31,7 +34,7 @@ export default function CvPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv")
+        .select("has_cv, has_application")
         .eq("user_id", user.id)
         .single();
 
@@ -40,24 +43,34 @@ export default function CvPage() {
         return;
       }
 
+      // Søknad krever eget entitlement
+      if (mode === "application" && !data.has_application) {
+        setMode("cv");
+      }
+
       setHasAccess(true);
       setLoading(false);
     }
 
     checkAccess();
-  }, [router, supabase]);
+  }, [router, supabase, mode]);
 
-  async function generateCv(formData: FormData) {
+  async function generate(formData: FormData) {
     setGenerating(true);
     setResult(null);
 
-    const res = await fetch("/api/generate-cv", {
+    const endpoint =
+      mode === "cv"
+        ? "/api/generate-cv"
+        : "/api/generate-application";
+
+    const res = await fetch(endpoint, {
       method: "POST",
       body: formData,
     });
 
     const json = await res.json();
-    setResult(json.cv);
+    setResult(mode === "cv" ? json.cv : json.application);
     setGenerating(false);
   }
 
@@ -79,7 +92,7 @@ export default function CvPage() {
     >
       <div
         style={{
-          maxWidth: "1000px",
+          maxWidth: "1100px",
           margin: "0 auto",
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -88,7 +101,7 @@ export default function CvPage() {
       >
         {/* FORM */}
         <form
-          action={generateCv}
+          action={generate}
           style={{
             background: "white",
             padding: "2rem",
@@ -96,7 +109,49 @@ export default function CvPage() {
             boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
           }}
         >
-          <h1>CV-generator</h1>
+          <h1 style={{ marginBottom: "1rem" }}>
+            {mode === "cv" ? "CV-generator" : "Søknadsgenerator"}
+          </h1>
+
+          {/* TOGGLE */}
+          <div style={{ marginBottom: "1.5rem" }}>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("cv");
+                setResult(null);
+              }}
+              style={{
+                marginRight: "0.5rem",
+                padding: "0.4rem 0.75rem",
+                background: mode === "cv" ? "#111" : "#eee",
+                color: mode === "cv" ? "white" : "#111",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              CV
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode("application");
+                setResult(null);
+              }}
+              style={{
+                padding: "0.4rem 0.75rem",
+                background: mode === "application" ? "#111" : "#eee",
+                color: mode === "application" ? "white" : "#111",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Søknad
+            </button>
+          </div>
 
           <label>
             Navn
@@ -119,7 +174,11 @@ export default function CvPage() {
           </label>
 
           <button type="submit" disabled={generating}>
-            {generating ? "Genererer…" : "Generer CV"}
+            {generating
+              ? "Genererer…"
+              : mode === "cv"
+              ? "Generer CV"
+              : "Generer søknad"}
           </button>
         </form>
 
@@ -169,7 +228,11 @@ export default function CvPage() {
               lineHeight: 1.6,
             }}
           >
-            {result ? result : "CV-en vises her etter generering."}
+            {result
+              ? result
+              : mode === "cv"
+              ? "CV-en vises her etter generering."
+              : "Søknaden vises her etter generering."}
           </div>
         </div>
       </div>
