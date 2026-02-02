@@ -1,70 +1,41 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabaseServer"
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-/* =========================
-   GET /api/cv
-   ========================= */
-export async function GET() {
-  const supabase = createClient()
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
-  if (!user || authError) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { data, error } = await supabase
-    .from("cvs")
-    .select("*")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle()
-
-  if (error) {
-    console.error("CV fetch error:", error)
-    return NextResponse.json({ error: "Database error" }, { status: 500 })
-  }
-
-  return NextResponse.json(data ? [data.data] : [])
-}
-
-/* =========================
-   POST /api/cv
-   ========================= */
 export async function POST(req: Request) {
-  const supabase = createClient()
+  const supabase = createSupabaseServerClient();
 
   const {
     data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
-  if (!user || authError) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!user) {
+    return NextResponse.json(
+      { error: "Ikke innlogget" },
+      { status: 401 }
+    );
   }
 
-  const cv = await req.json()
+  const data = await req.json();
 
-  // Upsert = oppdater hvis finnes, ellers opprett
-  const { data, error } = await supabase
-    .from("cvs")
-    .upsert(
-      {
-        user_id: user.id,
-        data: cv,
-      },
-      { onConflict: "user_id" }
-    )
-    .select()
-    .single()
+  const prompt = `
+Lag en profesjonell norsk CV basert kun på denne informasjonen.
+IKKE finn på utdanning eller erfaring.
 
-  if (error) {
-    console.error("CV save error:", error)
-    return NextResponse.json({ error: "Database error" }, { status: 500 })
-  }
+Data:
+${JSON.stringify(data, null, 2)}
+`;
 
-  return NextResponse.json(data.data)
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  return NextResponse.json({
+    cv: completion.choices[0].message.content,
+  });
 }
