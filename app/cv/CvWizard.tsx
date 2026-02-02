@@ -4,6 +4,8 @@ import { useState } from "react";
 import StepPersonal from "./steps/StepPersonal";
 import StepExperience from "./steps/StepExperience";
 import StepEducation from "./steps/StepEducation";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import CvPdf from "./CvPdf";
 
 export default function CvWizard() {
   const [step, setStep] = useState(1);
