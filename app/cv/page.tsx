@@ -21,7 +21,7 @@ export default async function CvPage() {
 
   // 2. Hent tilgang (try/catch-style)
   const { data: access, error } = await supabase
-    .from("user_access")
+    .from("user_entitlements")
     .select("has_cv, expires_at")
     .eq("user_id", userId)
     .maybeSingle();
