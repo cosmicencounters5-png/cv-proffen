@@ -1,5 +1,4 @@
 // app/pricing/page.tsx
-
 "use client";
 
 export default function PricingPage() {
@@ -57,14 +56,7 @@ export default function PricingPage() {
           >
             <h2>CV</h2>
             <p style={{ fontSize: "2rem", fontWeight: 600 }}>149 kr</p>
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: "1.5rem 0",
-                color: "#444",
-              }}
-            >
+            <ul style={{ listStyle: "none", padding: 0, margin: "1.5rem 0" }}>
               <li>✔️ Profesjonell CV</li>
               <li>✔️ Tilpasset stilling</li>
               <li>✔️ Klar til bruk</li>
@@ -99,14 +91,7 @@ export default function PricingPage() {
           >
             <h2>CV + Søknad</h2>
             <p style={{ fontSize: "2rem", fontWeight: 600 }}>249 kr</p>
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: "1.5rem 0",
-                color: "#444",
-              }}
-            >
+            <ul style={{ listStyle: "none", padding: 0, margin: "1.5rem 0" }}>
               <li>✔️ Profesjonell CV</li>
               <li>✔️ Personlig søknad</li>
               <li>✔️ Samme stil og tone</li>
@@ -131,3 +116,5 @@ export default function PricingPage() {
         </div>
       </div>
     </main>
+  );
+}
