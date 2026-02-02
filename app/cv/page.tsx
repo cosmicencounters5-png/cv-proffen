@@ -32,7 +32,9 @@ export default async function CvPage() {
     const education = formData.get("education") as string;
     const job = formData.get("job") as string;
 
-    if (!name || !experience || !job) return;
+    if (!name || !experience || !job) {
+      return;
+    }
 
     const prompt = `
 Du er en profesjonell norsk karriereveileder.
@@ -71,7 +73,10 @@ Lag en ferdig CV-tekst.
     });
 
     const json = await res.json();
-    return json.choices[0].message.content as string;
+
+    // Midlertidig: vi logger resultatet
+    // Resultatvisning kommer i neste steg (riktig måte)
+    console.log("GENERERT CV:", json.choices[0].message.content);
   }
 
   return (
@@ -100,12 +105,20 @@ Lag en ferdig CV-tekst.
 
         <label>
           Navn
-          <input name="name" required style={{ width: "100%", marginBottom: "1rem" }} />
+          <input
+            name="name"
+            required
+            style={{ width: "100%", marginBottom: "1rem" }}
+          />
         </label>
 
         <label>
           Stilling du søker
-          <input name="job" required style={{ width: "100%", marginBottom: "1rem" }} />
+          <input
+            name="job"
+            required
+            style={{ width: "100%", marginBottom: "1rem" }}
+          />
         </label>
 
         <label>
