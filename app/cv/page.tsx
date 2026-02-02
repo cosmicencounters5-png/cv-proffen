@@ -10,44 +10,35 @@ export default async function CvPage() {
     { cookies }
   );
 
-  // 1. Session
-  const { data, error: sessionError } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (sessionError || !data?.session) {
+  if (!session) {
     redirect("/login");
   }
 
-  const userId = data.session.user.id;
-
-  // 2. Hent tilgang (try/catch-style)
-  const { data: access, error } = await supabase
+  const { data: entitlement, error } = await supabase
     .from("user_entitlements")
-    .select("has_cv, expires_at")
-    .eq("user_id", userId)
-    .maybeSingle();
+    .select("has_cv, has_application, expires_at")
+    .eq("user_id", session.user.id)
+    .maybeSingle(); // ⬅️ VIKTIG
 
-  // Hvis tabell / RLS feiler → send til pricing
-  if (error || !access) {
+  // ❌ Ingen rad → send til pricing
+  if (!entitlement) {
     redirect("/pricing");
   }
 
-  // 3. Valider tilgang
-  const hasCv = access.has_cv === true;
-
-  const expiresAt = access.expires_at
-    ? new Date(access.expires_at)
-    : null;
-
-  const isValid =
-    hasCv &&
-    expiresAt instanceof Date &&
-    !isNaN(expiresAt.getTime()) &&
-    expiresAt > new Date();
-
-  if (!isValid) {
+  // ❌ Utløpt
+  if (entitlement.expires_at && new Date(entitlement.expires_at) < new Date()) {
     redirect("/pricing");
   }
 
-  // 4. OK
+  // ❌ Mangler CV-tilgang
+  if (!entitlement.has_cv) {
+    redirect("/pricing");
+  }
+
+  // ✅ ALT OK
   return <CvWizard />;
 }
