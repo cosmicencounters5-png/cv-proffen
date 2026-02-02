@@ -1,156 +1,122 @@
-"use client";
-
-import Link from "next/link";
-
 export default function HomePage() {
   return (
     <main>
       {/* HERO */}
-      <section
-        style={{
-          background:
-            "linear-gradient(135deg, #2563eb 0%, #1e40af 100%)",
-          color: "white",
-        }}
-      >
+      <section className="hero">
         <div className="container">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "40px",
-              alignItems: "center",
-              padding: "80px 0",
-            }}
-          >
-            <div>
-              <h1 style={{ fontSize: "44px", marginBottom: "20px" }}>
-                Lag en profesjonell CV <br /> med AI – på minutter
-              </h1>
-              <p
-                style={{
-                  fontSize: "18px",
-                  opacity: 0.95,
-                  marginBottom: "30px",
-                }}
-              >
-                CV-Proffen bruker OpenAI til å forbedre dine
-                <strong> ekte opplysninger</strong>.
-                Ingen oppdiktet utdanning. Ingen løgner.
-                Kun en CV som faktisk fungerer i Norge.
-              </p>
+          <h1>Lag en profesjonell CV og søknad med AI</h1>
+          <p>
+            CV-Proffen hjelper deg å lage en moderne, norsk og
+            rekrutteringsklar CV – basert kun på det du selv skriver inn.
+          </p>
 
-              <div style={{ display: "flex", gap: "16px" }}>
-                <Link href="/register">
-                  <button>Kom i gang gratis</button>
-                </Link>
-                <Link href="/pricing">
-                  <button
-                    style={{
-                      background: "white",
-                      color: "#1e40af",
-                    }}
-                  >
-                    Se priser
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: "white",
-                color: "#111827",
-                borderRadius: "16px",
-                padding: "24px",
-                boxShadow:
-                  "0 20px 40px rgba(0,0,0,0.15)",
-              }}
-            >
-              <h3 style={{ marginBottom: "12px" }}>
-                Eksempel på resultat
-              </h3>
-              <p style={{ fontSize: "14px", color: "#374151" }}>
-                «Motivert og erfaren prosessoperatør med solid
-                bakgrunn innen drift og produksjon. Dokumentert
-                erfaring fra norsk industri, med fokus på kvalitet,
-                sikkerhet og effektivitet.»
-              </p>
-            </div>
+          <div className="hero-actions">
+            <a href="/cv" className="btn-primary">
+              Lag CV nå
+            </a>
+            <a href="#pricing" className="btn-secondary">
+              Se priser
+            </a>
           </div>
         </div>
       </section>
 
       {/* FEATURES */}
-      <section>
+      <section className="features">
+        <div className="container grid-3">
+          <div className="card">
+            <h3>🇳🇴 Norsk standard</h3>
+            <p>
+              Tilpasset norsk arbeidsmarked, språk og forventninger fra
+              rekrutterere.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>🤖 AI – uten å lyve</h3>
+            <p>
+              OpenAI brukes kun til å forbedre språket, aldri til å finne på
+              utdanning eller erfaring.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>📄 CV + søknad</h3>
+            <p>
+              Velg pakke med både CV og jobbsøknad – klar til innsending.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="how">
         <div className="container">
-          <h2
-            style={{
-              textAlign: "center",
-              marginBottom: "40px",
-            }}
-          >
-            Derfor velger folk CV-Proffen
-          </h2>
+          <h2>Slik fungerer det</h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "24px",
-            }}
-          >
-            <div className="card">
-              <h3>🎯 Ekte informasjon</h3>
-              <p>
-                AI-en får kun det du selv skriver inn.
-                Ingen falsk utdanning eller erfaring.
-              </p>
+          <div className="grid-3">
+            <div className="step">
+              <span>1</span>
+              <h4>Fyll inn info</h4>
+              <p>Du legger inn ekte erfaring, utdanning og ferdigheter.</p>
             </div>
 
-            <div className="card">
-              <h3>🇳🇴 Norsk arbeidsmarked</h3>
-              <p>
-                Språk, struktur og nivå tilpasset norske
-                rekrutterere og ATS-systemer.
-              </p>
+            <div className="step">
+              <span>2</span>
+              <h4>AI forbedrer</h4>
+              <p>Vi gjør teksten profesjonell og strukturert.</p>
             </div>
 
-            <div className="card">
-              <h3>⚡ Ferdig på minutter</h3>
-              <p>
-                Fyll ut skjemaet – få profesjonell CV og
-                søknad umiddelbart.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3>📄 PDF klar til bruk</h3>
-              <p>
-                Last ned en ren, moderne PDF – klar til
-                Finn.no, LinkedIn og e-post.
-              </p>
+            <div className="step">
+              <span>3</span>
+              <h4>Last ned PDF</h4>
+              <p>CV og søknad klare som PDF.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section
-        style={{
-          background: "#f3f4f6",
-          marginTop: "60px",
-        }}
-      >
-        <div className="container" style={{ textAlign: "center" }}>
-          <h2>Klar for å få flere jobbintervjuer?</h2>
-          <p style={{ marginBottom: "24px" }}>
-            Start gratis – betal kun når du vil laste ned.
-          </p>
-          <Link href="/register">
-            <button>Lag CV nå</button>
-          </Link>
+      {/* PRICING */}
+      <section id="pricing" className="pricing">
+        <div className="container grid-3">
+          <div className="card price">
+            <h3>CV</h3>
+            <p className="price-number">299 kr</p>
+            <ul>
+              <li>✔ Profesjonell CV</li>
+              <li>✔ Norsk språk</li>
+              <li>✔ PDF-nedlasting</li>
+            </ul>
+            <a href="/cv" className="btn-primary">
+              Velg
+            </a>
+          </div>
+
+          <div className="card price highlight">
+            <h3>CV + Søknad</h3>
+            <p className="price-number">499 kr</p>
+            <ul>
+              <li>✔ CV + jobbsøknad</li>
+              <li>✔ Tilpasset stilling</li>
+              <li>✔ ATS-vennlig</li>
+            </ul>
+            <a href="/cv" className="btn-primary">
+              Mest populær
+            </a>
+          </div>
+
+          <div className="card price">
+            <h3>Premium</h3>
+            <p className="price-number">999 kr</p>
+            <ul>
+              <li>✔ CV + søknad</li>
+              <li>✔ Ekstra forbedring</li>
+              <li>✔ Prioritert AI</li>
+            </ul>
+            <a href="/cv" className="btn-primary">
+              Velg
+            </a>
+          </div>
         </div>
       </section>
     </main>
