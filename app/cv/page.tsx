@@ -6,9 +6,6 @@ import { useRouter } from "next/navigation";
 
 type Mode = "cv" | "application";
 
-/**
- * Enkel, defensiv formattering
- */
 function formatText(text: string) {
   const lines = text.split("\n").filter(Boolean);
 
@@ -22,23 +19,14 @@ function formatText(text: string) {
       lower.includes("kompetanse")
     ) {
       return (
-        <h3
-          key={i}
-          style={{
-            marginTop: "1.5rem",
-            marginBottom: "0.5rem",
-            borderBottom: "1px solid #ccc",
-            paddingBottom: "0.25rem",
-            fontFamily: "Arial, sans-serif",
-          }}
-        >
+        <h3 key={i} className="cv-section-title">
           {line}
         </h3>
       );
     }
 
     return (
-      <p key={i} style={{ marginBottom: "0.5rem" }}>
+      <p key={i} className="cv-paragraph">
         {line}
       </p>
     );
@@ -79,8 +67,7 @@ export default function CvPage() {
 
       if (
         !data?.has_cv ||
-        !data.expires_at ||
-        new Date(data.expires_at) <= now
+        (data.expires_at && new Date(data.expires_at) < now)
       ) {
         router.push("/pricing");
         return;
@@ -95,7 +82,7 @@ export default function CvPage() {
     }
 
     checkAccess();
-  }, [router, supabase, mode]);
+  }, [mode, router, supabase]);
 
   async function generate(formData: FormData) {
     setGenerating(true);
@@ -125,70 +112,29 @@ export default function CvPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "4rem 1rem",
-        background: "#f8f9fb",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "2rem",
-        }}
-      >
-        {/* FORM */}
-        <form
-          action={generate}
-          style={{
-            background: "white",
-            padding: "2rem",
-            borderRadius: "8px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          }}
-        >
-          <h1 style={{ marginBottom: "1rem" }}>
-            {mode === "cv" ? "CV-generator" : "Søknadsgenerator"}
-          </h1>
+    <main className="cv-page">
+      <div className="cv-container">
+        {/* VENSTRE: FORM */}
+        <form action={generate} className="cv-form">
+          <h1>{mode === "cv" ? "CV-generator" : "Søknadsgenerator"}</h1>
 
-          {/* TOGGLE */}
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div className="mode-toggle">
             <button
               type="button"
+              className={mode === "cv" ? "active" : ""}
               onClick={() => {
                 setMode("cv");
                 setResult(null);
               }}
-              style={{
-                marginRight: "0.5rem",
-                padding: "0.4rem 0.75rem",
-                background: mode === "cv" ? "#111" : "#eee",
-                color: mode === "cv" ? "white" : "#111",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
             >
               CV
             </button>
-
             <button
               type="button"
+              className={mode === "application" ? "active" : ""}
               onClick={() => {
                 setMode("application");
                 setResult(null);
-              }}
-              style={{
-                padding: "0.4rem 0.75rem",
-                background: mode === "application" ? "#111" : "#eee",
-                color: mode === "application" ? "white" : "#111",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
               }}
             >
               Søknad
@@ -215,7 +161,7 @@ export default function CvPage() {
             <textarea name="education" rows={4} />
           </label>
 
-          <button type="submit" disabled={generating}>
+          <button type="submit" className="primary" disabled={generating}>
             {generating
               ? "Genererer…"
               : mode === "cv"
@@ -224,74 +170,36 @@ export default function CvPage() {
           </button>
         </form>
 
-        {/* RESULTAT */}
-        <div
-          style={{
-            background: "white",
-            padding: "2rem",
-            borderRadius: "8px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
+        {/* HØYRE: RESULTAT */}
+        <section className="cv-result">
+          <div className="cv-result-header">
             <h2>Resultat</h2>
-
             {result && (
-              <button
-                onClick={() => window.print()}
-                style={{
-                  padding: "0.4rem 0.75rem",
-                  fontSize: "0.9rem",
-                  background: "#111",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
+              <button onClick={() => window.print()} className="secondary">
                 Last ned PDF
               </button>
             )}
           </div>
 
-          <div
-            id="cv-print"
-            style={{
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.6,
-              fontFamily: "Georgia, serif",
-            }}
-          >
+          <div id="cv-print" className="cv-document">
             {result
               ? formatText(result)
               : mode === "cv"
               ? "CV-en vises her etter generering."
               : "Søknaden vises her etter generering."}
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* PRINT CSS */}
+      {/* PRINT */}
       <style>{`
         @media print {
           body * {
             visibility: hidden;
           }
-
-          #cv-print,
-          #cv-print * {
+          #cv-print, #cv-print * {
             visibility: visible;
           }
-
           #cv-print {
             position: absolute;
             left: 0;
@@ -299,10 +207,6 @@ export default function CvPage() {
             width: 100%;
             padding: 2cm;
             font-size: 12pt;
-          }
-
-          button {
-            display: none;
           }
         }
       `}</style>
