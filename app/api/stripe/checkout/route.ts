@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -9,8 +9,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    // 🔐 Supabase client med cookies (KRITISK)
-    const supabase = createRouteHandlerClient({ cookies });
+    // 🔐 Supabase server client (LESER COOKIES KORREKT)
+    const cookieStore = cookies();
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
+    );
 
     const {
       data: { user },
@@ -23,7 +35,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 📦 Støtt både form POST og JSON
+    // 📦 Håndter både JSON og form POST
     let price_id: string | null = null;
     const contentType = req.headers.get("content-type") || "";
 
