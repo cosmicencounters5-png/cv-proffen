@@ -20,35 +20,34 @@ export async function POST(req: Request) {
 Du er en erfaren norsk karriereveileder.
 
 OPPGAVE:
-Strukturer og språkvask teksten til en profesjonell CV.
+Strukturer og språkvask teksten til en profesjonell og fyldig CV.
 
-ABSOLUTTE REGLER (må følges):
+VIKTIGE REGLER:
 - Bruk KUN informasjonen brukeren har gitt
-- IKKE legg til erfaring, utdanning, ferdigheter eller egenskaper
+- IKKE legg til nye fakta, erfaringer, utdanninger eller ferdigheter
+- Du kan utdype, presisere og omformulere eksisterende informasjon
 - IKKE anta noe som ikke er eksplisitt skrevet
-- IKKE bruk pynt, klisjeer eller tomme fraser
+- Unngå klisjeer og tomme fraser
+- Skriv profesjonelt, korrekt norsk
 - Hvis informasjon mangler, utelat seksjonen helt
-- Skriv nøkternt, profesjonelt norsk
-- Ikke bruk punktlister med mindre teksten naturlig tilsier det
 
 CV-EN SKAL INNEHOLDE:
 1. Navn (øverst)
-2. Kort profil (2–3 setninger, basert på erfaring og ønsket stilling)
-3. Arbeidserfaring (strukturert og ryddig)
+2. Profil (3–4 setninger, basert på erfaring og ønsket stilling)
+3. Arbeidserfaring (tydelig strukturert i avsnitt)
 4. Utdanning (kun hvis oppgitt)
 
-IKKE INKLUDER:
-- Stillingstittel som egen linje
-- Personlige egenskaper som ikke er nevnt
-- Referanser
-- Kontaktinformasjon
+RETNING:
+- Bruk hele setninger
+- Forklar ansvar og erfaring litt mer utfyllende
+- Ikke gjør teksten kortere enn nødvendig
 
 BRUKERENS OPPLYSNINGER:
 
 Navn:
 ${name}
 
-Stilling det søkes på (kun som kontekst, ikke som overskrift):
+Stilling det søkes på (kun som kontekst):
 ${job}
 
 Arbeidserfaring:
@@ -58,7 +57,7 @@ Utdanning:
 ${education}
 
 LEVERANSEN:
-Returner kun ferdig CV-tekst. Ingen forklaringer. Ingen overskrifter utenfor CV-en.
+Returner kun ferdig CV-tekst. Ingen forklaringer.
 `;
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -69,7 +68,7 @@ Returner kun ferdig CV-tekst. Ingen forklaringer. Ingen overskrifter utenfor CV-
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.2,
+        temperature: 0.3,
         messages: [{ role: "user", content: prompt }],
       }),
     });
