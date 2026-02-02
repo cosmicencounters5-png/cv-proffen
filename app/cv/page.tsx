@@ -11,33 +11,43 @@ export default async function CvPage() {
   );
 
   // 1. Session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data, error: sessionError } = await supabase.auth.getSession();
 
-  if (!session) {
+  if (sessionError || !data?.session) {
     redirect("/login");
   }
 
-  // 2. Hent tilgang
-  const { data: access } = await supabase
+  const userId = data.session.user.id;
+
+  // 2. Hent tilgang (try/catch-style)
+  const { data: access, error } = await supabase
     .from("user_access")
     .select("has_cv, expires_at")
-    .eq("user_id", session.user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
-  const now = new Date();
-
-  const hasValidCvAccess =
-    access?.has_cv === true &&
-    access?.expires_at &&
-    new Date(access.expires_at) > now;
-
-  // 3. Hvis gyldig tilgang → CV
-  if (hasValidCvAccess) {
-    return <CvWizard />;
+  // Hvis tabell / RLS feiler → send til pricing
+  if (error || !access) {
+    redirect("/pricing");
   }
 
-  // 4. Ellers → pricing
-  redirect("/pricing");
+  // 3. Valider tilgang
+  const hasCv = access.has_cv === true;
+
+  const expiresAt = access.expires_at
+    ? new Date(access.expires_at)
+    : null;
+
+  const isValid =
+    hasCv &&
+    expiresAt instanceof Date &&
+    !isNaN(expiresAt.getTime()) &&
+    expiresAt > new Date();
+
+  if (!isValid) {
+    redirect("/pricing");
+  }
+
+  // 4. OK
+  return <CvWizard />;
 }
