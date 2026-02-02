@@ -20,7 +20,7 @@ export default function HomePage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Ikke innlogget
+      // ❌ Ikke innlogget
       if (!user) {
         setCtaState("logged-out");
         return;
@@ -50,14 +50,22 @@ export default function HomePage() {
   function renderCta() {
     if (ctaState === "loading") return null;
 
+    // 🔓 Ikke innlogget
     if (ctaState === "logged-out") {
       return (
-        <Link href="/login">
-          <button className="cta">Logg inn</button>
-        </Link>
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+          <Link href="/register">
+            <button className="cta">Registrer deg</button>
+          </Link>
+
+          <Link href="/login">
+            <button className="secondary">Logg inn</button>
+          </Link>
+        </div>
       );
     }
 
+    // ✅ Har tilgang
     if (ctaState === "has-access") {
       return (
         <Link href="/cv">
@@ -66,6 +74,7 @@ export default function HomePage() {
       );
     }
 
+    // 💳 Innlogget uten tilgang
     return (
       <Link href="/pricing">
         <button className="cta">Velg pakke</button>
