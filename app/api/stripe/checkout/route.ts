@@ -1,30 +1,37 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: Request) {
   try {
-    let price_id: string | null = null;
+    // 🔐 Supabase client med cookies (KRITISK)
+    const supabase = createRouteHandlerClient({ cookies });
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    // 📦 Støtt både form POST og JSON
+    let price_id: string | null = null;
     const contentType = req.headers.get("content-type") || "";
 
-    // ✅ Håndter JSON
     if (contentType.includes("application/json")) {
       const body = await req.json();
       price_id = body.price_id;
     }
 
-    // ✅ Håndter form POST
     if (contentType.includes("application/x-www-form-urlencoded")) {
       const formData = await req.formData();
       price_id = formData.get("price_id") as string | null;
@@ -37,20 +44,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Finn bruker via Supabase-session cookie
-    const cookieHeader = headers().get("cookie") || "";
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser(cookieHeader);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
-    }
-
+    // 💳 Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -68,7 +62,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.redirect(session.url!, 303);
+    return NextResponse.redirect(session.url!, { status: 303 });
   } catch (err) {
     console.error("Stripe checkout error:", err);
     return NextResponse.json(
