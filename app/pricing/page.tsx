@@ -56,7 +56,7 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG */}
+        {/* HAR AKTIV TILGANG */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
@@ -108,8 +108,8 @@ export default function PricingPage() {
                 className="primary"
                 style={{ width: "100%", marginTop: "1.5rem" }}
                 onClick={() => {
-                  // kall Stripe checkout (eksisterende logikk)
-                  window.location.href = "/api/stripe/checkout?product=cv";
+                  window.location.href =
+                    "/api/stripe/checkout?price_id=price_1SuqYw2Ly9NpxKWhPtgANnw2";
                 }}
               >
                 Kjøp CV
@@ -156,7 +156,7 @@ export default function PricingPage() {
                 style={{ width: "100%", marginTop: "1.5rem" }}
                 onClick={() => {
                   window.location.href =
-                    "/api/stripe/checkout?product=cv_plus";
+                    "/api/stripe/checkout?price_id=price_1SuqZW2Ly9NpxKWht4M2P6ZP";
                 }}
               >
                 Kjøp CV + Søknad
