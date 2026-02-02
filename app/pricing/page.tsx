@@ -56,13 +56,11 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR AKTIV TILGANG */}
+        {/* HAR TILGANG */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
-            <p>
-              Du kan gå rett til CV-generatoren og fortsette der du slapp.
-            </p>
+            <p>Du kan gå rett til CV-generatoren.</p>
 
             <a
               href="/cv"
@@ -94,9 +92,7 @@ export default function PricingPage() {
             {/* CV */}
             <div className="card">
               <h3>CV</h3>
-              <p style={{ marginTop: "0.5rem" }}>
-                Lag en profesjonell CV basert kun på dine egne opplysninger.
-              </p>
+              <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>AI-generert CV</li>
@@ -104,25 +100,26 @@ export default function PricingPage() {
                 <li>3 dagers tilgang</li>
               </ul>
 
-              <button
-                className="primary"
-                style={{ width: "100%", marginTop: "1.5rem" }}
-                onClick={() => {
-                  window.location.href =
-                    "/api/stripe/checkout?price_id=price_1SuqYw2Ly9NpxKWhPtgANnw2";
-                }}
+              <form
+                method="POST"
+                action="/api/stripe/checkout"
+                style={{ marginTop: "1.5rem" }}
               >
-                Kjøp CV
-              </button>
+                <input
+                  type="hidden"
+                  name="price_id"
+                  value="price_1SuqYw2Ly9NpxKWhPtgANnw2"
+                />
+                <button className="primary" style={{ width: "100%" }}>
+                  Kjøp CV
+                </button>
+              </form>
             </div>
 
             {/* CV + SØKNAD */}
             <div
               className="card"
-              style={{
-                border: "2px solid var(--primary)",
-                position: "relative",
-              }}
+              style={{ border: "2px solid var(--primary)", position: "relative" }}
             >
               <div
                 style={{
@@ -140,9 +137,7 @@ export default function PricingPage() {
               </div>
 
               <h3>CV + Søknad</h3>
-              <p style={{ marginTop: "0.5rem" }}>
-                Full pakke: CV og målrettet jobbsøknad.
-              </p>
+              <p>CV og målrettet jobbsøknad.</p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>Profesjonell CV</li>
@@ -151,16 +146,20 @@ export default function PricingPage() {
                 <li>3 dagers tilgang</li>
               </ul>
 
-              <button
-                className="primary"
-                style={{ width: "100%", marginTop: "1.5rem" }}
-                onClick={() => {
-                  window.location.href =
-                    "/api/stripe/checkout?price_id=price_1SuqZW2Ly9NpxKWht4M2P6ZP";
-                }}
+              <form
+                method="POST"
+                action="/api/stripe/checkout"
+                style={{ marginTop: "1.5rem" }}
               >
-                Kjøp CV + Søknad
-              </button>
+                <input
+                  type="hidden"
+                  name="price_id"
+                  value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
+                />
+                <button className="primary" style={{ width: "100%" }}>
+                  Kjøp CV + Søknad
+                </button>
+              </form>
             </div>
           </div>
         )}
