@@ -1,91 +1,38 @@
-// app/login/page.tsx
+async function handleLogin(email: string, password: string) {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-export default function LoginPage() {
-  async function signIn(formData: FormData) {
-    "use server";
-
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    if (!email || !password) {
-      return;
-    }
-
-    const supabase = createSupabaseServerClient();
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      console.error("Login error:", error.message);
-      return;
-    }
-
-    redirect("/pricing");
+  if (error) {
+    alert(error.message);
+    return;
   }
 
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <form
-        action={signIn}
-        style={{
-          background: "white",
-          padding: "2rem",
-          borderRadius: "8px",
-          width: "100%",
-          maxWidth: "400px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h1 style={{ marginBottom: "1.5rem" }}>Logg inn</h1>
+  // Etter login: sjekk entitlements
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-        <label style={{ display: "block", marginBottom: "1rem" }}>
-          E-post
-          <input
-            name="email"
-            type="email"
-            required
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-          />
-        </label>
+  if (!user) {
+    router.push("/");
+    return;
+  }
 
-        <label style={{ display: "block", marginBottom: "1.5rem" }}>
-          Passord
-          <input
-            name="password"
-            type="password"
-            required
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
-          />
-        </label>
+  const { data } = await supabase
+    .from("user_entitlements")
+    .select("has_cv, expires_at")
+    .eq("user_id", user.id)
+    .single();
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "0.75rem",
-            background: "#111",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Logg inn
-        </button>
-      </form>
-    </main>
-  );
+  const now = new Date();
+
+  if (
+    data?.has_cv &&
+    (!data.expires_at || new Date(data.expires_at) > now)
+  ) {
+    router.push("/cv");
+  } else {
+    router.push("/pricing");
+  }
 }
