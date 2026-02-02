@@ -20,35 +20,35 @@ export async function POST(req: Request) {
 Du er en erfaren norsk karriereveileder.
 
 OPPGAVE:
-Skriv en profesjonell, ryddig jobbsøknad basert KUN på informasjonen brukeren har gitt.
+Skriv en profesjonell og fyldig jobbsøknad basert KUN på informasjonen brukeren har gitt.
 
-ABSOLUTTE REGLER (må følges):
+VIKTIGE REGLER:
 - Bruk KUN opplysningene brukeren har skrevet
-- IKKE legg til erfaring, utdanning, ferdigheter eller personlige egenskaper
-- IKKE anta motivasjon, interesse eller egenskaper som ikke er eksplisitt nevnt
-- IKKE bruk klisjeer eller generiske formuleringer
-- Hvis informasjon mangler, ikke skriv om det
-- Skriv nøkternt, korrekt norsk
-- Tonen skal være saklig, profesjonell og trygg
+- IKKE legg til nye erfaringer, ferdigheter eller egenskaper
+- Du kan utdype og forklare det brukeren allerede har skrevet
+- IKKE anta motivasjon eller personlighet som ikke er nevnt
+- Skriv sammenhengende, naturlig norsk
+- Tonen skal være saklig, trygg og profesjonell
 
 STRUKTUR:
-1. Kort innledning – hvorfor søknaden sendes (uten smiger)
-2. Relevant erfaring (basert på teksten brukeren har gitt)
+1. Innledning – hvorfor søknaden sendes
+2. Relevant erfaring (utfyllende, men faktabasert)
 3. Eventuell utdanning (kun hvis oppgitt)
-4. Avslutning – kort og nøytral
+4. Avslutning – kort og profesjonell
+
+RETNING:
+- Bruk hele avsnitt
+- Forklar sammenhenger
+- Ikke vær unødvendig kortfattet
 
 IKKE INKLUDER:
 - Kontaktinformasjon
-- Dato eller sted
-- Overskrift som “Søknad”
+- Dato / sted
+- Overskrift
 - Signatur
 - Referanser
-- Personlige egenskaper som ikke er eksplisitt nevnt
 
 BRUKERENS OPPLYSNINGER:
-
-Navn (kun som kontekst – ikke bruk i teksten):
-${name}
 
 Stilling det søkes på:
 ${job}
@@ -60,7 +60,7 @@ Utdanning:
 ${education}
 
 LEVERANSEN:
-Returner kun ferdig søknadstekst. Ingen forklaringer. Ingen punktlister.
+Returner kun ferdig søknadstekst. Ingen forklaringer.
 `;
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -71,7 +71,7 @@ Returner kun ferdig søknadstekst. Ingen forklaringer. Ingen punktlister.
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.25,
+        temperature: 0.35,
         messages: [{ role: "user", content: prompt }],
       }),
     });
