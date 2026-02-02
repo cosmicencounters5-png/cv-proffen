@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
 
 type AccessState = "loading" | "no-access" | "has-access";
@@ -51,6 +50,10 @@ export default function PricingPage() {
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <h1>Velg pakke</h1>
 
+        <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
+          Velg pakken som passer deg best. Tilgangen varer i 3 dager.
+        </p>
+
         {state === "loading" && <p>Laster…</p>}
 
         {/* HAR TILGANG */}
@@ -61,7 +64,7 @@ export default function PricingPage() {
               Du kan gå rett til CV-generatoren og fortsette der du slapp.
             </p>
 
-            <Link
+            <a
               href="/cv"
               style={{
                 display: "inline-block",
@@ -74,36 +77,90 @@ export default function PricingPage() {
               }}
             >
               Gå til CV
-            </Link>
+            </a>
           </div>
         )}
 
         {/* INGEN TILGANG */}
         {state === "no-access" && (
-          <div style={{ marginTop: "2rem" }}>
-            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>
-              Velg pakken som passer deg best. Tilgangen varer i 3 dager.
-            </p>
+          <div
+            style={{
+              marginTop: "3rem",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: "1.5rem",
+            }}
+          >
+            {/* CV */}
+            <div className="card">
+              <h3>CV</h3>
+              <p style={{ marginTop: "0.5rem" }}>
+                Lag en profesjonell CV basert kun på dine egne opplysninger.
+              </p>
 
-            {/* HER LEGGER DU STRIPE-KORTENE DINE */}
+              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
+                <li>AI-generert CV</li>
+                <li>PDF klar til bruk</li>
+                <li>3 dagers tilgang</li>
+              </ul>
+
+              <button
+                className="primary"
+                style={{ width: "100%", marginTop: "1.5rem" }}
+                onClick={() => {
+                  // kall Stripe checkout (eksisterende logikk)
+                  window.location.href = "/api/stripe/checkout?product=cv";
+                }}
+              >
+                Kjøp CV
+              </button>
+            </div>
+
+            {/* CV + SØKNAD */}
             <div
+              className="card"
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                gap: "1.5rem",
+                border: "2px solid var(--primary)",
+                position: "relative",
               }}
             >
-              <div className="card">
-                <h3>CV</h3>
-                <p>Lag en profesjonell CV.</p>
-                {/* checkout-knapp */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "-12px",
+                  right: "12px",
+                  background: "var(--primary)",
+                  color: "white",
+                  padding: "0.25rem 0.6rem",
+                  fontSize: "0.75rem",
+                  borderRadius: "999px",
+                }}
+              >
+                Mest populær
               </div>
 
-              <div className="card">
-                <h3>CV + Søknad</h3>
-                <p>CV og målrettet jobbsøknad.</p>
-                {/* checkout-knapp */}
-              </div>
+              <h3>CV + Søknad</h3>
+              <p style={{ marginTop: "0.5rem" }}>
+                Full pakke: CV og målrettet jobbsøknad.
+              </p>
+
+              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
+                <li>Profesjonell CV</li>
+                <li>Målrettet søknad</li>
+                <li>PDF klar til bruk</li>
+                <li>3 dagers tilgang</li>
+              </ul>
+
+              <button
+                className="primary"
+                style={{ width: "100%", marginTop: "1.5rem" }}
+                onClick={() => {
+                  window.location.href =
+                    "/api/stripe/checkout?product=cv_plus";
+                }}
+              >
+                Kjøp CV + Søknad
+              </button>
             </div>
           </div>
         )}
