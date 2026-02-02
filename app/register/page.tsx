@@ -20,16 +20,15 @@ export default function RegisterPage() {
 
     if (error) {
       setError(error.message);
-      return;
+    } else {
+      router.push("/cv");
     }
-
-    router.push("/login");
   }
 
   return (
     <div className="container">
       <div className="card">
-        <h1>Registrer konto</h1>
+        <h1>Registrer deg</h1>
 
         <input
           placeholder="E-post"
