@@ -82,6 +82,23 @@ export default function CvWizard() {
           >
             {cv}
           </pre>
+<PDFDownloadLink
+  document={<CvPdf data={data} />}
+  fileName="cv-proffen.pdf"
+  style={{
+    marginTop: 16,
+    display: "inline-block",
+    background: "#16a34a",
+    color: "white",
+    padding: "10px 16px",
+    borderRadius: 6,
+    textDecoration: "none",
+  }}
+>
+  {({ loading }) =>
+    loading ? "Genererer PDF..." : "Last ned PDF"
+  }
+</PDFDownloadLink>
         </div>
       )}
     </div>
