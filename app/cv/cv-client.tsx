@@ -3,39 +3,6 @@
 
 import { useState } from "react";
 
-function formatCv(text: string) {
-  // Enkel formattering basert på linjeskift
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-
-  return lines.map((line, i) => {
-    if (
-      line.toLowerCase().includes("profil") ||
-      line.toLowerCase().includes("erfaring") ||
-      line.toLowerCase().includes("utdanning")
-    ) {
-      return (
-        <h3
-          key={i}
-          style={{
-            marginTop: "1.5rem",
-            marginBottom: "0.5rem",
-            borderBottom: "1px solid #ddd",
-            paddingBottom: "0.25rem",
-          }}
-        >
-          {line}
-        </h3>
-      );
-    }
-
-    return (
-      <p key={i} style={{ marginBottom: "0.5rem", lineHeight: 1.6 }}>
-        {line}
-      </p>
-    );
-  });
-}
-
 export default function CvClient() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +21,7 @@ export default function CvClient() {
     setLoading(false);
   }
 
-  const inputStyle = {
+  const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: "0.6rem",
     marginTop: "0.25rem",
@@ -95,4 +62,50 @@ export default function CvClient() {
 
           <label>
             Navn
-            <input name="name" r
+            <input name="name" required style={inputStyle} />
+          </label>
+
+          <label>
+            Stilling du søker
+            <input name="job" required style={inputStyle} />
+          </label>
+
+          <label>
+            Arbeidserfaring
+            <textarea
+              name="experience"
+              rows={6}
+              required
+              style={inputStyle}
+            />
+          </label>
+
+          <label>
+            Utdanning (valgfritt)
+            <textarea name="education" rows={4} style={inputStyle} />
+          </label>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              background: "#111",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? "Genererer CV…" : "Generer CV"}
+          </button>
+        </form>
+
+        {/* RESULTAT */}
+        <div
+          style={{
+            background: "white",
+            padding: "2rem",
+            borderRadius: "8px",
