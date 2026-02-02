@@ -1,8 +1,33 @@
 // app/page.tsx
 
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createBrowserClient } from "@supabase/ssr";
+
+type UserState = "loading" | "loggedOut" | "loggedIn";
 
 export default function HomePage() {
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const [state, setState] = useState<UserState>("loading");
+
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setState(user ? "loggedIn" : "loggedOut");
+    }
+
+    checkUser();
+  }, [supabase]);
+
   return (
     <main
       style={{
@@ -29,24 +54,62 @@ export default function HomePage() {
             marginBottom: "2.5rem",
           }}
         >
-          CV-Proffen hjelper deg å lage en ryddig, målrettet CV og søknad – uten
-          gjetting, uten tull.
+          Lag en målrettet CV og søknad basert kun på dine egne opplysninger.
+          Ingen gjetting. Ingen tull.
         </p>
 
-        <Link
-          href="/pricing"
-          style={{
-            display: "inline-block",
-            padding: "0.9rem 1.5rem",
-            background: "#111",
-            color: "white",
-            borderRadius: "6px",
-            textDecoration: "none",
-            fontWeight: 500,
-          }}
-        >
-          Kom i gang
-        </Link>
+        {/* CTA */}
+        <div style={{ marginBottom: "3rem" }}>
+          {state === "loading" && <span>Laster…</span>}
+
+          {state === "loggedOut" && (
+            <>
+              <Link
+                href="/register"
+                style={{
+                  marginRight: "1rem",
+                  padding: "0.9rem 1.5rem",
+                  background: "#111",
+                  color: "white",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                }}
+              >
+                Registrer deg
+              </Link>
+
+              <Link
+                href="/login"
+                style={{
+                  padding: "0.9rem 1.5rem",
+                  background: "#eee",
+                  color: "#111",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                }}
+              >
+                Logg inn
+              </Link>
+            </>
+          )}
+
+          {state === "loggedIn" && (
+            <Link
+              href="/cv"
+              style={{
+                padding: "0.9rem 1.5rem",
+                background: "#111",
+                color: "white",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontWeight: 500,
+              }}
+            >
+              Gå til CV
+            </Link>
+          )}
+        </div>
 
         {/* FEATURES */}
         <div
@@ -54,13 +117,12 @@ export default function HomePage() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: "2rem",
-            marginTop: "4rem",
             textAlign: "left",
           }}
         >
           <Feature
             title="Ingen hallusinasjoner"
-            text="Vi bruker kun informasjonen du selv legger inn. Ingenting blir funnet på."
+            text="Vi bruker kun informasjonen du selv legger inn."
           />
           <Feature
             title="Tilpasset stillingen"
