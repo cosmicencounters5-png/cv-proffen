@@ -21,6 +21,15 @@ export default function CvClient() {
     setLoading(false);
   }
 
+  const inputStyle = {
+    width: "100%",
+    padding: "0.6rem",
+    marginTop: "0.25rem",
+    marginBottom: "1rem",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+  };
+
   return (
     <main
       style={{
@@ -31,14 +40,15 @@ export default function CvClient() {
     >
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: "1000px",
           margin: "0 auto",
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "2rem",
+          alignItems: "start",
         }}
       >
-        {/* Form */}
+        {/* FORM */}
         <form
           action={generateCv}
           style={{
@@ -48,34 +58,56 @@ export default function CvClient() {
             boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
           }}
         >
-          <h1>CV-generator</h1>
+          <h1 style={{ marginBottom: "1.5rem" }}>CV-generator</h1>
 
           <label>
             Navn
-            <input name="name" required />
+            <input name="name" required style={inputStyle} />
           </label>
 
           <label>
             Stilling du søker
-            <input name="job" required />
+            <input name="job" required style={inputStyle} />
           </label>
 
           <label>
             Arbeidserfaring
-            <textarea name="experience" rows={6} required />
+            <textarea
+              name="experience"
+              rows={6}
+              required
+              style={inputStyle}
+            />
           </label>
 
           <label>
             Utdanning (valgfritt)
-            <textarea name="education" rows={4} />
+            <textarea
+              name="education"
+              rows={4}
+              style={inputStyle}
+            />
           </label>
 
-          <button disabled={loading}>
-            {loading ? "Genererer..." : "Generer CV"}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              background: "#111",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? "Genererer CV…" : "Generer CV"}
           </button>
         </form>
 
-        {/* Result */}
+        {/* RESULTAT */}
         <div
           style={{
             background: "white",
@@ -83,10 +115,18 @@ export default function CvClient() {
             borderRadius: "8px",
             boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
             whiteSpace: "pre-wrap",
+            minHeight: "300px",
           }}
         >
-          <h2>Resultat</h2>
-          {result ? result : "CV-en vises her"}
+          <h2 style={{ marginBottom: "1rem" }}>Resultat</h2>
+
+          {result ? (
+            <div style={{ lineHeight: 1.6 }}>{result}</div>
+          ) : (
+            <p style={{ color: "#777" }}>
+              CV-en vises her etter generering.
+            </p>
+          )}
         </div>
       </div>
     </main>
