@@ -1,15 +1,20 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-const supabase = createSupabaseServerClient();
+export async function GET() {
+  const supabase = createSupabaseServerClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ access: false }, { status: 401 })
+  if (error || !user) {
+    return NextResponse.json(
+      { access: false },
+      { status: 401 }
+    );
   }
 
-  return NextResponse.json({ access: true })
+  return NextResponse.json({ access: true });
 }
