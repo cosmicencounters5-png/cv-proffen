@@ -4,32 +4,30 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  async function register() {
+  async function login() {
     setError("");
-
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
-      return;
+    } else {
+      router.push("/cv");
     }
-
-    router.push("/login");
   }
 
   return (
     <div className="container">
       <div className="card">
-        <h1>Registrer konto</h1>
+        <h1>Logg inn</h1>
 
         <input
           placeholder="E-post"
@@ -46,7 +44,7 @@ export default function RegisterPage() {
 
         {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <button onClick={register}>Opprett konto</button>
+        <button onClick={login}>Logg inn</button>
       </div>
     </div>
   );
