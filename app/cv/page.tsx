@@ -1,5 +1,3 @@
-// app/cv/page.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,6 +5,48 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 
 type Mode = "cv" | "application";
+
+/**
+ * Enkel, defensiv formattering:
+ * - Leser linje for linje
+ * - Gir seksjonsfølelse
+ * - Ingen JSX-triks som kan knekke build
+ */
+function formatText(text: string) {
+  const lines = text.split("\n").filter(Boolean);
+
+  return lines.map((line, i) => {
+    const lower = line.toLowerCase();
+
+    if (
+      lower.includes("profil") ||
+      lower.includes("erfaring") ||
+      lower.includes("utdanning") ||
+      lower.includes("kompetanse")
+    ) {
+      return (
+        <h3
+          key={i}
+          style={{
+            marginTop: "1.5rem",
+            marginBottom: "0.5rem",
+            borderBottom: "1px solid #ccc",
+            paddingBottom: "0.25rem",
+            fontFamily: "Arial, sans-serif",
+          }}
+        >
+          {line}
+        </h3>
+      );
+    }
+
+    return (
+      <p key={i} style={{ marginBottom: "0.5rem" }}>
+        {line}
+      </p>
+    );
+  });
+}
 
 export default function CvPage() {
   const router = useRouter();
@@ -43,7 +83,6 @@ export default function CvPage() {
         return;
       }
 
-      // Søknad krever eget entitlement
       if (mode === "application" && !data.has_application) {
         setMode("cv");
       }
@@ -226,10 +265,11 @@ export default function CvPage() {
             style={{
               whiteSpace: "pre-wrap",
               lineHeight: 1.6,
+              fontFamily: "Georgia, serif",
             }}
           >
             {result
-              ? result
+              ? formatText(result)
               : mode === "cv"
               ? "CV-en vises her etter generering."
               : "Søknaden vises her etter generering."}
