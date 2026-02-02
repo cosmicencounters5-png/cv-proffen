@@ -1,6 +1,24 @@
 // app/pricing/page.tsx
 
+"use client";
+
 export default function PricingPage() {
+  async function startCheckout(priceId: string) {
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ priceId }),
+    });
+
+    if (!res.ok) {
+      alert("Noe gikk galt. Prøv igjen.");
+      return;
+    }
+
+    const { url } = await res.json();
+    window.location.href = url;
+  }
+
   return (
     <main
       style={{
@@ -52,6 +70,9 @@ export default function PricingPage() {
               <li>✔️ Klar til bruk</li>
             </ul>
             <button
+              onClick={() =>
+                startCheckout("price_1SuqYw2Ly9NpxKWhPtgANnw2")
+              }
               style={{
                 width: "100%",
                 padding: "0.75rem",
@@ -62,7 +83,7 @@ export default function PricingPage() {
                 cursor: "pointer",
               }}
             >
-              Velg CV
+              Kjøp CV
             </button>
           </div>
 
@@ -91,6 +112,9 @@ export default function PricingPage() {
               <li>✔️ Samme stil og tone</li>
             </ul>
             <button
+              onClick={() =>
+                startCheckout("price_1SuqZW2Ly9NpxKWht4M2P6ZP")
+              }
               style={{
                 width: "100%",
                 padding: "0.75rem",
@@ -101,11 +125,9 @@ export default function PricingPage() {
                 cursor: "pointer",
               }}
             >
-              Velg pakke
+              Kjøp pakke
             </button>
           </div>
         </div>
       </div>
     </main>
-  );
-}
