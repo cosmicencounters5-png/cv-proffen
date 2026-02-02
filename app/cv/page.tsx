@@ -10,38 +10,34 @@ export default async function CvPage() {
     { cookies }
   );
 
+  // 1. Session
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // 1. Ikke logget inn
   if (!session) {
     redirect("/login");
   }
 
-  // 2. Sjekk om CV finnes
-  const { data: existingCv } = await supabase
-    .from("cvs")
-    .select("id")
+  // 2. Hent tilgang
+  const { data: access } = await supabase
+    .from("user_access")
+    .select("has_cv, expires_at")
     .eq("user_id", session.user.id)
     .maybeSingle();
 
-  // 3. Hvis CV finnes → ALDRI pricing
-  if (existingCv) {
+  const now = new Date();
+
+  const hasValidCvAccess =
+    access?.has_cv === true &&
+    access?.expires_at &&
+    new Date(access.expires_at) > now;
+
+  // 3. Hvis gyldig tilgang → CV
+  if (hasValidCvAccess) {
     return <CvWizard />;
   }
 
-  // 4. Sjekk betaling
-  const { data: payment } = await supabase
-    .from("payments")
-    .select("id")
-    .eq("user_id", session.user.id)
-    .eq("status", "paid")
-    .maybeSingle();
-
-  if (!payment) {
-    redirect("/pricing");
-  }
-
-  return <CvWizard />;
+  // 4. Ellers → pricing
+  redirect("/pricing");
 }
