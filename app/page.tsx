@@ -1,6 +1,78 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createBrowserClient } from "@supabase/ssr";
+
+type CtaState = "loading" | "logged-out" | "has-access" | "no-access";
 
 export default function HomePage() {
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const [ctaState, setCtaState] = useState<CtaState>("loading");
+
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Ikke innlogget
+      if (!user) {
+        setCtaState("logged-out");
+        return;
+      }
+
+      const { data } = await supabase
+        .from("user_entitlements")
+        .select("has_cv, expires_at")
+        .eq("user_id", user.id)
+        .single();
+
+      const now = new Date();
+
+      if (
+        data?.has_cv &&
+        (!data.expires_at || new Date(data.expires_at) > now)
+      ) {
+        setCtaState("has-access");
+      } else {
+        setCtaState("no-access");
+      }
+    }
+
+    checkUser();
+  }, [supabase]);
+
+  function renderCta() {
+    if (ctaState === "loading") return null;
+
+    if (ctaState === "logged-out") {
+      return (
+        <Link href="/login">
+          <button className="cta">Logg inn</button>
+        </Link>
+      );
+    }
+
+    if (ctaState === "has-access") {
+      return (
+        <Link href="/cv">
+          <button className="cta">Gå til CV</button>
+        </Link>
+      );
+    }
+
+    return (
+      <Link href="/pricing">
+        <button className="cta">Velg pakke</button>
+      </Link>
+    );
+  }
+
   return (
     <main>
       {/* HERO */}
@@ -12,9 +84,7 @@ export default function HomePage() {
           Strukturert, presist og klart til bruk.
         </p>
 
-        <Link href="/cv">
-          <button className="cta">Gå til CV</button>
-        </Link>
+        {renderCta()}
       </section>
 
       {/* FEATURES */}
@@ -30,8 +100,8 @@ export default function HomePage() {
         <div className="feature-card">
           <h3>Tilpasset stillingen</h3>
           <p>
-            Innholdet struktureres og formuleres direkte mot jobben du søker,
-            med riktig språk og prioritering.
+            Innholdet struktureres direkte mot jobben du søker, med riktig språk
+            og prioritering.
           </p>
         </div>
 
