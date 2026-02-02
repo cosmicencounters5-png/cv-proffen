@@ -1,15 +1,30 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import CvWizard from "./CvWizard";
 
-export default function CvPage({
+export default async function CvPage({
   searchParams,
 }: {
   searchParams: { paid?: string };
 }) {
-  // Kun tilgang hvis betalt
-  if (searchParams.paid !== "true") {
-    redirect("/pricing");
-  }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookies().getAll(),
+        setAll: () => {},
+      },
+    }
+  );
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) redirect("/login");
+  if (searchParams.paid !== "true") redirect("/pricing");
 
   return (
     <div className="container">
