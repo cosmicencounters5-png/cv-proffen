@@ -10,7 +10,7 @@ export default async function CvLayout({
 }) {
   const supabase = createSupabaseServerClient();
 
-  // 1️⃣ Hent innlogget bruker
+  // 1️⃣ Hent bruker
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -19,15 +19,15 @@ export default async function CvLayout({
     redirect("/login");
   }
 
-  // 2️⃣ Hent entitlement for DENNE brukeren
+  // 2️⃣ Hent entitlement FOR DENNE BRUKEREN
   const { data: entitlement, error } = await supabase
     .from("user_entitlements")
     .select("has_cv, expires_at")
     .eq("user_id", user.id)
-    .maybeSingle();
+    .maybeSingle(); // 🔑 VIKTIG
 
-  // ❌ Ingen rad = ingen tilgang
-  if (error || !entitlement) {
+  // ❌ Ingen tilgang
+  if (!entitlement) {
     redirect("/pricing");
   }
 
@@ -39,11 +39,11 @@ export default async function CvLayout({
     redirect("/pricing");
   }
 
-  // ❌ Mangler CV-tilgang
+  // ❌ Mangler CV
   if (!entitlement.has_cv) {
     redirect("/pricing");
   }
 
-  // ✅ Alt OK
+  // ✅ OK
   return <>{children}</>;
 }
