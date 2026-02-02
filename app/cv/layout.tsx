@@ -1,39 +1,49 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabaseServer"
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export default async function CvLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const supabase = createClient()
+  const supabase = createSupabaseServerClient();
 
-  // 1️⃣ Hent bruker
+  // 1️⃣ Hent innlogget bruker
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login")
+    redirect("/login");
   }
 
-  // 2️⃣ Hent entitlement
+  // 2️⃣ Hent entitlement for DENNE brukeren
   const { data: entitlement, error } = await supabase
     .from("user_entitlements")
-    .select("has_cv")
-    .single()
+    .select("has_cv, expires_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  if (error) {
-    console.error("Entitlement error:", error)
-    redirect("/pricing")
+  // ❌ Ingen rad = ingen tilgang
+  if (error || !entitlement) {
+    redirect("/pricing");
   }
 
-  // 3️⃣ Feature gate
-  if (!entitlement?.has_cv) {
-    redirect("/pricing")
+  // ❌ Utløpt
+  if (
+    entitlement.expires_at &&
+    new Date(entitlement.expires_at) < new Date()
+  ) {
+    redirect("/pricing");
   }
 
-  return <>{children}</>
+  // ❌ Mangler CV-tilgang
+  if (!entitlement.has_cv) {
+    redirect("/pricing");
+  }
+
+  // ✅ Alt OK
+  return <>{children}</>;
 }
