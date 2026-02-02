@@ -1,32 +1,39 @@
-// app/register/page.tsx
+"use client";
 
-import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function RegisterPage() {
-  async function signUp(formData: FormData) {
-    "use server";
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    if (!email || !password) {
-      return;
-    }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    const supabase = createSupabaseServerClient();
-
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (error) {
-      console.error("Signup error:", error.message);
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
       return;
     }
 
-    redirect("/login");
+    // 🔑 Viktig: nye brukere skal ALLTID velge pakke
+    router.push("/pricing");
   }
 
   return (
@@ -36,54 +43,48 @@ export default function RegisterPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        background: "var(--bg)",
+        padding: "1rem",
       }}
     >
       <form
-        action={signUp}
-        style={{
-          background: "white",
-          padding: "2rem",
-          borderRadius: "8px",
-          width: "100%",
-          maxWidth: "400px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-        }}
+        onSubmit={handleSubmit}
+        className="card"
+        style={{ width: "100%", maxWidth: "420px" }}
       >
         <h1 style={{ marginBottom: "1.5rem" }}>Opprett konto</h1>
 
-        <label style={{ display: "block", marginBottom: "1rem" }}>
+        <label>
           E-post
           <input
-            name="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
           />
         </label>
 
-        <label style={{ display: "block", marginBottom: "1.5rem" }}>
+        <label>
           Passord
           <input
-            name="password"
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.25rem" }}
           />
         </label>
+
+        {error && (
+          <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
+        )}
 
         <button
           type="submit"
-          style={{
-            width: "100%",
-            padding: "0.75rem",
-            background: "#111",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
+          className="primary"
+          disabled={loading}
+          style={{ width: "100%" }}
         >
-          Opprett konto
+          {loading ? "Oppretter konto…" : "Opprett konto"}
         </button>
       </form>
     </main>
