@@ -1,62 +1,44 @@
-"use client"
-
-import BuyButton from "@/components/BuyButton"
+"use client";
 
 export default function PricingPage() {
+  async function checkout(product: "cv" | "cv_plus") {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product }),
+    });
+
+    const data = await res.json();
+    window.location.href = data.url;
+  }
+
   return (
-    <div className="max-w-4xl mx-auto py-16 px-6">
-      <h1 className="text-3xl font-bold text-center mb-4">
-        Velg pakken som passer deg
-      </h1>
+    <div className="container">
+      <h1>Priser</h1>
 
-      <p className="text-center text-gray-600 mb-12">
-        Du får full tilgang i 3 dager. Lag, juster og last ned CV (og søknad).
-      </p>
+      <div style={{ display: "grid", gap: 24, marginTop: 32 }}>
+        {/* CV */}
+        <div className="card">
+          <h2>Profesjonell CV</h2>
+          <p>AI-generert CV basert kun på dine ekte data</p>
+          <h3>299 kr</h3>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* CV ONLY */}
-        <div className="border rounded-xl p-6 flex flex-col">
-          <h2 className="text-xl font-semibold mb-2">Kun CV</h2>
-          <p className="text-gray-600 mb-4">
-            Perfekt for deg som kun trenger en profesjonell CV.
-          </p>
-
-          <ul className="text-sm mb-6 space-y-2">
-            <li>✅ Profesjonell CV</li>
-            <li>✅ AI-forbedringer</li>
-            <li>✅ PDF-nedlasting</li>
-            <li>⏳ 3 dagers tilgang</li>
-          </ul>
-
-          <div className="mt-auto">
-            <p className="text-2xl font-bold mb-4">199 kr</p>
-            <BuyButton packageType="cv_only" />
-          </div>
+          <button onClick={() => checkout("cv")}>
+            Kjøp CV
+          </button>
         </div>
 
-        {/* CV + APPLICATION */}
-        <div className="border rounded-xl p-6 flex flex-col bg-gray-50">
-          <h2 className="text-xl font-semibold mb-2">
-            CV + Søknad (AI)
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Full pakke – CV + skreddersydd jobbsøknad med AI.
-          </p>
+        {/* CV + Søknad */}
+        <div className="card">
+          <h2>CV + Søknad</h2>
+          <p>Komplett pakke: CV + målrettet søknad</p>
+          <h3>499 kr</h3>
 
-          <ul className="text-sm mb-6 space-y-2">
-            <li>✅ Profesjonell CV</li>
-            <li>✅ AI-generert søknad</li>
-            <li>✅ Rediger begge</li>
-            <li>✅ PDF-nedlasting</li>
-            <li>⏳ 3 dagers tilgang</li>
-          </ul>
-
-          <div className="mt-auto">
-            <p className="text-2xl font-bold mb-4">299 kr</p>
-            <BuyButton packageType="cv_and_application" />
-          </div>
+          <button onClick={() => checkout("cv_plus")}>
+            Kjøp CV + Søknad
+          </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
