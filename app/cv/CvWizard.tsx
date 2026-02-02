@@ -71,6 +71,7 @@ export default function CvWizard() {
       {cv && (
         <div style={{ marginTop: 24 }}>
           <h3>Forhåndsvisning av CV</h3>
+
           <pre
             style={{
               whiteSpace: "pre-wrap",
@@ -82,23 +83,24 @@ export default function CvWizard() {
           >
             {cv}
           </pre>
-<PDFDownloadLink
-  document={<CvPdf data={data} />}
-  fileName="cv-proffen.pdf"
-  style={{
-    marginTop: 16,
-    display: "inline-block",
-    background: "#16a34a",
-    color: "white",
-    padding: "10px 16px",
-    borderRadius: 6,
-    textDecoration: "none",
-  }}
->
-  {({ loading }) =>
-    loading ? "Genererer PDF..." : "Last ned PDF"
-  }
-</PDFDownloadLink>
+
+          {/* ✅ PDF-knapp – RIKTIG MÅTE */}
+          <PDFDownloadLink
+            document={<CvPdf data={data} />}
+            fileName="cv-proffen.pdf"
+            style={{
+              marginTop: 16,
+              display: "inline-block",
+              background: "#16a34a",
+              color: "white",
+              padding: "10px 16px",
+              borderRadius: 6,
+              textDecoration: "none",
+              fontWeight: 500,
+            }}
+          >
+            Last ned PDF
+          </PDFDownloadLink>
         </div>
       )}
     </div>
