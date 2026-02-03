@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams } from "next/navigation";
 
 type AccessState = "loading" | "no-access" | "has-access";
 
-export default function PricingPage() {
+function PricingContent() {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -30,7 +30,7 @@ export default function PricingPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, has_application, expires_at")
+        .select("has_cv, expires_at")
         .eq("user_id", user.id)
         .single();
 
@@ -40,8 +40,7 @@ export default function PricingPage() {
         data?.has_cv &&
         (!data.expires_at || new Date(data.expires_at) > now);
 
-      // 🔴 Viktig: Hvis bruker er her for å oppgradere til søknad,
-      // skal vi IKKE vise "har allerede tilgang"
+      // Hvis bruker er her for å oppgradere, skal vi alltid vise kjøp
       if (upgradeTarget === "application") {
         setState("no-access");
         return;
@@ -68,7 +67,7 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG (kun CV og ikke i upgrade-modus) */}
+        {/* HAR TILGANG */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
@@ -101,7 +100,7 @@ export default function PricingPage() {
               gap: "1.5rem",
             }}
           >
-            {/* CV */}
+            {/* CV – skjules ved upgrade */}
             {!upgradeTarget && (
               <div className="card">
                 <h3>CV</h3>
@@ -109,8 +108,6 @@ export default function PricingPage() {
                 <p style={{ fontSize: "2rem", fontWeight: 700 }}>
                   149 kr
                 </p>
-
-                <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
 
                 <form
                   method="POST"
@@ -146,12 +143,6 @@ export default function PricingPage() {
                 249 kr
               </p>
 
-              <p>
-                {upgradeTarget === "application"
-                  ? "Legg til målrettet jobbsøknad."
-                  : "CV og målrettet jobbsøknad."}
-              </p>
-
               <form
                 method="POST"
                 action="/api/stripe/checkout"
@@ -173,5 +164,13 @@ export default function PricingPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<p style={{ padding: "4rem" }}>Laster…</p>}>
+      <PricingContent />
+    </Suspense>
   );
 }
