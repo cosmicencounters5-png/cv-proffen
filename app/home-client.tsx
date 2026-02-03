@@ -93,26 +93,27 @@ export default function HomeClient() {
       {/* FEATURES */}
       <section className="features">
         <div className="feature-card highlight">
-          <h3>Kun dine opplysninger</h3>
+          <h3>Basert kun på dine faktiske opplysninger</h3>
           <p>
-            CV og søknad bygges utelukkende på informasjonen du selv legger inn.
-            Ingen antagelser. Ingen tillegg.
+            Innholdet bygges utelukkende på det du selv legger inn.
+            Vi legger ikke til utdanning, erfaring eller ferdigheter.
+            Dette gir en korrekt og troverdig CV.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Tilpasset stillingen</h3>
+          <h3>Strukturert for stillingen du søker</h3>
           <p>
-            Innholdet struktureres direkte mot jobben du søker, med riktig språk
-            og prioritering.
+            CV og søknad struktureres målrettet mot stillingen,
+            med tydelig prioritering, korrekt språk og profesjonell fremtoning.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>PDF klar til bruk</h3>
+          <h3>Ferdig dokument i PDF-format</h3>
           <p>
-            Last ned ferdig dokument og send det direkte til arbeidsgiver.
-            Ingen ekstra redigering nødvendig.
+            Last ned et ryddig og profesjonelt dokument klart til innsending.
+            Egnet for både privat og offentlig sektor.
           </p>
         </div>
       </section>
