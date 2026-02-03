@@ -14,10 +14,13 @@ export default function CvPage() {
   );
 
   const [loading, setLoading] = useState(true);
-  const [hasApplication, setHasApplication] = useState(false);
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
+  const [hasCv, setHasCv] = useState(false);
+  const [hasApplication, setHasApplication] = useState(false);
   const [mode, setMode] = useState<Mode>("cv");
+
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -32,6 +35,8 @@ export default function CvPage() {
         return;
       }
 
+      setName(user.user_metadata?.name ?? null);
+
       const { data } = await supabase
         .from("user_entitlements")
         .select("has_cv, has_application, expires_at")
@@ -43,10 +48,16 @@ export default function CvPage() {
         return;
       }
 
+      setHasCv(data.has_cv);
       setHasApplication(!!data.has_application);
 
       if (data.expires_at) {
-        setExpiresAt(new Date(data.expires_at));
+        const expires = new Date(data.expires_at);
+        const now = new Date();
+        const diff = Math.ceil(
+          (expires.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        setDaysLeft(diff > 0 ? diff : 0);
       }
 
       setLoading(false);
@@ -76,212 +87,45 @@ export default function CvPage() {
     return <p style={{ padding: "2rem" }}>Laster…</p>;
   }
 
-  // ⏳ beregn dager igjen
-  let daysLeft: number | null = null;
-  if (expiresAt) {
-    const diff = expiresAt.getTime() - Date.now();
-    daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }
-
   return (
     <main
       style={{
         minHeight: "100vh",
-        padding: "4rem 1rem",
-        background: "#f8f9fb",
+        padding: "3rem 1rem",
+        background: "var(--bg)",
       }}
     >
-      {/* ⏳ TILGANGSINFO */}
-      {expiresAt && daysLeft !== null && (
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "0 auto 1.5rem auto",
-            background: "#eef2ff",
-            border: "1px solid #c7d2fe",
-            padding: "0.75rem 1rem",
-            borderRadius: "6px",
-            fontSize: "0.9rem",
-            color: "#1e3a8a",
-          }}
-        >
-          ⏳ Tilgangen din utløper om{" "}
-          <strong>
-            {daysLeft} dag{daysLeft === 1 ? "" : "er"}
-          </strong>{" "}
-          ({expiresAt.toLocaleDateString("no-NO")})
-        </div>
-      )}
-
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "2rem",
-        }}
-      >
-        {/* VENSTRE */}
-        <div
-          style={{
-            background: "white",
-            padding: "2rem",
-            borderRadius: "8px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          }}
-        >
-          <h1 style={{ marginBottom: "1rem" }}>
-            {mode === "cv" ? "CV-generator" : "Jobbsøknad"}
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        {/* 👋 HEADER */}
+        <div style={{ marginBottom: "2rem" }}>
+          <h1 style={{ marginBottom: "0.25rem" }}>
+            God dag{ name ? `, ${name}` : "" }
           </h1>
 
-          {/* TOGGLE */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("cv");
-                setResult(null);
-              }}
-              style={{
-                marginRight: "0.5rem",
-                padding: "0.4rem 0.75rem",
-                background: mode === "cv" ? "#111" : "#eee",
-                color: mode === "cv" ? "white" : "#111",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              CV
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setMode("application");
-                setResult(null);
-              }}
-              style={{
-                padding: "0.4rem 0.75rem",
-                background:
-                  mode === "application" ? "#111" : "#eee",
-                color:
-                  mode === "application" ? "white" : "#111",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Søknad
-            </button>
-          </div>
-
-          {/* 🔒 OPPGRADERING */}
-          {mode === "application" && !hasApplication && (
-            <div
-              style={{
-                border: "2px solid #111",
-                padding: "1.5rem",
-                borderRadius: "8px",
-              }}
-            >
-              <h2>Jobbsøknad er ikke inkludert</h2>
-
-              <p style={{ marginTop: "0.5rem" }}>
-                Du har allerede tilgang til CV. Legg til målrettet
-                jobbsøknad for å få full pakke.
-              </p>
-
-              <p
-                style={{
-                  fontSize: "1.5rem",
-                  fontWeight: 600,
-                  marginTop: "1rem",
-                }}
-              >
-                100 kr
-              </p>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1rem" }}
-              >
-                <input
-                  type="hidden"
-                  name="price_id"
-                  value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
-                />
-                <button
-                  className="primary"
-                  style={{ width: "100%" }}
-                >
-                  Oppgrader nå
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* 📝 SKJEMA */}
-          {(mode === "cv" || hasApplication) && (
-            <form action={generate}>
-              <label>
-                Navn
-                <input name="name" required />
-              </label>
-
-              <label>
-                Stilling du søker
-                <input name="job" required />
-              </label>
-
-              <label>
-                Arbeidserfaring
-                <textarea
-                  name="experience"
-                  rows={6}
-                  required
-                />
-              </label>
-
-              <label>
-                Utdanning (valgfritt)
-                <textarea name="education" rows={4} />
-              </label>
-
-              <button
-                type="submit"
-                disabled={generating}
-                style={{ marginTop: "1rem" }}
-              >
-                {generating
-                  ? "Genererer…"
-                  : mode === "cv"
-                  ? "Generer CV"
-                  : "Generer søknad"}
-              </button>
-            </form>
+          {daysLeft !== null && (
+            <p style={{ color: "var(--muted)" }}>
+              Du har <strong>{daysLeft} dag{daysLeft === 1 ? "" : "er"}</strong>{" "}
+              igjen av tilgangen din.
+            </p>
           )}
         </div>
 
-        {/* HØYRE */}
         <div
           style={{
-            background: "white",
-            padding: "2rem",
-            borderRadius: "8px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            whiteSpace: "pre-wrap",
-            lineHeight: 1.6,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "2rem",
           }}
         >
-          <h2>Resultat</h2>
-          {result
-            ? result
-            : "Resultatet vises her etter generering."}
-        </div>
-      </div>
-    </main>
-  );
-}
+          {/* VENSTRE */}
+          <div className="card">
+            {/* TOGGLE */}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("cv");
+                  setResult(null);
+                }}
+                style={{
+                  marginRight
