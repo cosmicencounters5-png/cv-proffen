@@ -65,7 +65,7 @@ export default function PricingPage() {
         <h1>Velg pakke</h1>
 
         <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
-          Alle kjøp gir 3 dagers tilgang. Ingen abonnement.
+          Engangskjøp. Tilgangen varer i 3 dager. Ingen abonnement.
         </p>
 
         {state === "loading" && <p>Laster…</p>}
@@ -95,19 +95,12 @@ export default function PricingPage() {
 
         {/* OPPGRADERING */}
         {state === "can-upgrade" && (
-          <div
-            style={{
-              marginTop: "3rem",
-              display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: "1.5rem",
-            }}
-          >
+          <div style={{ marginTop: "3rem" }}>
             <div
               className="card"
               style={{ border: "2px solid var(--primary)" }}
             >
-              <h3>Oppgrader til CV + Søknad</h3>
+              <h3>Oppgrader med jobbsøknad</h3>
 
               <p
                 style={{
@@ -116,12 +109,12 @@ export default function PricingPage() {
                   margin: "0.5rem 0",
                 }}
               >
-                249 kr
+                100 kr
               </p>
 
               <p>
                 Du har allerede CV. Legg til målrettet jobbsøknad og få full
-                tilgang.
+                tilgang i resten av perioden.
               </p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
@@ -138,7 +131,7 @@ export default function PricingPage() {
                 <input
                   type="hidden"
                   name="price_id"
-                  value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
+                  value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
                 />
                 <button className="primary" style={{ width: "100%" }}>
                   Oppgrader nå
