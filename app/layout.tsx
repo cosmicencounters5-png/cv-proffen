@@ -1,5 +1,3 @@
-// app/layout.tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,7 +17,7 @@ export default function RootLayout({
   );
 
   const router = useRouter();
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -45,6 +43,7 @@ export default function RootLayout({
 
   async function logout() {
     await supabase.auth.signOut();
+    setLoggedIn(false);
     router.push("/");
     router.refresh();
   }
@@ -70,25 +69,25 @@ export default function RootLayout({
               alignItems: "center",
             }}
           >
+            {/* LOGO */}
             <Link
               href="/"
               style={{
                 fontWeight: 600,
                 textDecoration: "none",
                 color: "#111",
+                fontSize: "1.05rem",
               }}
             >
               CV-Proffen
             </Link>
 
-            {loggedIn && (
+            {/* NAV */}
+            {loggedIn === true && (
               <div style={{ display: "flex", gap: "1rem" }}>
                 <Link
                   href="/cv"
-                  style={{
-                    textDecoration: "none",
-                    color: "#111",
-                  }}
+                  style={{ textDecoration: "none", color: "#111" }}
                 >
                   Gå til CV
                 </Link>
@@ -105,6 +104,28 @@ export default function RootLayout({
                 >
                   Logg ut
                 </button>
+              </div>
+            )}
+
+            {loggedIn === false && (
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <Link
+                  href="/login"
+                  style={{ textDecoration: "none", color: "#111" }}
+                >
+                  Logg inn
+                </Link>
+
+                <Link
+                  href="/register"
+                  style={{
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    color: "#111",
+                  }}
+                >
+                  Registrer deg
+                </Link>
               </div>
             )}
           </div>
