@@ -1,19 +1,19 @@
 import Stripe from "stripe";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
 
-export const runtime = "nodejs"; // 🔴 VIKTIG
+export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const priceId = formData.get("price_id");
+  const { price_id } = await req.json();
 
-  if (!priceId) {
-    return new Response("Missing price_id", { status: 400 });
+  if (!price_id) {
+    return NextResponse.json({ error: "Missing price_id" }, { status: 400 });
   }
 
   const supabase = createServerClient(
@@ -27,26 +27,20 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return new Response("Not authenticated", { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
-    line_items: [{ price: priceId as string, quantity: 1 }],
+    line_items: [{ price: price_id, quantity: 1 }],
     success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
     metadata: {
       user_id: user.id,
-      price_id: priceId as string,
+      price_id,
     },
   });
 
-  // ✅ REN HTTP-REDIRECT (IKKE NextResponse)
-  return new Response(null, {
-    status: 303,
-    headers: {
-      Location: session.url!,
-    },
-  });
+  return NextResponse.json({ url: session.url });
 }
