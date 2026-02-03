@@ -92,6 +92,17 @@ export default function PricingPage() {
             {/* CV */}
             <div className="card">
               <h3>CV</h3>
+
+              <p
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0.5rem 0",
+                }}
+              >
+                149 kr
+              </p>
+
               <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
@@ -119,7 +130,10 @@ export default function PricingPage() {
             {/* CV + SØKNAD */}
             <div
               className="card"
-              style={{ border: "2px solid var(--primary)", position: "relative" }}
+              style={{
+                border: "2px solid var(--primary)",
+                position: "relative",
+              }}
             >
               <div
                 style={{
@@ -137,6 +151,17 @@ export default function PricingPage() {
               </div>
 
               <h3>CV + Søknad</h3>
+
+              <p
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0.5rem 0",
+                }}
+              >
+                249 kr
+              </p>
+
               <p>CV og målrettet jobbsøknad.</p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
