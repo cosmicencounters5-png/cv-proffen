@@ -1,5 +1,3 @@
-// app/api/stripe/webhook/route.ts
-
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -14,9 +12,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// PRICES
+// STRIPE PRICES
 const PRICE_CV = "price_1SuqYw2Ly9NpxKWhPtgANnw2";
 const PRICE_CV_PLUS = "price_1SuqZW2Ly9NpxKWht4M2P6ZP";
+const PRICE_UPGRADE = "price_1Swe8d2Ly9NpxKWhXtP3o5pA";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -34,8 +33,8 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err) {
-    return new NextResponse("Webhook error", { status: 400 });
+  } catch {
+    return new NextResponse("Invalid signature", { status: 400 });
   }
 
   if (event.type !== "checkout.session.completed") {
@@ -51,24 +50,48 @@ export async function POST(req: Request) {
     return new NextResponse("Missing metadata", { status: 400 });
   }
 
+  // Standard: 3 dagers tilgang (kun for nye kjøp)
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 3);
 
-  const hasCv = true;
-  const hasApplication = priceId === PRICE_CV_PLUS;
-
-  await supabase
-    .from("user_entitlements")
-    .upsert(
+  // 🟢 KUN CV
+  if (priceId === PRICE_CV) {
+    await supabase.from("user_entitlements").upsert(
       {
         user_id: userId,
-        has_cv: hasCv,
-        has_application: hasApplication,
+        has_cv: true,
+        has_application: false,
         expires_at: expiresAt.toISOString(),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
     );
+  }
+
+  // 🟢 CV + SØKNAD (FULL PAKKE)
+  if (priceId === PRICE_CV_PLUS) {
+    await supabase.from("user_entitlements").upsert(
+      {
+        user_id: userId,
+        has_cv: true,
+        has_application: true,
+        expires_at: expiresAt.toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+  }
+
+  // 🟢 OPPGRADERING – KUN SØKNAD
+  if (priceId === PRICE_UPGRADE) {
+    await supabase
+      .from("user_entitlements")
+      .update({
+        has_application: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+  }
 
   return NextResponse.json({ success: true });
 }
