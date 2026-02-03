@@ -14,8 +14,9 @@ export default function CvPage() {
   );
 
   const [loading, setLoading] = useState(true);
-  const [hasCv, setHasCv] = useState(false);
   const [hasApplication, setHasApplication] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+
   const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -33,7 +34,7 @@ export default function CvPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, has_application")
+        .select("has_cv, has_application, expires_at")
         .eq("user_id", user.id)
         .single();
 
@@ -42,8 +43,12 @@ export default function CvPage() {
         return;
       }
 
-      setHasCv(data.has_cv);
       setHasApplication(!!data.has_application);
+
+      if (data.expires_at) {
+        setExpiresAt(new Date(data.expires_at));
+      }
+
       setLoading(false);
     }
 
@@ -71,6 +76,13 @@ export default function CvPage() {
     return <p style={{ padding: "2rem" }}>Laster…</p>;
   }
 
+  // ⏳ beregn dager igjen
+  let daysLeft: number | null = null;
+  if (expiresAt) {
+    const diff = expiresAt.getTime() - Date.now();
+    daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
+
   return (
     <main
       style={{
@@ -79,6 +91,28 @@ export default function CvPage() {
         background: "#f8f9fb",
       }}
     >
+      {/* ⏳ TILGANGSINFO */}
+      {expiresAt && daysLeft !== null && (
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto 1.5rem auto",
+            background: "#eef2ff",
+            border: "1px solid #c7d2fe",
+            padding: "0.75rem 1rem",
+            borderRadius: "6px",
+            fontSize: "0.9rem",
+            color: "#1e3a8a",
+          }}
+        >
+          ⏳ Tilgangen din utløper om{" "}
+          <strong>
+            {daysLeft} dag{daysLeft === 1 ? "" : "er"}
+          </strong>{" "}
+          ({expiresAt.toLocaleDateString("no-NO")})
+        </div>
+      )}
+
       <div
         style={{
           maxWidth: "1100px",
@@ -88,7 +122,7 @@ export default function CvPage() {
           gap: "2rem",
         }}
       >
-        {/* VENSTRE: FORM / OPPGRADERING */}
+        {/* VENSTRE */}
         <div
           style={{
             background: "white",
@@ -231,7 +265,7 @@ export default function CvPage() {
           )}
         </div>
 
-        {/* HØYRE: RESULTAT */}
+        {/* HØYRE */}
         <div
           style={{
             background: "white",
