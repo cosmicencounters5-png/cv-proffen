@@ -1,9 +1,9 @@
 import HomeClient from "./home-client";
 
 export const metadata = {
-  title: "CV-Proffen – Lag profesjonell CV og jobbsøknad på norsk",
+  title: "CV-Proffen | Lag profesjonell CV og jobbsøknad på norsk – på minutter",
   description:
-    "CV-Proffen hjelper deg å lage en strukturert og korrekt CV og jobbsøknad basert kun på dine egne opplysninger. Egnet for privat og offentlig sektor.",
+    "Lag en profesjonell CV og jobbsøknad på norsk, basert kun på dine egne opplysninger. Ingen gjetting. Klar PDF. Brukes av jobbsøkere i Norge.",
   alternates: {
     canonical: "/",
   },
