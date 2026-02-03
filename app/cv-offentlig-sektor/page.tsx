@@ -1,10 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title:
-    "CV til offentlig sektor – Slik skriver du en korrekt CV | CV-Proffen",
+  title: "CV til offentlig sektor – Slik skriver du en korrekt CV | CV-Proffen",
   description:
-    "Lær hvordan du skriver en korrekt og ryddig CV til offentlig sektor. Krav, struktur og vanlige feil – og et verktøy som hjelper deg å skrive presist.",
+    "Hvordan skrive en korrekt og ryddig CV til offentlig sektor. Krav, struktur og vanlige feil.",
 };
 
 export default function CvOffentligSektorPage() {
@@ -14,89 +13,31 @@ export default function CvOffentligSektorPage() {
         <h1>CV til offentlig sektor</h1>
 
         <p>
-          Når du søker jobb i offentlig sektor, stilles det ofte strengere krav
-          til dokumentasjon, presisjon og korrekthet enn i privat sektor. En CV
-          til offentlig sektor skal være ryddig, nøktern og basert på faktiske
-          opplysninger.
+          Offentlige arbeidsgivere stiller ofte strengere krav til dokumentasjon
+          og korrekthet. CV-en må være ryddig og etterprøvbar.
         </p>
 
-        <p>
-          Denne siden forklarer hvordan du bør strukturere en CV til statlige,
-          fylkeskommunale og kommunale stillinger, og hvilke hensyn du bør ta
-          når du skriver CV til offentlig sektor.
-        </p>
-
-        <h2>Hva kjennetegner en CV til offentlig jobb?</h2>
-
-        <p>
-          I offentlig sektor er det viktig at CV-en gir et korrekt og
-          etterprøvbart bilde av din bakgrunn. Informasjonen må være tydelig og
-          relevant for stillingen du søker.
-        </p>
+        <h2>Hva vektlegges i offentlig sektor?</h2>
 
         <ul>
-          <li>Tydelig og korrekt arbeidserfaring</li>
-          <li>Utdanning som er relevant for stillingen</li>
-          <li>Klare beskrivelser av ansvar og oppgaver</li>
-          <li>Oversiktlig struktur</li>
+          <li>Korrekt arbeidserfaring</li>
+          <li>Relevant utdanning</li>
+          <li>Tydelige beskrivelser av ansvar</li>
         </ul>
 
-        <p>
-          Opplysninger som ikke er dokumenterbare eller relevante bør utelates.
-        </p>
-
-        <h2>Struktur og innhold</h2>
-
-        <p>
-          En CV til offentlig sektor bør være logisk bygget opp, med klare
-          overskrifter og en ryddig rekkefølge. Arbeidserfaring presenteres
-          vanligvis i kronologisk rekkefølge, med fokus på oppgaver og ansvar.
-        </p>
-
-        <p>
-          Profilteksten bør være kort og nøktern. Den skal gi en oversikt over
-          erfaringen din, ikke fungere som en søknad.
-        </p>
-
-        <h2>Dokumentasjon og korrekthet</h2>
-
-        <p>
-          Offentlige arbeidsgivere legger ofte vekt på at opplysningene i CV-en
-          kan dokumenteres. Det er derfor viktig at CV-en kun inneholder
-          informasjon som er korrekt og etterprøvbar.
-        </p>
-
-        <p>
-          Unngå generelle formuleringer og påstander som ikke støttes av konkret
-          erfaring.
-        </p>
-
-        <h2>Vanlige feil i CV til offentlig sektor</h2>
+        <h2>Vanlige feil</h2>
 
         <ul>
-          <li>Uklare beskrivelser av arbeidsoppgaver</li>
+          <li>Uklare beskrivelser</li>
           <li>For mye irrelevant informasjon</li>
-          <li>Manglende struktur</li>
           <li>Opplysninger som ikke stemmer</li>
         </ul>
 
-        <p>
-          En ryddig og korrekt CV gir arbeidsgiver et godt grunnlag for å vurdere
-          søknaden din.
-        </p>
-
-        <h2>Lag CV til offentlig sektor med CV-Proffen</h2>
+        <h2>Lag CV til offentlig jobb med CV-Proffen</h2>
 
         <p>
-          CV-Proffen hjelper deg å lage en strukturert og korrekt CV basert kun
-          på opplysningene du selv legger inn. Verktøyet språkvasker og
-          strukturerer teksten, uten å legge til nye erfaringer eller
-          antagelser.
-        </p>
-
-        <p>
-          Resultatet er en profesjonell CV som er egnet for bruk i offentlig
-          sektor.
+          CV-Proffen hjelper deg å lage en korrekt og strukturert CV basert kun
+          på dine egne opplysninger.
         </p>
 
         <div style={{ marginTop: "2.5rem" }}>
@@ -104,6 +45,19 @@ export default function CvOffentligSektorPage() {
             <button className="cta">Lag CV til offentlig jobb</button>
           </Link>
         </div>
+
+        {/* INTERN LENKING */}
+        <hr style={{ margin: "3rem 0" }} />
+
+        <h3>Relaterte sider</h3>
+        <ul>
+          <li>
+            <Link href="/lage-cv">Lage CV på norsk</Link>
+          </li>
+          <li>
+            <Link href="/jobbsoknad">Slik skriver du jobbsøknad</Link>
+          </li>
+        </ul>
       </article>
     </main>
   );
