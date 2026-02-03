@@ -4,6 +4,9 @@ export const metadata = {
   title: "CV til offentlig sektor – Slik skriver du en korrekt CV | CV-Proffen",
   description:
     "Hvordan skrive en korrekt og ryddig CV til offentlig sektor. Krav, struktur og vanlige feil.",
+  alternates: {
+    canonical: "/cv-offentlig-sektor",
+  },
 };
 
 export default function CvOffentligSektorPage() {
