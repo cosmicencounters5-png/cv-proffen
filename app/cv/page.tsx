@@ -8,6 +8,7 @@ type Mode = "cv" | "application";
 
 export default function CvPage() {
   const router = useRouter();
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -25,7 +26,7 @@ export default function CvPage() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    async function checkAccess() {
+    async function load() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -54,16 +55,16 @@ export default function CvPage() {
       if (data.expires_at) {
         const expires = new Date(data.expires_at);
         const now = new Date();
-        const diff = Math.ceil(
+        const diffDays = Math.ceil(
           (expires.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
         );
-        setDaysLeft(diff > 0 ? diff : 0);
+        setDaysLeft(diffDays > 0 ? diffDays : 0);
       }
 
       setLoading(false);
     }
 
-    checkAccess();
+    load();
   }, [router, supabase]);
 
   async function generate(formData: FormData) {
@@ -96,16 +97,16 @@ export default function CvPage() {
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* 👋 HEADER */}
+        {/* HEADER */}
         <div style={{ marginBottom: "2rem" }}>
-          <h1 style={{ marginBottom: "0.25rem" }}>
+          <h1>
             God dag{ name ? `, ${name}` : "" }
           </h1>
 
           {daysLeft !== null && (
             <p style={{ color: "var(--muted)" }}>
-              Du har <strong>{daysLeft} dag{daysLeft === 1 ? "" : "er"}</strong>{" "}
-              igjen av tilgangen din.
+              Du har <strong>{daysLeft}</strong> dag
+              {daysLeft === 1 ? "" : "er"} igjen av tilgangen.
             </p>
           )}
         </div>
@@ -119,13 +120,114 @@ export default function CvPage() {
         >
           {/* VENSTRE */}
           <div className="card">
-            {/* TOGGLE */}
-            <div style={{ marginBottom: "1.5rem" }}>
+            {/* MODE */}
+            <div style={{ marginBottom: "1rem" }}>
               <button
-                type="button"
-                onClick={() => {
-                  setMode("cv");
-                  setResult(null);
-                }}
+                onClick={() => setMode("cv")}
                 style={{
-                  marginRight
+                  marginRight: "0.5rem",
+                  background: mode === "cv" ? "var(--primary)" : "#eee",
+                  color: mode === "cv" ? "white" : "#111",
+                  border: "none",
+                  padding: "0.4rem 0.75rem",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                CV
+              </button>
+
+              <button
+                onClick={() => setMode("application")}
+                style={{
+                  background:
+                    mode === "application" ? "var(--primary)" : "#eee",
+                  color:
+                    mode === "application" ? "white" : "#111",
+                  border: "none",
+                  padding: "0.4rem 0.75rem",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Søknad
+              </button>
+            </div>
+
+            {/* OPPGRADER */}
+            {mode === "application" && !hasApplication && (
+              <div
+                style={{
+                  border: "2px solid var(--primary)",
+                  padding: "1.5rem",
+                  borderRadius: "8px",
+                }}
+              >
+                <h2>Oppgrader til Søknad</h2>
+                <p>Legg til målrettet jobbsøknad.</p>
+
+                <p style={{ fontSize: "1.4rem", fontWeight: 600 }}>
+                  100 kr
+                </p>
+
+                <form method="POST" action="/api/stripe/checkout">
+                  <input
+                    type="hidden"
+                    name="price_id"
+                    value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
+                  />
+                  <button className="primary" style={{ width: "100%" }}>
+                    Oppgrader nå
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* FORM */}
+            {(mode === "cv" || hasApplication) && (
+              <form action={generate} style={{ marginTop: "1rem" }}>
+                <label>
+                  Navn
+                  <input name="name" required />
+                </label>
+
+                <label>
+                  Stilling du søker
+                  <input name="job" required />
+                </label>
+
+                <label>
+                  Arbeidserfaring
+                  <textarea name="experience" rows={6} required />
+                </label>
+
+                <label>
+                  Utdanning (valgfritt)
+                  <textarea name="education" rows={4} />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={generating}
+                  style={{ marginTop: "1rem" }}
+                >
+                  {generating
+                    ? "Genererer…"
+                    : mode === "cv"
+                    ? "Generer CV"
+                    : "Generer søknad"}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* RESULTAT */}
+          <div className="card" style={{ whiteSpace: "pre-wrap" }}>
+            <h2>Resultat</h2>
+            {result ?? "Resultatet vises her etter generering."}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
