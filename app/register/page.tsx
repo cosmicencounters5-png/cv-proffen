@@ -11,6 +11,7 @@ export default function RegisterPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,11 @@ export default function RegisterPage() {
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
     });
 
     if (signUpError) {
@@ -53,6 +59,16 @@ export default function RegisterPage() {
         style={{ width: "100%", maxWidth: "420px" }}
       >
         <h1 style={{ marginBottom: "1.5rem" }}>Opprett konto</h1>
+
+        <label>
+          Navn
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </label>
 
         <label>
           E-post
