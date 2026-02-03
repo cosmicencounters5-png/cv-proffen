@@ -1,4 +1,3 @@
-// app/api/stripe/checkout/route.ts
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 🔐 HENT BRUKER FRA SESSION (IKKE FRA FORM)
+  // ✅ Hent bruker sikkert fra session
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
