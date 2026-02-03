@@ -1,39 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  const router = useRouter();
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function register(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name, // 👈 lagres i user_metadata
+        },
+      },
     });
 
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
       return;
     }
 
-    // 🔑 Viktig: nye brukere skal ALLTID velge pakke
     router.push("/pricing");
+    router.refresh();
   }
 
   return (
@@ -41,52 +50,78 @@ export default function RegisterPage() {
       style={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
         background: "var(--bg)",
-        padding: "1rem",
+        padding: "2rem",
       }}
     >
-      <form
-        onSubmit={handleSubmit}
+      <div
         className="card"
-        style={{ width: "100%", maxWidth: "420px" }}
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+        }}
       >
-        <h1 style={{ marginBottom: "1.5rem" }}>Opprett konto</h1>
+        <h1>Opprett konto</h1>
 
-        <label>
-          E-post
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
+        <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
+          Lag konto for å generere CV og søknad.
+        </p>
 
-        <label>
-          Passord
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+        <form onSubmit={register} style={{ marginTop: "1.5rem" }}>
+          <label>
+            Navn
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Per Hansen"
+            />
+          </label>
 
-        {error && (
-          <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
-        )}
+          <label>
+            E-post
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="per@epost.no"
+            />
+          </label>
 
-        <button
-          type="submit"
-          className="primary"
-          disabled={loading}
-          style={{ width: "100%" }}
-        >
-          {loading ? "Oppretter konto…" : "Opprett konto"}
-        </button>
-      </form>
+          <label>
+            Passord
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minst 6 tegn"
+            />
+          </label>
+
+          {error && (
+            <p style={{ color: "#c00", marginTop: "0.75rem" }}>{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="primary"
+            style={{ width: "100%", marginTop: "1.5rem" }}
+          >
+            {loading ? "Oppretter konto…" : "Opprett konto"}
+          </button>
+        </form>
+
+        <p style={{ marginTop: "1.5rem", fontSize: "0.9rem" }}>
+          Har du allerede konto?{" "}
+          <Link href="/login">Logg inn</Link>
+        </p>
+      </div>
     </main>
   );
 }
