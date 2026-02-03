@@ -81,10 +81,11 @@ export default function HomeClient() {
     <main>
       {/* HERO */}
       <section className="hero">
-        <h1>Lag en profesjonell CV på norsk</h1>
+        <h1>Lag profesjonell CV og jobbsøknad – på norsk</h1>
         <p>
-          CV-Proffen hjelper deg å skrive en strukturert og korrekt CV og
-          jobbsøknad basert kun på dine egne opplysninger.
+          CV-Proffen hjelper deg å skrive en strukturert, korrekt og målrettet
+          CV og jobbsøknad basert utelukkende på dine egne opplysninger.
+          Ingen antagelser. Ingen automatisk fyll.
         </p>
         {renderCta()}
       </section>
