@@ -4,6 +4,9 @@ export const metadata = {
   title: "Lage CV på norsk – Profesjonell CV på minutter | CV-Proffen",
   description:
     "Lær hvordan du lager en profesjonell CV på norsk. Struktur, innhold og eksempler – og et verktøy som hjelper deg å skrive korrekt og presist.",
+  alternates: {
+    canonical: "/lage-cv",
+  },
 };
 
 export default function LageCvPage() {
