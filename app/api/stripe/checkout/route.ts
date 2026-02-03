@@ -1,7 +1,8 @@
 import Stripe from "stripe";
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+export const runtime = "nodejs"; // 🔴 VIKTIG
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -12,13 +13,9 @@ export async function POST(req: Request) {
   const priceId = formData.get("price_id");
 
   if (!priceId) {
-    return NextResponse.json(
-      { error: "Missing price_id" },
-      { status: 400 }
-    );
+    return new Response("Missing price_id", { status: 400 });
   }
 
-  // ✅ Hent bruker sikkert fra session
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,10 +27,7 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json(
-      { error: "Not authenticated" },
-      { status: 401 }
-    );
+    return new Response("Not authenticated", { status: 401 });
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -48,5 +42,11 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.redirect(session.url!, 303);
+  // ✅ REN HTTP-REDIRECT (IKKE NextResponse)
+  return new Response(null, {
+    status: 303,
+    headers: {
+      Location: session.url!,
+    },
+  });
 }
