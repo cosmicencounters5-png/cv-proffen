@@ -1,21 +1,24 @@
 import Stripe from "stripe";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
-
-export const runtime = "nodejs";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
 export async function POST(req: Request) {
-  const { price_id } = await req.json();
+  const formData = await req.formData();
+  const priceId = formData.get("price_id") as string | null;
 
-  if (!price_id) {
-    return NextResponse.json({ error: "Missing price_id" }, { status: 400 });
+  if (!priceId) {
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?error=missing_price`,
+      303
+    );
   }
 
+  // 🔐 HENT BRUKER FRA COOKIE (IKKE FRA FORM)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -27,20 +30,23 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+      303
+    );
   }
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
-    line_items: [{ price: price_id, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv`,
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
     metadata: {
       user_id: user.id,
-      price_id,
+      price_id: priceId,
     },
   });
 
-  return NextResponse.json({ url: session.url });
+  return NextResponse.redirect(session.url!, 303);
 }
