@@ -1,11 +1,17 @@
+export const runtime = "nodejs"; // 🔥 TVINGER NODE – IKKE EDGE
+
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -13,21 +19,24 @@ export async function POST(req: Request) {
 
   if (!priceId) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?error=missing_price`,
+      `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
       303
     );
   }
 
-  // 🔐 HENT BRUKER FRA COOKIE (IKKE FRA FORM)
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+  // ⚠️ LES USER FRA AUTH COOKIE VIA SERVICE ROLE
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader) {
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+      303
+    );
+  }
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
 
   if (!user) {
     return NextResponse.redirect(
