@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createBrowserClient } from "@supabase/ssr";
 
+export const metadata = {
+  title: "CV-Proffen – Lag profesjonell CV og jobbsøknad på norsk",
+  description:
+    "CV-Proffen hjelper deg å lage en strukturert og korrekt CV og jobbsøknad basert kun på dine egne opplysninger. Egnet for privat og offentlig sektor.",
+};
+
 type CtaState = "loading" | "logged-out" | "has-access" | "no-access";
 
 export default function HomePage() {
@@ -20,7 +26,6 @@ export default function HomePage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // ❌ Ikke innlogget
       if (!user) {
         setCtaState("logged-out");
         return;
@@ -50,10 +55,16 @@ export default function HomePage() {
   function renderCta() {
     if (ctaState === "loading") return null;
 
-    // 🔓 Ikke innlogget
     if (ctaState === "logged-out") {
       return (
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.75rem",
+            justifyContent: "center",
+            marginTop: "1.5rem",
+          }}
+        >
           <Link href="/register">
             <button className="cta">Registrer deg</button>
           </Link>
@@ -65,7 +76,6 @@ export default function HomePage() {
       );
     }
 
-    // ✅ Har tilgang
     if (ctaState === "has-access") {
       return (
         <Link href="/cv">
@@ -74,7 +84,6 @@ export default function HomePage() {
       );
     }
 
-    // 💳 Innlogget uten tilgang
     return (
       <Link href="/pricing">
         <button className="cta">Velg pakke</button>
@@ -86,11 +95,11 @@ export default function HomePage() {
     <main>
       {/* HERO */}
       <section className="hero">
-        <h1>Klar på minutter.</h1>
+        <h1>Lag en profesjonell CV på norsk</h1>
 
         <p>
-          Lag en målrettet CV og søknad basert kun på dine egne opplysninger.
-          Strukturert, presist og klart til bruk.
+          CV-Proffen hjelper deg å skrive en strukturert og korrekt CV og
+          jobbsøknad basert kun på dine egne opplysninger.
         </p>
 
         {renderCta()}
@@ -101,7 +110,7 @@ export default function HomePage() {
         <div className="feature-card highlight">
           <h3>Kun dine opplysninger</h3>
           <p>
-            CV og søknad bygges utelukkende på det du selv skriver inn.
+            CV og søknad bygges utelukkende på informasjonen du selv legger inn.
             Ingen antagelser. Ingen tillegg.
           </p>
         </div>
