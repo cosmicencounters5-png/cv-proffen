@@ -18,18 +18,7 @@ export default function LageCvPage() {
           overdrivelser eller unødvendig informasjon.
         </p>
 
-        <p>
-          På denne siden forklarer vi hvordan du lager en profesjonell CV på
-          norsk, hva den bør inneholde, og hvordan du kan strukturere innholdet
-          slik at det er lett å lese og forstå.
-        </p>
-
         <h2>Hva skal en CV inneholde?</h2>
-
-        <p>
-          En CV bør inneholde de mest relevante opplysningene om din bakgrunn.
-          For de fleste stillinger betyr dette:
-        </p>
 
         <ul>
           <li>Navn</li>
@@ -38,63 +27,20 @@ export default function LageCvPage() {
           <li>Utdanning</li>
         </ul>
 
-        <p>
-          Det er viktig at informasjonen er korrekt og etterprøvbar. Unngå å
-          legge til erfaring eller ferdigheter du ikke kan dokumentere.
-        </p>
-
-        <h2>Hvordan strukturere en CV</h2>
-
-        <p>
-          En ryddig struktur gjør CV-en lettere å lese. Bruk klare overskrifter
-          og skriv i hele setninger. Arbeidserfaring bør presenteres i
-          kronologisk rekkefølge, med de mest relevante erfaringene først.
-        </p>
-
-        <p>
-          Profilteksten bør være kort og saklig. Den skal oppsummere erfaringen
-          din, ikke fungere som en søknad.
-        </p>
-
-        <h2>CV til offentlig og privat sektor</h2>
-
-        <p>
-          I offentlig sektor stilles det ofte strengere krav til dokumentasjon
-          og presisjon. Da er det ekstra viktig at CV-en kun inneholder
-          faktiske opplysninger og er strukturert på en ryddig måte.
-        </p>
-
-        <p>
-          I privat sektor er kravene ofte noe mer fleksible, men også her er en
-          tydelig og korrekt CV en fordel.
-        </p>
-
-        <h2>Vanlige feil når man lager CV</h2>
+        <h2>Vanlige feil</h2>
 
         <ul>
           <li>For mye irrelevant informasjon</li>
-          <li>Uklare eller lange beskrivelser</li>
-          <li>Ustrukturert oppsett</li>
+          <li>Uklare formuleringer</li>
           <li>Opplysninger som ikke stemmer</li>
         </ul>
 
-        <p>
-          En god CV er nøktern og presis. Den skal gjøre det enkelt for
-          arbeidsgiver å vurdere om du er aktuell for stillingen.
-        </p>
-
-        <h2>Lag CV med hjelp av CV-Proffen</h2>
+        <h2>Lag CV med CV-Proffen</h2>
 
         <p>
           CV-Proffen hjelper deg å lage en profesjonell CV basert kun på
-          opplysningene du selv legger inn. Verktøyet strukturerer og
-          språkvasker teksten, uten å legge til nye erfaringer eller
-          antagelser.
-        </p>
-
-        <p>
-          Resultatet er en ryddig CV som er egnet for både privat og offentlig
-          sektor.
+          opplysningene du selv legger inn. Ingen erfaring eller utdanning legges
+          til automatisk.
         </p>
 
         <div style={{ marginTop: "2.5rem" }}>
@@ -102,6 +48,23 @@ export default function LageCvPage() {
             <button className="cta">Lag CV nå</button>
           </Link>
         </div>
+
+        {/* INTERN LENKING */}
+        <hr style={{ margin: "3rem 0" }} />
+
+        <h3>Relaterte sider</h3>
+        <ul>
+          <li>
+            <Link href="/jobbsoknad">
+              Hvordan skrive en god jobbsøknad
+            </Link>
+          </li>
+          <li>
+            <Link href="/cv-offentlig-sektor">
+              CV til offentlig sektor
+            </Link>
+          </li>
+        </ul>
       </article>
     </main>
   );
