@@ -50,20 +50,19 @@ export default function RootLayout({
 
   return (
     <html lang="no">
-      <body>
+      <body style={{ background: "#f8f9fb", margin: 0 }}>
         {/* HEADER */}
         <header
           style={{
-            width: "100%",
-            padding: "1rem",
-            borderBottom: "1px solid #eee",
             background: "white",
+            borderBottom: "1px solid #e6e8ec",
           }}
         >
           <div
             style={{
               maxWidth: "1200px",
               margin: "0 auto",
+              padding: "1.25rem 1rem",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -73,10 +72,11 @@ export default function RootLayout({
             <Link
               href="/"
               style={{
-                fontWeight: 600,
+                fontWeight: 700,
+                fontSize: "1.15rem",
                 textDecoration: "none",
                 color: "#111",
-                fontSize: "1.05rem",
+                letterSpacing: "0.2px",
               }}
             >
               CV-Proffen
@@ -84,10 +84,14 @@ export default function RootLayout({
 
             {/* NAV */}
             {loggedIn === true && (
-              <div style={{ display: "flex", gap: "1rem" }}>
+              <nav style={{ display: "flex", gap: "1.25rem" }}>
                 <Link
                   href="/cv"
-                  style={{ textDecoration: "none", color: "#111" }}
+                  style={{
+                    textDecoration: "none",
+                    color: "#111",
+                    fontWeight: 500,
+                  }}
                 >
                   Gå til CV
                 </Link>
@@ -98,20 +102,25 @@ export default function RootLayout({
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#c00",
+                    color: "#b00020",
                     fontWeight: 500,
+                    padding: 0,
                   }}
                 >
                   Logg ut
                 </button>
-              </div>
+              </nav>
             )}
 
             {loggedIn === false && (
-              <div style={{ display: "flex", gap: "1rem" }}>
+              <nav style={{ display: "flex", gap: "1rem" }}>
                 <Link
                   href="/login"
-                  style={{ textDecoration: "none", color: "#111" }}
+                  style={{
+                    textDecoration: "none",
+                    color: "#111",
+                    fontWeight: 500,
+                  }}
                 >
                   Logg inn
                 </Link>
@@ -120,19 +129,80 @@ export default function RootLayout({
                   href="/register"
                   style={{
                     textDecoration: "none",
+                    background: "#111",
+                    color: "white",
+                    padding: "0.45rem 0.9rem",
+                    borderRadius: "6px",
                     fontWeight: 600,
-                    color: "#111",
                   }}
                 >
                   Registrer deg
                 </Link>
-              </div>
+              </nav>
             )}
           </div>
         </header>
 
         {/* PAGE CONTENT */}
-        {children}
+        <main>{children}</main>
+
+        {/* FOOTER */}
+        <footer
+          style={{
+            marginTop: "4rem",
+            padding: "3rem 1rem",
+            background: "#f1f3f7",
+            borderTop: "1px solid #e6e8ec",
+            fontSize: "0.9rem",
+            color: "#444",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1200px",
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "2rem",
+            }}
+          >
+            <div>
+              <strong style={{ fontSize: "1rem" }}>CV-Proffen</strong>
+              <p style={{ marginTop: "0.75rem", lineHeight: 1.6 }}>
+                Profesjonell CV og jobbsøknad på norsk.
+                <br />
+                Basert kun på dine egne opplysninger.
+              </p>
+            </div>
+
+            <div>
+              <p>
+                <Link href="/lage-cv">Hvordan lage CV</Link>
+              </p>
+              <p>
+                <Link href="/jobbsoknad">Hvordan skrive jobbsøknad</Link>
+              </p>
+              <p>
+                <Link href="/cv-offentlig-sektor">
+                  CV i offentlig sektor
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              maxWidth: "1200px",
+              margin: "2rem auto 0",
+              paddingTop: "1rem",
+              borderTop: "1px solid #ddd",
+              fontSize: "0.8rem",
+              color: "#666",
+            }}
+          >
+            © {new Date().getFullYear()} CV-Proffen
+          </div>
+        </footer>
       </body>
     </html>
   );
