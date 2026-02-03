@@ -16,6 +16,7 @@ export default function PricingPage() {
   );
 
   const [state, setState] = useState<AccessState>("loading");
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkAccess() {
@@ -27,6 +28,8 @@ export default function PricingPage() {
         setState("no-access");
         return;
       }
+
+      setUserId(user.id);
 
       const { data } = await supabase
         .from("user_entitlements")
@@ -59,89 +62,56 @@ export default function PricingPage() {
     checkAccess();
   }, [supabase]);
 
+  function CheckoutForm({
+    priceId,
+    label,
+  }: {
+    priceId: string;
+    label: string;
+  }) {
+    if (!userId) return null;
+
+    return (
+      <form method="POST" action="/api/stripe/checkout">
+        <input type="hidden" name="price_id" value={priceId} />
+        <input type="hidden" name="user_id" value={userId} />
+        <button className="primary" style={{ width: "100%" }}>
+          {label}
+        </button>
+      </form>
+    );
+  }
+
   return (
     <main style={{ padding: "4rem 1rem", background: "var(--bg)" }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <h1>Velg pakke</h1>
-
         <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
-          Engangskjøp. Tilgangen varer i 3 dager. Ingen abonnement.
+          Engangskjøp. Tilgangen varer i 3 dager.
         </p>
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* FULL TILGANG */}
         {state === "has-full-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har full tilgang ✅</h2>
-            <p>CV og jobbsøknad er allerede tilgjengelig.</p>
-
-            <a
-              href="/cv"
-              style={{
-                display: "inline-block",
-                marginTop: "1rem",
-                padding: "0.6rem 1rem",
-                background: "var(--primary)",
-                color: "white",
-                borderRadius: "var(--radius)",
-                textDecoration: "none",
-              }}
-            >
+            <a href="/cv" className="primary">
               Gå til CV
             </a>
           </div>
         )}
 
-        {/* OPPGRADERING */}
         {state === "can-upgrade" && (
-          <div style={{ marginTop: "3rem" }}>
-            <div
-              className="card"
-              style={{ border: "2px solid var(--primary)" }}
-            >
-              <h3>Oppgrader med jobbsøknad</h3>
-
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                100 kr
-              </p>
-
-              <p>
-                Du har allerede CV. Legg til målrettet jobbsøknad og få full
-                tilgang i resten av perioden.
-              </p>
-
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>Målrettet jobbsøknad</li>
-                <li>PDF klar til bruk</li>
-                <li>Samme 3 dagers tilgang</li>
-              </ul>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
-                <input
-                  type="hidden"
-                  name="price_id"
-                  value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
-                />
-                <button className="primary" style={{ width: "100%" }}>
-                  Oppgrader nå
-                </button>
-              </form>
-            </div>
+          <div className="card" style={{ marginTop: "2rem" }}>
+            <h3>Oppgrader med jobbsøknad</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700 }}>100 kr</p>
+            <CheckoutForm
+              priceId="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
+              label="Oppgrader nå"
+            />
           </div>
         )}
 
-        {/* INGEN TILGANG */}
         {state === "no-access" && (
           <div
             style={{
@@ -151,66 +121,22 @@ export default function PricingPage() {
               gap: "1.5rem",
             }}
           >
-            {/* CV */}
             <div className="card">
               <h3>CV</h3>
               <p style={{ fontSize: "2rem", fontWeight: 700 }}>149 kr</p>
-
-              <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
-
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>AI-generert CV</li>
-                <li>PDF klar til bruk</li>
-                <li>3 dagers tilgang</li>
-              </ul>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
-                <input
-                  type="hidden"
-                  name="price_id"
-                  value="price_1SuqYw2Ly9NpxKWhPtgANnw2"
-                />
-                <button className="primary" style={{ width: "100%" }}>
-                  Kjøp CV
-                </button>
-              </form>
+              <CheckoutForm
+                priceId="price_1SuqYw2Ly9NpxKWhPtgANnw2"
+                label="Kjøp CV"
+              />
             </div>
 
-            {/* CV + SØKNAD */}
-            <div
-              className="card"
-              style={{ border: "2px solid var(--primary)" }}
-            >
+            <div className="card" style={{ border: "2px solid var(--primary)" }}>
               <h3>CV + Søknad</h3>
               <p style={{ fontSize: "2rem", fontWeight: 700 }}>249 kr</p>
-
-              <p>Komplett pakke for jobbsøking.</p>
-
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>Profesjonell CV</li>
-                <li>Målrettet søknad</li>
-                <li>PDF klar til bruk</li>
-                <li>3 dagers tilgang</li>
-              </ul>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
-                <input
-                  type="hidden"
-                  name="price_id"
-                  value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
-                />
-                <button className="primary" style={{ width: "100%" }}>
-                  Kjøp CV + Søknad
-                </button>
-              </form>
+              <CheckoutForm
+                priceId="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
+                label="Kjøp CV + Søknad"
+              />
             </div>
           </div>
         )}
