@@ -51,29 +51,44 @@ export default function HomeClient() {
 
     if (ctaState === "logged-out") {
       return (
-        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
-          <Link href="/register">
-            <button className="cta">Registrer deg</button>
-          </Link>
-          <Link href="/login">
-            <button className="secondary">Logg inn</button>
-          </Link>
+        <div style={{ marginTop: "1.75rem" }}>
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            <Link href="/register">
+              <button className="cta">Lag CV og søknad</button>
+            </Link>
+            <Link href="/login">
+              <button className="secondary">Logg inn</button>
+            </Link>
+          </div>
+          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
+            Opprett konto for å komme i gang. Ingen binding.
+          </p>
         </div>
       );
     }
 
     if (ctaState === "has-access") {
       return (
-        <Link href="/cv">
-          <button className="cta">Gå til CV</button>
-        </Link>
+        <div style={{ marginTop: "1.75rem" }}>
+          <Link href="/cv">
+            <button className="cta">Gå til CV-generator</button>
+          </Link>
+          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
+            Fortsett der du slapp.
+          </p>
+        </div>
       );
     }
 
     return (
-      <Link href="/pricing">
-        <button className="cta">Velg pakke</button>
-      </Link>
+      <div style={{ marginTop: "1.75rem" }}>
+        <Link href="/pricing">
+          <button className="cta">Få tilgang til CV-verktøyet</button>
+        </Link>
+        <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
+          Velg pakke og få full tilgang med én gang.
+        </p>
+      </div>
     );
   }
 
