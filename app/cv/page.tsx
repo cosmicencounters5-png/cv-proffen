@@ -1,37 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 
 type Mode = "cv" | "application";
-
-function formatText(text: string) {
-  const lines = text.split("\n").filter(Boolean);
-
-  return lines.map((line, i) => {
-    const lower = line.toLowerCase();
-
-    if (
-      lower.includes("profil") ||
-      lower.includes("erfaring") ||
-      lower.includes("utdanning") ||
-      lower.includes("kompetanse")
-    ) {
-      return (
-        <h3 key={i} className="cv-section-title">
-          {line}
-        </h3>
-      );
-    }
-
-    return (
-      <p key={i} className="cv-paragraph">
-        {line}
-      </p>
-    );
-  });
-}
 
 export default function CvPage() {
   const router = useRouter();
@@ -41,7 +14,8 @@ export default function CvPage() {
   );
 
   const [loading, setLoading] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
+  const [hasCv, setHasCv] = useState(false);
+  const [hasApplication, setHasApplication] = useState(false);
   const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -59,39 +33,29 @@ export default function CvPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, has_application, expires_at")
+        .select("has_cv, has_application")
         .eq("user_id", user.id)
         .single();
 
-      const now = new Date();
-
-      if (
-        !data?.has_cv ||
-        (data.expires_at && new Date(data.expires_at) < now)
-      ) {
+      if (!data?.has_cv) {
         router.push("/pricing");
         return;
       }
 
-      if (mode === "application" && !data.has_application) {
-        setMode("cv");
-      }
-
-      setHasAccess(true);
+      setHasCv(data.has_cv);
+      setHasApplication(!!data.has_application);
       setLoading(false);
     }
 
     checkAccess();
-  }, [mode, router, supabase]);
+  }, [router, supabase]);
 
   async function generate(formData: FormData) {
     setGenerating(true);
     setResult(null);
 
     const endpoint =
-      mode === "cv"
-        ? "/api/generate-cv"
-        : "/api/generate-application";
+      mode === "cv" ? "/api/generate-cv" : "/api/generate-application";
 
     const res = await fetch(endpoint, {
       method: "POST",
@@ -107,109 +71,183 @@ export default function CvPage() {
     return <p style={{ padding: "2rem" }}>Laster…</p>;
   }
 
-  if (!hasAccess) {
-    return null;
-  }
-
   return (
-    <main className="cv-page">
-      <div className="cv-container">
-        {/* VENSTRE: FORM */}
-        <form action={generate} className="cv-form">
-          <h1>{mode === "cv" ? "CV-generator" : "Søknadsgenerator"}</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "4rem 1rem",
+        background: "#f8f9fb",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "2rem",
+        }}
+      >
+        {/* VENSTRE: FORM / OPPGRADERING */}
+        <div
+          style={{
+            background: "white",
+            padding: "2rem",
+            borderRadius: "8px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          }}
+        >
+          <h1 style={{ marginBottom: "1rem" }}>
+            {mode === "cv" ? "CV-generator" : "Jobbsøknad"}
+          </h1>
 
-          <div className="mode-toggle">
+          {/* TOGGLE */}
+          <div style={{ marginBottom: "1.5rem" }}>
             <button
               type="button"
-              className={mode === "cv" ? "active" : ""}
               onClick={() => {
                 setMode("cv");
                 setResult(null);
               }}
+              style={{
+                marginRight: "0.5rem",
+                padding: "0.4rem 0.75rem",
+                background: mode === "cv" ? "#111" : "#eee",
+                color: mode === "cv" ? "white" : "#111",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
             >
               CV
             </button>
+
             <button
               type="button"
-              className={mode === "application" ? "active" : ""}
               onClick={() => {
                 setMode("application");
                 setResult(null);
+              }}
+              style={{
+                padding: "0.4rem 0.75rem",
+                background:
+                  mode === "application" ? "#111" : "#eee",
+                color:
+                  mode === "application" ? "white" : "#111",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
               }}
             >
               Søknad
             </button>
           </div>
 
-          <label>
-            Navn
-            <input name="name" required />
-          </label>
+          {/* 🔒 OPPGRADERING */}
+          {mode === "application" && !hasApplication && (
+            <div
+              style={{
+                border: "2px solid #111",
+                padding: "1.5rem",
+                borderRadius: "8px",
+              }}
+            >
+              <h2>Jobbsøknad er ikke inkludert</h2>
 
-          <label>
-            Stilling du søker
-            <input name="job" required />
-          </label>
+              <p style={{ marginTop: "0.5rem" }}>
+                Du har allerede tilgang til CV. Legg til målrettet
+                jobbsøknad for å få full pakke.
+              </p>
 
-          <label>
-            Arbeidserfaring
-            <textarea name="experience" rows={6} required />
-          </label>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 600,
+                  marginTop: "1rem",
+                }}
+              >
+                100 kr
+              </p>
 
-          <label>
-            Utdanning (valgfritt)
-            <textarea name="education" rows={4} />
-          </label>
+              <form
+                method="POST"
+                action="/api/stripe/checkout"
+                style={{ marginTop: "1rem" }}
+              >
+                <input
+                  type="hidden"
+                  name="price_id"
+                  value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
+                />
+                <button
+                  className="primary"
+                  style={{ width: "100%" }}
+                >
+                  Oppgrader nå
+                </button>
+              </form>
+            </div>
+          )}
 
-          <button type="submit" className="primary" disabled={generating}>
-            {generating
-              ? "Genererer…"
-              : mode === "cv"
-              ? "Generer CV"
-              : "Generer søknad"}
-          </button>
-        </form>
+          {/* 📝 SKJEMA */}
+          {(mode === "cv" || hasApplication) && (
+            <form action={generate}>
+              <label>
+                Navn
+                <input name="name" required />
+              </label>
+
+              <label>
+                Stilling du søker
+                <input name="job" required />
+              </label>
+
+              <label>
+                Arbeidserfaring
+                <textarea
+                  name="experience"
+                  rows={6}
+                  required
+                />
+              </label>
+
+              <label>
+                Utdanning (valgfritt)
+                <textarea name="education" rows={4} />
+              </label>
+
+              <button
+                type="submit"
+                disabled={generating}
+                style={{ marginTop: "1rem" }}
+              >
+                {generating
+                  ? "Genererer…"
+                  : mode === "cv"
+                  ? "Generer CV"
+                  : "Generer søknad"}
+              </button>
+            </form>
+          )}
+        </div>
 
         {/* HØYRE: RESULTAT */}
-        <section className="cv-result">
-          <div className="cv-result-header">
-            <h2>Resultat</h2>
-            {result && (
-              <button onClick={() => window.print()} className="secondary">
-                Last ned PDF
-              </button>
-            )}
-          </div>
-
-          <div id="cv-print" className="cv-document">
-            {result
-              ? formatText(result)
-              : mode === "cv"
-              ? "CV-en vises her etter generering."
-              : "Søknaden vises her etter generering."}
-          </div>
-        </section>
+        <div
+          style={{
+            background: "white",
+            padding: "2rem",
+            borderRadius: "8px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+            whiteSpace: "pre-wrap",
+            lineHeight: 1.6,
+          }}
+        >
+          <h2>Resultat</h2>
+          {result
+            ? result
+            : "Resultatet vises her etter generering."}
+        </div>
       </div>
-
-      {/* PRINT */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #cv-print, #cv-print * {
-            visibility: visible;
-          }
-          #cv-print {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 2cm;
-            font-size: 12pt;
-          }
-        }
-      `}</style>
     </main>
   );
 }
