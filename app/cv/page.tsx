@@ -45,6 +45,7 @@ export default function CvPage() {
   const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
 
   useEffect(() => {
     async function checkAccess() {
@@ -74,7 +75,12 @@ export default function CvPage() {
       }
 
       if (mode === "application" && !data.has_application) {
-        setMode("cv");
+        router.push("/pricing");
+        return;
+      }
+
+      if (data.expires_at) {
+        setExpiresAt(new Date(data.expires_at));
       }
 
       setHasAccess(true);
@@ -111,9 +117,22 @@ export default function CvPage() {
     return null;
   }
 
+  const daysLeft =
+    expiresAt
+      ? Math.ceil(
+          (expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        )
+      : null;
+
   return (
     <main className="cv-page">
       <div className="cv-container">
+        {daysLeft !== null && (
+          <p style={{ marginBottom: "1rem", color: "#555" }}>
+            Tilgangen din utløper om {daysLeft} dag{daysLeft === 1 ? "" : "er"}.
+          </p>
+        )}
+
         {/* VENSTRE: FORM */}
         <form action={generate} className="cv-form">
           <h1>{mode === "cv" ? "CV-generator" : "Søknadsgenerator"}</h1>
@@ -191,7 +210,6 @@ export default function CvPage() {
         </section>
       </div>
 
-      {/* PRINT */}
       <style>{`
         @media print {
           body * {
