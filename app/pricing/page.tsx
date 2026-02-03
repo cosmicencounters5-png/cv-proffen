@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
-type AccessState = "loading" | "no-access" | "has-access";
+type AccessState =
+  | "loading"
+  | "no-access"
+  | "has-full-access"
+  | "can-upgrade";
 
 export default function PricingPage() {
   const supabase = createBrowserClient(
@@ -26,20 +30,30 @@ export default function PricingPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, expires_at")
+        .select("has_cv, has_application, expires_at")
         .eq("user_id", user.id)
         .single();
 
       const now = new Date();
+      const active =
+        data?.expires_at && new Date(data.expires_at) > now;
 
-      if (
-        data?.has_cv &&
-        (!data.expires_at || new Date(data.expires_at) > now)
-      ) {
-        setState("has-access");
-      } else {
+      if (!data || !active) {
         setState("no-access");
+        return;
       }
+
+      if (data.has_cv && data.has_application) {
+        setState("has-full-access");
+        return;
+      }
+
+      if (data.has_cv && !data.has_application) {
+        setState("can-upgrade");
+        return;
+      }
+
+      setState("no-access");
     }
 
     checkAccess();
@@ -51,16 +65,16 @@ export default function PricingPage() {
         <h1>Velg pakke</h1>
 
         <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
-          Velg pakken som passer deg best. Tilgangen varer i 3 dager.
+          Alle kjøp gir 3 dagers tilgang. Ingen abonnement.
         </p>
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG */}
-        {state === "has-access" && (
+        {/* FULL TILGANG */}
+        {state === "has-full-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
-            <h2>Du har allerede aktiv tilgang ✅</h2>
-            <p>Du kan gå rett til CV-generatoren.</p>
+            <h2>Du har full tilgang ✅</h2>
+            <p>CV og jobbsøknad er allerede tilgjengelig.</p>
 
             <a
               href="/cv"
@@ -79,6 +93,61 @@ export default function PricingPage() {
           </div>
         )}
 
+        {/* OPPGRADERING */}
+        {state === "can-upgrade" && (
+          <div
+            style={{
+              marginTop: "3rem",
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: "1.5rem",
+            }}
+          >
+            <div
+              className="card"
+              style={{ border: "2px solid var(--primary)" }}
+            >
+              <h3>Oppgrader til CV + Søknad</h3>
+
+              <p
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0.5rem 0",
+                }}
+              >
+                249 kr
+              </p>
+
+              <p>
+                Du har allerede CV. Legg til målrettet jobbsøknad og få full
+                tilgang.
+              </p>
+
+              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
+                <li>Målrettet jobbsøknad</li>
+                <li>PDF klar til bruk</li>
+                <li>Samme 3 dagers tilgang</li>
+              </ul>
+
+              <form
+                method="POST"
+                action="/api/stripe/checkout"
+                style={{ marginTop: "1.5rem" }}
+              >
+                <input
+                  type="hidden"
+                  name="price_id"
+                  value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
+                />
+                <button className="primary" style={{ width: "100%" }}>
+                  Oppgrader nå
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* INGEN TILGANG */}
         {state === "no-access" && (
           <div
@@ -92,16 +161,7 @@ export default function PricingPage() {
             {/* CV */}
             <div className="card">
               <h3>CV</h3>
-
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                149 kr
-              </p>
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>149 kr</p>
 
               <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
 
@@ -130,39 +190,12 @@ export default function PricingPage() {
             {/* CV + SØKNAD */}
             <div
               className="card"
-              style={{
-                border: "2px solid var(--primary)",
-                position: "relative",
-              }}
+              style={{ border: "2px solid var(--primary)" }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-12px",
-                  right: "12px",
-                  background: "var(--primary)",
-                  color: "white",
-                  padding: "0.25rem 0.6rem",
-                  fontSize: "0.75rem",
-                  borderRadius: "999px",
-                }}
-              >
-                Mest populær
-              </div>
-
               <h3>CV + Søknad</h3>
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>249 kr</p>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                249 kr
-              </p>
-
-              <p>CV og målrettet jobbsøknad.</p>
+              <p>Komplett pakke for jobbsøking.</p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>Profesjonell CV</li>
