@@ -18,6 +18,7 @@ export default function RootLayout({
 
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
+  const [name, setName] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -26,6 +27,13 @@ export default function RootLayout({
       } = await supabase.auth.getUser();
 
       setLoggedIn(!!user);
+
+      if (user) {
+        const meta = user.user_metadata;
+        setName(meta?.full_name || meta?.name || null);
+      } else {
+        setName(null);
+      }
     }
 
     checkUser();
@@ -51,7 +59,6 @@ export default function RootLayout({
   return (
     <html lang="no">
       <body style={{ background: "#f8f9fb", margin: 0 }}>
-        {/* HEADER */}
         <header
           style={{
             background: "white",
@@ -68,7 +75,6 @@ export default function RootLayout({
               alignItems: "center",
             }}
           >
-            {/* LOGO */}
             <Link
               href="/"
               style={{
@@ -76,15 +82,19 @@ export default function RootLayout({
                 fontSize: "1.15rem",
                 textDecoration: "none",
                 color: "#111",
-                letterSpacing: "0.2px",
               }}
             >
               CV-Proffen
             </Link>
 
-            {/* NAV */}
             {loggedIn === true && (
-              <nav style={{ display: "flex", gap: "1.25rem" }}>
+              <nav style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+                {name && (
+                  <span style={{ color: "#444" }}>
+                    God dag, {name}
+                  </span>
+                )}
+
                 <Link
                   href="/cv"
                   style={{
@@ -143,10 +153,8 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
         <main>{children}</main>
 
-        {/* FOOTER */}
         <footer
           style={{
             marginTop: "4rem",
@@ -167,7 +175,7 @@ export default function RootLayout({
             }}
           >
             <div>
-              <strong style={{ fontSize: "1rem" }}>CV-Proffen</strong>
+              <strong>CV-Proffen</strong>
               <p style={{ marginTop: "0.75rem", lineHeight: 1.6 }}>
                 Profesjonell CV og jobbsøknad på norsk.
                 <br />
