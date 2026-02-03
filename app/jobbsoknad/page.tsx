@@ -4,6 +4,9 @@ export const metadata = {
   title: "Jobbsøknad på norsk – Slik skriver du en god søknad | CV-Proffen",
   description:
     "Lær hvordan du skriver en profesjonell jobbsøknad på norsk. Struktur, innhold og vanlige feil.",
+  alternates: {
+    canonical: "/jobbsoknad",
+  },
 };
 
 export default function JobbsoknadPage() {
