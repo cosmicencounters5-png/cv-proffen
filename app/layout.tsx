@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 
 export default function RootLayout({
@@ -78,17 +79,14 @@ export default function RootLayout({
             }}
           >
             {/* LOGO */}
-            <Link
-              href="/"
-              style={{
-                fontWeight: 700,
-                fontSize: "1.15rem",
-                textDecoration: "none",
-                color: "#111",
-                letterSpacing: "0.2px",
-              }}
-            >
-              CV-Proffen
+            <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+              <Image
+                src="/A670EAF8-1A82-42CD-9CB9-687EA383339E.png"
+                alt="CV-Proffen"
+                width={140}
+                height={32}
+                priority
+              />
             </Link>
 
             {/* NAV */}
