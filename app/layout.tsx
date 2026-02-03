@@ -18,6 +18,7 @@ export default function RootLayout({
 
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
+  const [name, setName] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -26,6 +27,13 @@ export default function RootLayout({
       } = await supabase.auth.getUser();
 
       setLoggedIn(!!user);
+
+      if (user) {
+        const meta = user.user_metadata || {};
+        setName(meta.full_name || meta.name || null);
+      } else {
+        setName(null);
+      }
     }
 
     checkUser();
@@ -44,6 +52,7 @@ export default function RootLayout({
   async function logout() {
     await supabase.auth.signOut();
     setLoggedIn(false);
+    setName(null);
     router.push("/");
     router.refresh();
   }
@@ -84,7 +93,19 @@ export default function RootLayout({
 
             {/* NAV */}
             {loggedIn === true && (
-              <nav style={{ display: "flex", gap: "1.25rem" }}>
+              <nav
+                style={{
+                  display: "flex",
+                  gap: "1.25rem",
+                  alignItems: "center",
+                }}
+              >
+                {name && (
+                  <span style={{ color: "#444" }}>
+                    God dag, {name}
+                  </span>
+                )}
+
                 <Link
                   href="/cv"
                   style={{
