@@ -6,6 +6,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 
 export default function RegisterPage() {
+
   const router = useRouter();
 
   const supabase = createBrowserClient(
@@ -20,22 +21,24 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   async function handleSubmit(e: React.FormEvent) {
+
     e.preventDefault();
 
     setLoading(true);
     setError(null);
 
-    // ✅ Opprett bruker
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
+    const { data, error: signUpError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
         },
-      },
-    });
+      });
 
     if (signUpError || !data.user) {
       setError("Kunne ikke opprette konto.");
@@ -45,13 +48,14 @@ export default function RegisterPage() {
 
     const user = data.user;
 
-    // 🔥 GRATIS TRIAL FLOW
+    // ✅ GRATIS TRIAL
     const freeTrial =
       typeof window !== "undefined"
         ? localStorage.getItem("cvproffen_free_trial")
         : null;
 
     if (freeTrial === "true") {
+
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
@@ -69,9 +73,10 @@ export default function RegisterPage() {
       return;
     }
 
-    // 🚫 Normal flow
+    // Normal flow
     router.push("/pricing");
   }
+
 
   return (
     <main
@@ -153,4 +158,14 @@ export default function RegisterPage() {
             cursor: "pointer",
           }}
         >
-          {loading ?
+          {loading ? "Oppretter konto…" : "Opprett konto"}
+        </button>
+
+        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem" }}>
+          Har du allerede konto?{" "}
+          <Link href="/login">Logg inn</Link>
+        </p>
+      </form>
+    </main>
+  );
+}
