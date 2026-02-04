@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    // 🔐 Supabase server client (LESER COOKIES KORREKT)
+    // 🔐 Supabase server client
     const cookieStore = cookies();
 
     const supabase = createServerClient(
@@ -28,14 +28,14 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user || !user.email) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
       );
     }
 
-    // 📦 Håndter både JSON og form POST
+    // 📦 Hent price_id (JSON eller form)
     let price_id: string | null = null;
     const contentType = req.headers.get("content-type") || "";
 
@@ -56,16 +56,26 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔎 VALIDER PRICE I STRIPE (viktig!)
+    const price = await stripe.prices.retrieve(price_id);
+
+    if (!price || !price.active) {
+      return NextResponse.json(
+        { error: "Invalid or inactive price" },
+        { status: 400 }
+      );
+    }
+
     // 💳 Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
       line_items: [
         {
           price: price_id,
           quantity: 1,
         },
       ],
+      customer_email: user.email,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
       metadata: {
@@ -78,7 +88,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("Stripe checkout error:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Stripe checkout failed" },
       { status: 500 }
     );
   }
