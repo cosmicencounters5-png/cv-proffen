@@ -1,3 +1,4 @@
+// app/api/stripe/checkout/route.ts
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -9,7 +10,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    // 🔐 Supabase server client (LESER COOKIES KORREKT)
     const cookieStore = cookies();
 
     const supabase = createServerClient(
@@ -29,57 +29,31 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
+      return new NextResponse("Not authenticated", { status: 401 });
     }
 
-    // 📦 Håndter både JSON og form POST
-    let price_id: string | null = null;
-    const contentType = req.headers.get("content-type") || "";
+    const formData = await req.formData();
+    const priceId = formData.get("price_id") as string | null;
 
-    if (contentType.includes("application/json")) {
-      const body = await req.json();
-      price_id = body.price_id;
+    if (!priceId) {
+      return new NextResponse("Missing price_id", { status: 400 });
     }
 
-    if (contentType.includes("application/x-www-form-urlencoded")) {
-      const formData = await req.formData();
-      price_id = formData.get("price_id") as string | null;
-    }
-
-    if (!price_id) {
-      return NextResponse.json(
-        { error: "Missing price_id" },
-        { status: 400 }
-      );
-    }
-
-    // 💳 Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: price_id,
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success`,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
       metadata: {
         user_id: user.id,
-        price_id,
+        price_id: priceId,
       },
     });
 
+    // 🔑 DETTE ER MAGIEN
     return NextResponse.redirect(session.url!, { status: 303 });
   } catch (err) {
     console.error("Stripe checkout error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return new NextResponse("Internal server error", { status: 500 });
   }
 }
