@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,12 +19,13 @@ export default function RootLayout({
   );
 
   const router = useRouter();
+
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [greetingName, setGreetingName] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadUserAndEntitlement() {
+    async function loadUser() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -64,22 +66,22 @@ export default function RootLayout({
         return;
       }
 
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffHours / 24);
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const days = Math.floor(hours / 24);
 
-      if (diffDays >= 1) {
-        setTimeLeft(`${diffDays} dag${diffDays > 1 ? "er" : ""} igjen`);
+      if (days >= 1) {
+        setTimeLeft(`${days} dag${days > 1 ? "er" : ""} igjen`);
       } else {
-        setTimeLeft(`${diffHours} time${diffHours !== 1 ? "r" : ""} igjen`);
+        setTimeLeft(`${hours} time${hours !== 1 ? "r" : ""} igjen`);
       }
     }
 
-    loadUserAndEntitlement();
+    loadUser();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      loadUserAndEntitlement();
+      loadUser();
     });
 
     return () => {
@@ -90,15 +92,13 @@ export default function RootLayout({
   async function logout() {
     await supabase.auth.signOut();
     setLoggedIn(false);
-    setGreetingName(null);
-    setTimeLeft(null);
     router.push("/");
     router.refresh();
   }
 
   return (
     <html lang="no">
-      <body style={{ background: "#f8f9fb", margin: 0 }}>
+      <body style={{ margin: 0, background: "#f8f9fb" }}>
         {/* HEADER */}
         <header
           style={{
@@ -112,8 +112,8 @@ export default function RootLayout({
               margin: "0 auto",
               padding: "1.25rem 1rem",
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
             {/* LOGO */}
@@ -121,9 +121,13 @@ export default function RootLayout({
               <Image
                 src="/A670EAF8-1A82-42CD-9CB9-687EA383339E.png"
                 alt="CV-Proffen"
-                width={140}
-                height={32}
+                width={240}
+                height={64}
                 priority
+                style={{
+                  height: "40px",
+                  width: "auto",
+                }}
               />
             </Link>
 
@@ -134,17 +138,16 @@ export default function RootLayout({
                   display: "flex",
                   alignItems: "center",
                   gap: "1.25rem",
+                  fontSize: "0.95rem",
                 }}
               >
                 <span
                   style={{
-                    fontWeight: 500,
                     color: "#444",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  God dag
-                  {greetingName ? `, ${greetingName}` : ""}
+                  God dag{greetingName ? `, ${greetingName}` : ""}
                   {timeLeft ? ` · ${timeLeft}` : ""}
                 </span>
 
@@ -230,7 +233,7 @@ export default function RootLayout({
             }}
           >
             <div>
-              <strong style={{ fontSize: "1rem" }}>CV-Proffen</strong>
+              <strong>CV-Proffen</strong>
               <p style={{ marginTop: "0.75rem", lineHeight: 1.6 }}>
                 Profesjonell CV og jobbsøknad på norsk.
                 <br />
@@ -272,9 +275,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function(c,l,a,r,i,t,y){
-                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
               })(window, document, "clarity", "script", "vc2wf9kprn");
             `,
           }}
