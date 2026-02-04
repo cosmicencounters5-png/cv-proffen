@@ -43,6 +43,7 @@ export default function CvPage() {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [hasApplication, setHasApplication] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -76,6 +77,24 @@ export default function CvPage() {
 
       setHasApplication(!!data.has_application);
       setHasAccess(true);
+
+      // ⏳ NEDTELLING
+      if (data.expires_at) {
+        const expires = new Date(data.expires_at);
+        const diffMs = expires.getTime() - now.getTime();
+
+        if (diffMs > 0) {
+          const hours = Math.floor(diffMs / (1000 * 60 * 60));
+          const days = Math.floor(hours / 24);
+
+          if (days >= 1) {
+            setTimeLeft(`${days} dag${days > 1 ? "er" : ""} igjen`);
+          } else {
+            setTimeLeft(`${hours} time${hours !== 1 ? "r" : ""} igjen`);
+          }
+        }
+      }
+
       setLoading(false);
     }
 
@@ -114,7 +133,21 @@ export default function CvPage() {
       <div className="cv-container">
         {/* VENSTRE: FORM */}
         <form action={generate} className="cv-form">
-          <h1>{mode === "cv" ? "CV-generator" : "Søknadsgenerator"}</h1>
+          <h1 style={{ marginBottom: "0.25rem" }}>
+            {mode === "cv" ? "CV-generator" : "Søknadsgenerator"}
+          </h1>
+
+          {timeLeft && (
+            <p
+              style={{
+                marginBottom: "1.25rem",
+                fontSize: "0.9rem",
+                color: "#666",
+              }}
+            >
+              ⏳ {timeLeft}
+            </p>
+          )}
 
           <div className="mode-toggle">
             <button
