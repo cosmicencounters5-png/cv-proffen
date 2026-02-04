@@ -3,10 +3,15 @@
 import { useRouter } from "next/navigation";
 
 export default function GratisPage() {
+
   const router = useRouter();
 
-  function activateFreeTrial() {
+  function activateTrial() {
+
+    // 🔥 SETT FREE TRIAL FLAG
     localStorage.setItem("cvproffen_free_trial", "true");
+
+    // Send til register
     router.push("/register");
   }
 
@@ -18,40 +23,46 @@ export default function GratisPage() {
         alignItems: "center",
         justifyContent: "center",
         background: "#f8f9fb",
-        padding: "2rem",
+        padding: "2rem"
       }}
     >
+
       <div
         style={{
           background: "white",
-          padding: "2.5rem",
-          borderRadius: "10px",
-          maxWidth: "500px",
+          padding: "3rem",
+          borderRadius: "12px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.06)",
           textAlign: "center",
+          maxWidth: "500px"
         }}
       >
+
         <h1>Gratis tilgang i 24 timer</h1>
 
-        <p style={{ marginTop: "1rem" }}>
-          Test CV-Proffen gratis uten betaling.
+        <p style={{ marginTop: "1rem", color: "#555" }}>
+          Test CV-Proffen gratis i 24 timer.
+          Ingen betaling.
         </p>
 
         <button
-          onClick={activateFreeTrial}
+          onClick={activateTrial}
           style={{
-            marginTop: "1.5rem",
+            marginTop: "2rem",
+            padding: "0.8rem 1.4rem",
             background: "#111",
             color: "white",
-            padding: "0.75rem 1.5rem",
-            borderRadius: "6px",
             border: "none",
-            cursor: "pointer",
+            borderRadius: "8px",
             fontWeight: 600,
+            cursor: "pointer"
           }}
         >
           Aktiver gratis tilgang
         </button>
+
       </div>
+
     </main>
   );
 }
