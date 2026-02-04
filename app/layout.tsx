@@ -20,34 +20,66 @@ export default function RootLayout({
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [greetingName, setGreetingName] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
   useEffect(() => {
-    async function checkUser() {
+    async function loadUserAndEntitlement() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user) {
-        setLoggedIn(true);
-
-        const name =
-          (user.user_metadata?.full_name as string) ||
-          (user.user_metadata?.name as string) ||
-          null;
-
-        setGreetingName(name);
-      } else {
+      if (!user) {
         setLoggedIn(false);
         setGreetingName(null);
+        setTimeLeft(null);
+        return;
+      }
+
+      setLoggedIn(true);
+
+      const name =
+        (user.user_metadata?.full_name as string) ||
+        (user.user_metadata?.name as string) ||
+        null;
+
+      setGreetingName(name);
+
+      const { data: entitlement } = await supabase
+        .from("user_entitlements")
+        .select("expires_at")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!entitlement?.expires_at) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const expires = new Date(entitlement.expires_at);
+      const now = new Date();
+      const diffMs = expires.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffDays >= 1) {
+        setTimeLeft(`${diffDays} dag${diffDays > 1 ? "er" : ""} igjen`);
+      } else {
+        setTimeLeft(`${diffHours} time${diffHours !== 1 ? "r" : ""} igjen`);
       }
     }
 
-    checkUser();
+    loadUserAndEntitlement();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      checkUser();
+      loadUserAndEntitlement();
     });
 
     return () => {
@@ -59,6 +91,7 @@ export default function RootLayout({
     await supabase.auth.signOut();
     setLoggedIn(false);
     setGreetingName(null);
+    setTimeLeft(null);
     router.push("/");
     router.refresh();
   }
@@ -100,18 +133,19 @@ export default function RootLayout({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "1.5rem",
+                  gap: "1.25rem",
                 }}
               >
                 <span
                   style={{
                     fontWeight: 500,
                     color: "#444",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {greetingName
-                    ? `God dag, ${greetingName}`
-                    : "God dag"}
+                  God dag
+                  {greetingName ? `, ${greetingName}` : ""}
+                  {timeLeft ? ` · ${timeLeft}` : ""}
                 </span>
 
                 <Link
@@ -175,7 +209,7 @@ export default function RootLayout({
         {/* PAGE CONTENT */}
         <main>{children}</main>
 
-        {/* FOOTER */}
+        {/* FOOTER (uendret) */}
         <footer
           style={{
             marginTop: "4rem",
