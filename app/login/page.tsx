@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -40,6 +43,13 @@ export default function LoginPage() {
 
     if (!user) {
       router.push("/");
+      return;
+    }
+
+    // 🔁 Hvis redirect finnes (gratis-link / kampanje)
+    if (redirect) {
+      router.push(redirect);
+      setLoading(false);
       return;
     }
 
