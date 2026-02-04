@@ -14,7 +14,7 @@ export default function RegisterPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,52 +23,48 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const hasFreeTrial =
-      typeof window !== "undefined" &&
-      localStorage.getItem("cvproffen_free_trial") === "true";
-
-    const { data, error: signUpError } =
-      await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
         },
-      });
+      },
+    });
 
     if (signUpError || !data.user) {
-      setError(signUpError?.message || "Noe gikk galt.");
+      setError("Kunne ikke opprette konto.");
       setLoading(false);
       return;
     }
 
-    // 🆓 GRATIS 24T TILGANG
+    const user = data.user;
+
+    // ✅ SJEKK GRATIS-TILGANG
+    const hasFreeTrial =
+      typeof window !== "undefined" &&
+      localStorage.getItem("cvproffen_free_trial") === "true";
+
     if (hasFreeTrial) {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
-      await supabase.from("user_entitlements").upsert(
-        {
-          user_id: data.user.id,
-          has_cv: true,
-          has_application: false,
-          expires_at: expiresAt.toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" }
-      );
+      await supabase.from("user_entitlements").upsert({
+        user_id: user.id,
+        has_cv: true,
+        has_application: false,
+        expires_at: expiresAt.toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       localStorage.removeItem("cvproffen_free_trial");
-
       router.push("/cv");
-      router.refresh();
       return;
     }
 
+    // 🚫 Ingen gratis → pricing
     router.push("/pricing");
-    router.refresh();
   }
 
   return (
@@ -87,25 +83,22 @@ export default function RegisterPage() {
         style={{
           background: "white",
           padding: "2.5rem",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+          borderRadius: "14px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.06)",
           width: "100%",
           maxWidth: "420px",
         }}
       >
-        <h1 style={{ marginBottom: "0.5rem" }}>
-          Opprett konto
-        </h1>
-
-        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
-          Kom i gang med CV-Proffen.
+        <h1>Opprett konto</h1>
+        <p style={{ color: "#555", marginBottom: "1.5rem" }}>
+          Kom i gang med CV-Proffen
         </p>
 
         <label>
           Navn
           <input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             style={{ width: "100%", marginBottom: "1rem" }}
           />
@@ -129,15 +122,12 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
             style={{ width: "100%", marginBottom: "1.25rem" }}
           />
         </label>
 
         {error && (
-          <p style={{ color: "#b00020", marginBottom: "1rem" }}>
-            {error}
-          </p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
         )}
 
         <button
@@ -150,24 +140,14 @@ export default function RegisterPage() {
             color: "white",
             border: "none",
             borderRadius: "8px",
-            cursor: "pointer",
             fontWeight: 600,
           }}
         >
           {loading ? "Oppretter konto…" : "Opprett konto"}
         </button>
 
-        <p
-          style={{
-            marginTop: "1.25rem",
-            fontSize: "0.9rem",
-            color: "#555",
-          }}
-        >
-          Har du allerede konto?{" "}
-          <Link href="/login" style={{ fontWeight: 600 }}>
-            Logg inn
-          </Link>
+        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem" }}>
+          Har du allerede konto? <Link href="/login">Logg inn</Link>
         </p>
       </form>
     </main>
