@@ -1,62 +1,70 @@
-"use client";
+import Link from "next/link";
 
-import { useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
-import { useRouter } from "next/navigation";
+export const metadata = {
+  title: "Gratis CV i 24 timer | CV-Proffen",
+  description:
+    "Test CV-Proffen gratis i 24 timer. Ingen betaling. Ingen binding.",
+};
 
-export default function GratisPage() {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const router = useRouter();
-
-  useEffect(() => {
-    async function grantAccess() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // Ikke innlogget → send til login
-      if (!user) {
-        router.push("/login?redirect=/gratis");
-        return;
-      }
-
-      // Sjekk om bruker allerede har hatt tilgang
-      const { data: existing } = await supabase
-        .from("user_entitlements")
-        .select("expires_at")
-        .eq("user_id", user.id)
-        .single();
-
-      if (existing?.expires_at) {
-        // Har hatt tilgang før → send til pricing
-        router.push("/pricing");
-        return;
-      }
-
-      // Gi 24t gratis tilgang
-      const expires = new Date();
-      expires.setHours(expires.getHours() + 24);
-
-      await supabase.from("user_entitlements").insert({
-        user_id: user.id,
-        has_cv: true,
-        has_application: false,
-        expires_at: expires.toISOString(),
-      });
-
-      router.push("/cv");
-    }
-
-    grantAccess();
-  }, [router, supabase]);
-
+export default function GratisLanding() {
   return (
-    <main style={{ padding: "4rem", textAlign: "center" }}>
-      <p>Aktiverer gratis tilgang…</p>
+    <main
+      style={{
+        minHeight: "70vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        background: "#f8f9fb",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "520px",
+          background: "white",
+          padding: "2.5rem",
+          borderRadius: "12px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          textAlign: "center",
+        }}
+      >
+        <h1>Gratis CV i 24 timer</h1>
+
+        <p style={{ marginTop: "1rem", lineHeight: 1.6 }}>
+          Test CV-Proffen helt gratis i 24 timer.
+          <br />
+          Ingen betaling. Ingen kort. Ingen binding.
+        </p>
+
+        <ul
+          style={{
+            textAlign: "left",
+            marginTop: "1.5rem",
+            paddingLeft: "1.2rem",
+          }}
+        >
+          <li>Profesjonell CV på norsk</li>
+          <li>Basert kun på dine egne opplysninger</li>
+          <li>PDF klar til bruk</li>
+          <li>24 timers gratis tilgang</li>
+        </ul>
+
+        <Link
+          href="/gratis/aktiver"
+          style={{
+            display: "block",
+            marginTop: "2rem",
+            background: "#111",
+            color: "white",
+            padding: "0.75rem",
+            borderRadius: "8px",
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          Aktiver gratis tilgang
+        </Link>
+      </div>
     </main>
   );
 }
