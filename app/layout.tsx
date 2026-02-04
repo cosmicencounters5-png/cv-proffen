@@ -209,7 +209,7 @@ export default function RootLayout({
         {/* PAGE CONTENT */}
         <main>{children}</main>
 
-        {/* FOOTER (uendret) */}
+        {/* FOOTER */}
         <footer
           style={{
             marginTop: "4rem",
@@ -266,6 +266,19 @@ export default function RootLayout({
             © {new Date().getFullYear()} CV-Proffen
           </div>
         </footer>
+
+        {/* Microsoft Clarity */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "vc2wf9kprn");
+            `,
+          }}
+        />
       </body>
     </html>
   );
