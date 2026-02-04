@@ -55,55 +55,63 @@ export default function PricingPage() {
   return (
     <main style={{ padding: "4rem 1rem", background: "var(--bg)" }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <h1>Velg pakke</h1>
+        <h1>Velg tilgang</h1>
 
-        <p style={{ marginTop: "0.5rem", color: "var(--muted)" }}>
-          Velg pakken som passer deg best. Tilgangen varer i 3 dager.
+        <p style={{ marginTop: "0.5rem", color: "var(--muted)", maxWidth: "640px" }}>
+          Lag en profesjonell CV – og eventuelt en målrettet jobbsøknad –
+          basert kun på dine egne opplysninger. Tilgangen varer i 3 dager.
         </p>
 
         {state === "loading" && <p>Laster…</p>}
 
         {/* FULL TILGANG */}
         {state === "has-access" && (
-          <div className="card" style={{ marginTop: "2rem" }}>
-            <h2>Du har allerede aktiv tilgang ✅</h2>
-            <p>Du kan gå rett til CV-generatoren.</p>
+          <div className="card" style={{ marginTop: "2.5rem" }}>
+            <h2>Du har full tilgang ✅</h2>
+            <p style={{ marginTop: "0.5rem" }}>
+              Du kan bruke både CV- og søknadsgeneratoren.
+            </p>
 
             <a
               href="/cv"
               style={{
                 display: "inline-block",
-                marginTop: "1rem",
+                marginTop: "1.25rem",
                 padding: "0.6rem 1rem",
                 background: "var(--primary)",
                 color: "white",
                 borderRadius: "var(--radius)",
                 textDecoration: "none",
+                fontWeight: 600,
               }}
             >
-              Gå til CV
+              Gå til generatoren
             </a>
           </div>
         )}
 
         {/* 🔥 UPGRADE */}
         {state === "upgrade" && (
-          <div className="card" style={{ marginTop: "3rem" }}>
-            <h2>Oppgrader til jobbsøknad</h2>
+          <div className="card" style={{ marginTop: "3rem", maxWidth: "520px" }}>
+            <h2>Legg til jobbsøknad</h2>
 
-            <p>
-              Du har allerede laget CV. Legg til en målrettet jobbsøknad for å
-              øke sjansene dine.
+            <p style={{ marginTop: "0.5rem" }}>
+              Du har allerede laget CV. Med en målrettet jobbsøknad øker du
+              sjansene dine betydelig.
             </p>
 
             <p
               style={{
                 fontSize: "2rem",
                 fontWeight: 700,
-                margin: "1rem 0",
+                margin: "1rem 0 0.25rem",
               }}
             >
               100 kr
+            </p>
+
+            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+              Engangskjøp · ingen abonnement
             </p>
 
             <form
@@ -137,7 +145,7 @@ export default function PricingPage() {
             <div className="card">
               <h3>CV</h3>
 
-              <p style={{ fontSize: "2rem", fontWeight: 700 }}>
+              <p style={{ fontSize: "2rem", fontWeight: 700, margin: "0.5rem 0" }}>
                 149 kr
               </p>
 
@@ -168,14 +176,21 @@ export default function PricingPage() {
             </div>
 
             {/* CV + SØKNAD */}
-            <div className="card" style={{ border: "2px solid var(--primary)" }}>
+            <div
+              className="card"
+              style={{
+                border: "2px solid var(--primary)",
+              }}
+            >
               <h3>CV + Søknad</h3>
 
-              <p style={{ fontSize: "2rem", fontWeight: 700 }}>
+              <p style={{ fontSize: "2rem", fontWeight: 700, margin: "0.5rem 0" }}>
                 249 kr
               </p>
 
-              <p>CV og målrettet jobbsøknad.</p>
+              <p>
+                Komplett pakke med både CV og målrettet jobbsøknad.
+              </p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>Profesjonell CV</li>
@@ -195,7 +210,7 @@ export default function PricingPage() {
                   value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
                 />
                 <button className="primary" style={{ width: "100%" }}>
-                  Kjøp CV + Søknad
+                  Kjøp komplett pakke
                 </button>
               </form>
             </div>
