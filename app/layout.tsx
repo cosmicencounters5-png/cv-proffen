@@ -19,7 +19,7 @@ export default function RootLayout({
 
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
-  const [fullName, setFullName] = useState<string | null>(null);
+  const [greetingName, setGreetingName] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -29,12 +29,16 @@ export default function RootLayout({
 
       if (user) {
         setLoggedIn(true);
-        setFullName(
-          (user.user_metadata?.full_name as string) || null
-        );
+
+        const name =
+          (user.user_metadata?.full_name as string) ||
+          (user.user_metadata?.name as string) ||
+          null;
+
+        setGreetingName(name);
       } else {
         setLoggedIn(false);
-        setFullName(null);
+        setGreetingName(null);
       }
     }
 
@@ -54,7 +58,7 @@ export default function RootLayout({
   async function logout() {
     await supabase.auth.signOut();
     setLoggedIn(false);
-    setFullName(null);
+    setGreetingName(null);
     router.push("/");
     router.refresh();
   }
@@ -99,16 +103,16 @@ export default function RootLayout({
                   gap: "1.5rem",
                 }}
               >
-                {fullName && (
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      color: "#444",
-                    }}
-                  >
-                    God dag, {fullName}
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontWeight: 500,
+                    color: "#444",
+                  }}
+                >
+                  {greetingName
+                    ? `God dag, ${greetingName}`
+                    : "God dag"}
+                </span>
 
                 <Link
                   href="/cv"
