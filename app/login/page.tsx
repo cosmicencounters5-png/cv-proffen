@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
@@ -46,10 +48,8 @@ export default function LoginPage() {
       return;
     }
 
-    // 🔁 Hvis redirect finnes (gratis-link / kampanje)
     if (redirect) {
       router.push(redirect);
-      setLoading(false);
       return;
     }
 
