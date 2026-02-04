@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function GratisPage() {
+  const router = useRouter();
+
   useEffect(() => {
-    // Marker at brukeren kom via gratis-lenke
-    localStorage.setItem("cvproffen_free_trial", "true");
+    // Marker at brukeren kommer fra gratis-tilgang
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cvproffen_free_trial", "true");
+    }
   }, []);
 
   return (
@@ -17,85 +22,81 @@ export default function GratisPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "1rem",
+        padding: "1.5rem",
       }}
     >
-      <div
+      <section
         style={{
           background: "white",
-          padding: "2.5rem",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-          maxWidth: "420px",
+          maxWidth: "560px",
           width: "100%",
+          padding: "3rem",
+          borderRadius: "14px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.06)",
           textAlign: "center",
         }}
       >
         <h1 style={{ marginBottom: "0.75rem" }}>
-          🎉 Gratis tilgang aktivert
+          🎉 Gratis tilgang i 24 timer
         </h1>
 
-        <p style={{ color: "#555", lineHeight: 1.6 }}>
-          Du har fått <strong>24 timers gratis tilgang</strong> til CV-Proffen.
-          <br />
+        <p
+          style={{
+            fontSize: "1.05rem",
+            lineHeight: 1.7,
+            color: "#444",
+            marginBottom: "1.75rem",
+          }}
+        >
+          Du får full tilgang til å lage profesjonell CV på norsk – helt gratis
+          i 24 timer.  
           Ingen betaling. Ingen binding.
         </p>
 
-        <p style={{ marginTop: "1rem", color: "#555" }}>
-          Logg inn eller opprett konto for å aktivere tilgangen.
-        </p>
-
-        <div
+        <ul
           style={{
-            marginTop: "1.75rem",
-            display: "flex",
-            gap: "0.75rem",
-            justifyContent: "center",
+            textAlign: "left",
+            maxWidth: "420px",
+            margin: "0 auto 2rem",
+            lineHeight: 1.8,
+            color: "#333",
           }}
         >
-          <Link href="/login">
-            <button
-              style={{
-                padding: "0.6rem 1.1rem",
-                background: "#111",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Logg inn
-            </button>
-          </Link>
+          <li>✔️ Lag profesjonell CV</li>
+          <li>✔️ Tilpasset stillingen du søker</li>
+          <li>✔️ Last ned ferdig PDF</li>
+          <li>✔️ 24 timer gratis tilgang</li>
+        </ul>
 
-          <Link href="/register">
-            <button
-              style={{
-                padding: "0.6rem 1.1rem",
-                background: "#eee",
-                color: "#111",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Opprett konto
-            </button>
-          </Link>
-        </div>
+        <Link
+          href="/register"
+          style={{
+            display: "inline-block",
+            background: "#111",
+            color: "white",
+            padding: "0.9rem 1.6rem",
+            borderRadius: "10px",
+            textDecoration: "none",
+            fontWeight: 600,
+            fontSize: "1rem",
+          }}
+        >
+          Aktiver gratis tilgang
+        </Link>
 
         <p
           style={{
             marginTop: "1.5rem",
-            fontSize: "0.85rem",
-            color: "#777",
+            fontSize: "0.9rem",
+            color: "#666",
           }}
         >
-          Tilgangen starter når du logger inn.
+          Har du allerede konto?{" "}
+          <Link href="/login" style={{ fontWeight: 600 }}>
+            Logg inn
+          </Link>
         </p>
-      </div>
+      </section>
     </main>
   );
 }
