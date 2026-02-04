@@ -14,10 +14,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// PRICES
-const PRICE_CV = "price_1SuqYw2Ly9NpxKWhPtgANnw2";
-const PRICE_CV_PLUS = "price_1SuqZW2Ly9NpxKWht4M2P6ZP";
-const PRICE_UPGRADE = "price_1Swe8d2Ly9NpxKWhXtP3o5pA"; // 🔥 NY
+// 🔑 LIVE PRICES
+const PRICE_CV = "price_1Sx4UG2Ly9NpxKWhFb4sWtIN";
+const PRICE_CV_PLUS = "price_1Sx4VJ2Ly9NpxKWheBaclMvl";
+const PRICE_UPGRADE = "price_1Sx4W02Ly9NpxKWhA4idXSa2";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
+    console.error("Webhook signature verification failed:", err);
     return new NextResponse("Webhook error", { status: 400 });
   }
 
@@ -52,16 +53,23 @@ export async function POST(req: Request) {
     return new NextResponse("Missing metadata", { status: 400 });
   }
 
+  // ⏳ 3 dagers tilgang
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 3);
 
-  let hasCv = false;
-  let hasApplication = false;
+  // 🔍 Hent eksisterende tilgang (hvis finnes)
+  const { data: existing } = await supabase
+    .from("user_entitlements")
+    .select("has_cv, has_application")
+    .eq("user_id", userId)
+    .single();
+
+  let hasCv = existing?.has_cv ?? false;
+  let hasApplication = existing?.has_application ?? false;
 
   // 🎯 TOLK KJØPET
   if (priceId === PRICE_CV) {
     hasCv = true;
-    hasApplication = false;
   }
 
   if (priceId === PRICE_CV_PLUS) {
@@ -70,7 +78,6 @@ export async function POST(req: Request) {
   }
 
   if (priceId === PRICE_UPGRADE) {
-    hasCv = true;
     hasApplication = true;
   }
 
