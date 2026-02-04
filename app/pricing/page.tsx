@@ -57,15 +57,9 @@ export default function PricingPage() {
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <h1>Velg tilgang</h1>
 
-        <p
-          style={{
-            marginTop: "0.5rem",
-            color: "var(--muted)",
-            maxWidth: "640px",
-          }}
-        >
-          Lag en profesjonell CV – og eventuelt en målrettet jobbsøknad –
-          basert kun på dine egne opplysninger. Tilgangen varer i 3 dager.
+        <p style={{ marginTop: "0.5rem", color: "var(--muted)", maxWidth: "640px" }}>
+          Lag en profesjonell CV – og eventuelt en målrettet jobbsøknad – basert
+          kun på dine egne opplysninger. Tilgangen varer i 3 dager.
         </p>
 
         {state === "loading" && <p>Laster…</p>}
@@ -74,9 +68,7 @@ export default function PricingPage() {
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2.5rem" }}>
             <h2>Du har full tilgang ✅</h2>
-            <p style={{ marginTop: "0.5rem" }}>
-              Du kan bruke både CV- og søknadsgeneratoren.
-            </p>
+            <p>Du kan bruke både CV- og søknadsgeneratoren.</p>
 
             <a
               href="/cv"
@@ -96,39 +88,25 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* 🔥 UPGRADE */}
+        {/* 🔥 OPPGRADER */}
         {state === "upgrade" && (
           <div className="card" style={{ marginTop: "3rem", maxWidth: "520px" }}>
             <h2>Legg til jobbsøknad</h2>
 
-            <p style={{ marginTop: "0.5rem" }}>
+            <p>
               Du har allerede laget CV. Med en målrettet jobbsøknad øker du
               sjansene dine betydelig.
             </p>
 
-            <p
-              style={{
-                fontSize: "2rem",
-                fontWeight: 700,
-                margin: "1rem 0 0.25rem",
-              }}
-            >
-              1 kr
+            <p style={{ fontSize: "2rem", fontWeight: 700, margin: "1rem 0" }}>
+              100 kr
             </p>
 
-            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-              Engangskjøp · testbetaling
-            </p>
-
-            <form
-              method="POST"
-              action="/api/stripe/checkout"
-              style={{ marginTop: "1.5rem" }}
-            >
+            <form method="POST" action="/api/stripe/checkout">
               <input
                 type="hidden"
                 name="price_id"
-                value="price_1Sx4W02Ly9NpxKWhA4idXSa2"
+                value="price_1Sx8wO2Ly9NpxKWh2lqi2g6i"
               />
               <button className="primary">Oppgrader nå</button>
             </form>
@@ -148,36 +126,13 @@ export default function PricingPage() {
             {/* CV */}
             <div className="card">
               <h3>CV</h3>
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>149 kr</p>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                1 kr
-              </p>
-
-              <p>
-                Lag en profesjonell CV basert på dine egne opplysninger.
-              </p>
-
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>AI-generert CV</li>
-                <li>PDF klar til bruk</li>
-                <li>3 dagers tilgang</li>
-              </ul>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
+              <form method="POST" action="/api/stripe/checkout">
                 <input
                   type="hidden"
                   name="price_id"
-                  value="price_1Sx4UG2Ly9NpxKWhFb4sWtIN"
+                  value="price_1Sx8sW2Ly9NpxKWhs77Gnipg"
                 />
                 <button className="primary" style={{ width: "100%" }}>
                   Kjøp CV
@@ -186,42 +141,15 @@ export default function PricingPage() {
             </div>
 
             {/* CV + SØKNAD */}
-            <div
-              className="card"
-              style={{ border: "2px solid var(--primary)" }}
-            >
+            <div className="card" style={{ border: "2px solid var(--primary)" }}>
               <h3>CV + Søknad</h3>
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>249 kr</p>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                1 kr
-              </p>
-
-              <p>
-                Komplett pakke med både CV og målrettet jobbsøknad.
-              </p>
-
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>Profesjonell CV</li>
-                <li>Målrettet søknad</li>
-                <li>PDF klar til bruk</li>
-                <li>3 dagers tilgang</li>
-              </ul>
-
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
+              <form method="POST" action="/api/stripe/checkout">
                 <input
                   type="hidden"
                   name="price_id"
-                  value="price_1Sx4VJ2Ly9NpxKWheBaclMvl"
+                  value="price_1Sx8vC2Ly9NpxKWhpU8ws3Yd"
                 />
                 <button className="primary" style={{ width: "100%" }}>
                   Kjøp komplett pakke
