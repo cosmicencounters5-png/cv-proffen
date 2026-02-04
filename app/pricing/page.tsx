@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { useSearchParams } from "next/navigation";
 
 type AccessState = "loading" | "no-access" | "has-access";
 
@@ -10,6 +11,9 @@ export default function PricingPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  const searchParams = useSearchParams();
+  const upgradeTarget = searchParams.get("upgrade"); // "application" | null
 
   const [state, setState] = useState<AccessState>("loading");
 
@@ -32,10 +36,19 @@ export default function PricingPage() {
 
       const now = new Date();
 
-      if (
+      const hasValidCvAccess =
         data?.has_cv &&
-        (!data.expires_at || new Date(data.expires_at) > now)
-      ) {
+        (!data.expires_at || new Date(data.expires_at) > now);
+
+      // 🔑 VIKTIG:
+      // Hvis bruker er her for å oppgradere til søknad,
+      // skal vi ALLTID vise kjøpsvalg
+      if (upgradeTarget === "application") {
+        setState("no-access");
+        return;
+      }
+
+      if (hasValidCvAccess) {
         setState("has-access");
       } else {
         setState("no-access");
@@ -43,7 +56,7 @@ export default function PricingPage() {
     }
 
     checkAccess();
-  }, [supabase]);
+  }, [supabase, upgradeTarget]);
 
   return (
     <main style={{ padding: "4rem 1rem", background: "var(--bg)" }}>
@@ -56,7 +69,7 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG */}
+        {/* HAR TILGANG (kun når ikke upgrade) */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
@@ -79,7 +92,7 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* INGEN TILGANG */}
+        {/* KJØP / OPPGRADER */}
         {state === "no-access" && (
           <div
             style={{
@@ -89,43 +102,41 @@ export default function PricingPage() {
               gap: "1.5rem",
             }}
           >
-            {/* CV */}
-            <div className="card">
-              <h3>CV</h3>
+            {/* CV – skjules ved upgrade */}
+            {!upgradeTarget && (
+              <div className="card">
+                <h3>CV</h3>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
-                149 kr
-              </p>
+                <p style={{ fontSize: "2rem", fontWeight: 700 }}>
+                  149 kr
+                </p>
 
-              <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
+                <p>
+                  Lag en profesjonell CV basert på dine egne opplysninger.
+                </p>
 
-              <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
-                <li>AI-generert CV</li>
-                <li>PDF klar til bruk</li>
-                <li>3 dagers tilgang</li>
-              </ul>
+                <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
+                  <li>AI-generert CV</li>
+                  <li>PDF klar til bruk</li>
+                  <li>3 dagers tilgang</li>
+                </ul>
 
-              <form
-                method="POST"
-                action="/api/stripe/checkout"
-                style={{ marginTop: "1.5rem" }}
-              >
-                <input
-                  type="hidden"
-                  name="price_id"
-                  value="price_1SuqYw2Ly9NpxKWhPtgANnw2"
-                />
-                <button className="primary" style={{ width: "100%" }}>
-                  Kjøp CV
-                </button>
-              </form>
-            </div>
+                <form
+                  method="POST"
+                  action="/api/stripe/checkout"
+                  style={{ marginTop: "1.5rem" }}
+                >
+                  <input
+                    type="hidden"
+                    name="price_id"
+                    value="price_1SuqYw2Ly9NpxKWhPtgANnw2"
+                  />
+                  <button className="primary" style={{ width: "100%" }}>
+                    Kjøp CV
+                  </button>
+                </form>
+              </div>
+            )}
 
             {/* CV + SØKNAD */}
             <div
@@ -150,7 +161,11 @@ export default function PricingPage() {
                 Mest populær
               </div>
 
-              <h3>CV + Søknad</h3>
+              <h3>
+                {upgradeTarget === "application"
+                  ? "Oppgrader til søknad"
+                  : "CV + Søknad"}
+              </h3>
 
               <p
                 style={{
@@ -162,7 +177,11 @@ export default function PricingPage() {
                 249 kr
               </p>
 
-              <p>CV og målrettet jobbsøknad.</p>
+              <p>
+                {upgradeTarget === "application"
+                  ? "Legg til målrettet jobbsøknad."
+                  : "CV og målrettet jobbsøknad."}
+              </p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>Profesjonell CV</li>
@@ -182,7 +201,9 @@ export default function PricingPage() {
                   value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
                 />
                 <button className="primary" style={{ width: "100%" }}>
-                  Kjøp CV + Søknad
+                  {upgradeTarget === "application"
+                    ? "Oppgrader nå"
+                    : "Kjøp CV + Søknad"}
                 </button>
               </form>
             </div>
