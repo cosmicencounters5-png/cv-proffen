@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
-type AccessState = "loading" | "no-access" | "has-access";
+type AccessState = "loading" | "no-access" | "upgrade" | "has-access";
 
 export default function PricingPage() {
   const supabase = createBrowserClient(
@@ -26,20 +26,27 @@ export default function PricingPage() {
 
       const { data } = await supabase
         .from("user_entitlements")
-        .select("has_cv, expires_at")
+        .select("has_cv, has_application, expires_at")
         .eq("user_id", user.id)
         .single();
 
       const now = new Date();
 
-      if (
+      const hasValidCv =
         data?.has_cv &&
-        (!data.expires_at || new Date(data.expires_at) > now)
-      ) {
+        (!data.expires_at || new Date(data.expires_at) > now);
+
+      if (hasValidCv && data?.has_application) {
         setState("has-access");
-      } else {
-        setState("no-access");
+        return;
       }
+
+      if (hasValidCv && !data?.has_application) {
+        setState("upgrade");
+        return;
+      }
+
+      setState("no-access");
     }
 
     checkAccess();
@@ -56,7 +63,7 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG */}
+        {/* FULL TILGANG */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
@@ -79,6 +86,42 @@ export default function PricingPage() {
           </div>
         )}
 
+        {/* 🔥 UPGRADE */}
+        {state === "upgrade" && (
+          <div className="card" style={{ marginTop: "3rem" }}>
+            <h2>Oppgrader til jobbsøknad</h2>
+            <p>
+              Du har allerede laget CV. Legg til målrettet jobbsøknad for å
+              styrke søknaden din.
+            </p>
+
+            <p
+              style={{
+                fontSize: "2rem",
+                fontWeight: 700,
+                margin: "1rem 0",
+              }}
+            >
+              100 kr
+            </p>
+
+            <form
+              method="POST"
+              action="/api/stripe/checkout"
+              style={{ marginTop: "1.5rem" }}
+            >
+              <input
+                type="hidden"
+                name="price_id"
+                value="price_1Stu5cRt72eNJeMc499OeNcy"
+              />
+              <button className="primary">
+                Oppgrader nå
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* INGEN TILGANG */}
         {state === "no-access" && (
           <div
@@ -93,17 +136,13 @@ export default function PricingPage() {
             <div className="card">
               <h3>CV</h3>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>
                 149 kr
               </p>
 
-              <p>Lag en profesjonell CV basert på dine egne opplysninger.</p>
+              <p>
+                Lag en profesjonell CV basert på dine egne opplysninger.
+              </p>
 
               <ul style={{ marginTop: "1rem", paddingLeft: "1.2rem" }}>
                 <li>AI-generert CV</li>
@@ -132,33 +171,11 @@ export default function PricingPage() {
               className="card"
               style={{
                 border: "2px solid var(--primary)",
-                position: "relative",
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-12px",
-                  right: "12px",
-                  background: "var(--primary)",
-                  color: "white",
-                  padding: "0.25rem 0.6rem",
-                  fontSize: "0.75rem",
-                  borderRadius: "999px",
-                }}
-              >
-                Mest populær
-              </div>
-
               <h3>CV + Søknad</h3>
 
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0.5rem 0",
-                }}
-              >
+              <p style={{ fontSize: "2rem", fontWeight: 700 }}>
                 249 kr
               </p>
 
