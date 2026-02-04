@@ -90,9 +90,10 @@ export default function PricingPage() {
         {state === "upgrade" && (
           <div className="card" style={{ marginTop: "3rem" }}>
             <h2>Oppgrader til jobbsøknad</h2>
+
             <p>
-              Du har allerede laget CV. Legg til målrettet jobbsøknad for å
-              styrke søknaden din.
+              Du har allerede laget CV. Legg til en målrettet jobbsøknad for å
+              øke sjansene dine.
             </p>
 
             <p
@@ -113,7 +114,7 @@ export default function PricingPage() {
               <input
                 type="hidden"
                 name="price_id"
-                value="price_1Stu5cRt72eNJeMc499OeNcy"
+                value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
               />
               <button className="primary">
                 Oppgrader nå
@@ -167,12 +168,7 @@ export default function PricingPage() {
             </div>
 
             {/* CV + SØKNAD */}
-            <div
-              className="card"
-              style={{
-                border: "2px solid var(--primary)",
-              }}
-            >
+            <div className="card" style={{ border: "2px solid var(--primary)" }}>
               <h3>CV + Søknad</h3>
 
               <p style={{ fontSize: "2rem", fontWeight: 700 }}>
