@@ -1,13 +1,13 @@
+
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 
-function LoginInner() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -17,12 +17,6 @@ function LoginInner() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const gratisToken =
-    searchParams.get("token") ||
-    (typeof window !== "undefined"
-      ? localStorage.getItem("gratis_token")
-      : null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,8 +44,12 @@ function LoginInner() {
       return;
     }
 
-    // 🔓 Gratis tilgang (24t)
-    if (gratisToken) {
+    const hasFreeTrial =
+      typeof window !== "undefined" &&
+      localStorage.getItem("cvproffen_free_trial") === "true";
+
+    // 🆓 GRATIS TILGANG
+    if (hasFreeTrial) {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
@@ -59,19 +57,21 @@ function LoginInner() {
         {
           user_id: user.id,
           has_cv: true,
-          has_application: true,
+          has_application: false,
           expires_at: expiresAt.toISOString(),
           updated_at: new Date().toISOString(),
         },
         { onConflict: "user_id" }
       );
 
-      localStorage.removeItem("gratis_token");
+      localStorage.removeItem("cvproffen_free_trial");
+
       router.push("/cv");
+      router.refresh();
       return;
     }
 
-    // 🔁 Normal flyt
+    // 🔁 NORMAL FLYT
     const { data } = await supabase
       .from("user_entitlements")
       .select("has_cv, expires_at")
@@ -107,17 +107,17 @@ function LoginInner() {
         onSubmit={handleSubmit}
         style={{
           background: "white",
-          padding: "2.25rem",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+          padding: "2rem",
+          borderRadius: "10px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: "400px",
         }}
       >
         <h1 style={{ marginBottom: "0.5rem" }}>Logg inn</h1>
 
-        <p style={{ color: "#555", marginBottom: "1.5rem" }}>
-          Fortsett til CV-generatoren
+        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
+          Logg inn for å fortsette til CV-Proffen.
         </p>
 
         <label>
@@ -165,7 +165,13 @@ function LoginInner() {
           {loading ? "Logger inn…" : "Logg inn"}
         </button>
 
-        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem", color: "#555" }}>
+        <p
+          style={{
+            marginTop: "1.25rem",
+            fontSize: "0.9rem",
+            color: "#555",
+          }}
+        >
           Har du ikke konto?{" "}
           <Link href="/register" style={{ fontWeight: 600 }}>
             Opprett konto
@@ -173,13 +179,5 @@ function LoginInner() {
         </p>
       </form>
     </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginInner />
-    </Suspense>
   );
 }
