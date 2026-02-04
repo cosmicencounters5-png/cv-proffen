@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,12 +29,11 @@ export default function LoginPage() {
       });
 
     if (signInError) {
-      setError(signInError.message);
+      setError("Feil e-post eller passord.");
       setLoading(false);
       return;
     }
 
-    // hent bruker
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -43,7 +43,6 @@ export default function LoginPage() {
       return;
     }
 
-    // sjekk tilgang
     const { data } = await supabase
       .from("user_entitlements")
       .select("has_cv, expires_at")
@@ -80,13 +79,16 @@ export default function LoginPage() {
         style={{
           background: "white",
           padding: "2rem",
-          borderRadius: "8px",
+          borderRadius: "10px",
           boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
           width: "100%",
           maxWidth: "400px",
         }}
       >
-        <h1 style={{ marginBottom: "1.5rem" }}>Logg inn</h1>
+        <h1 style={{ marginBottom: "0.5rem" }}>Velkommen tilbake</h1>
+        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
+          Logg inn for å fortsette der du slapp.
+        </p>
 
         <label>
           E-post
@@ -106,12 +108,12 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ width: "100%", marginBottom: "1.5rem" }}
+            style={{ width: "100%", marginBottom: "1.25rem" }}
           />
         </label>
 
         {error && (
-          <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
         )}
 
         <button
@@ -123,12 +125,20 @@ export default function LoginPage() {
             background: "#111",
             color: "white",
             border: "none",
-            borderRadius: "4px",
+            borderRadius: "6px",
             cursor: "pointer",
+            fontWeight: 600,
           }}
         >
           {loading ? "Logger inn…" : "Logg inn"}
         </button>
+
+        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem", color: "#555" }}>
+          Har du ikke konto?{" "}
+          <Link href="/register" style={{ fontWeight: 600 }}>
+            Opprett konto
+          </Link>
+        </p>
       </form>
     </main>
   );
