@@ -12,9 +12,9 @@ export default function RegisterPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,23 +23,52 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
+    const hasFreeTrial =
+      typeof window !== "undefined" &&
+      localStorage.getItem("cvproffen_free_trial") === "true";
 
-    if (signUpError) {
-      setError(signUpError.message);
+    const { data, error: signUpError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+
+    if (signUpError || !data.user) {
+      setError(signUpError?.message || "Noe gikk galt.");
       setLoading(false);
       return;
     }
 
+    // 🆓 GRATIS 24T TILGANG
+    if (hasFreeTrial) {
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      await supabase.from("user_entitlements").upsert(
+        {
+          user_id: data.user.id,
+          has_cv: true,
+          has_application: false,
+          expires_at: expiresAt.toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+      localStorage.removeItem("cvproffen_free_trial");
+
+      router.push("/cv");
+      router.refresh();
+      return;
+    }
+
     router.push("/pricing");
+    router.refresh();
   }
 
   return (
@@ -49,32 +78,36 @@ export default function RegisterPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "var(--bg)",
+        background: "#f8f9fb",
         padding: "1rem",
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="card"
-        style={{ width: "100%", maxWidth: "420px" }}
+        style={{
+          background: "white",
+          padding: "2.5rem",
+          borderRadius: "12px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+          width: "100%",
+          maxWidth: "420px",
+        }}
       >
-        <h1 style={{ marginBottom: "0.4rem" }}>Opprett konto</h1>
+        <h1 style={{ marginBottom: "0.5rem" }}>
+          Opprett konto
+        </h1>
 
-        {/* 👇 Pris + trygghet */}
-        <p style={{ marginBottom: "0.5rem", color: "#555" }}>
-          CV fra <strong>149 kr</strong> · ingen abonnement
-        </p>
-        <p style={{ marginBottom: "1.25rem", fontSize: "0.9rem" }}>
-          <Link href="/pricing">Se priser</Link>
+        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
+          Kom i gang med CV-Proffen.
         </p>
 
         <label>
-          Fullt navn
+          Navn
           <input
-            type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
+            style={{ width: "100%", marginBottom: "1rem" }}
           />
         </label>
 
@@ -85,6 +118,7 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            style={{ width: "100%", marginBottom: "1rem" }}
           />
         </label>
 
@@ -95,23 +129,41 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={6}
+            style={{ width: "100%", marginBottom: "1.25rem" }}
           />
         </label>
 
         {error && (
-          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>
+            {error}
+          </p>
         )}
 
         <button
           type="submit"
-          className="primary"
           disabled={loading}
-          style={{ width: "100%" }}
+          style={{
+            width: "100%",
+            padding: "0.8rem",
+            background: "#111",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
         >
           {loading ? "Oppretter konto…" : "Opprett konto"}
         </button>
 
-        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem", color: "#555" }}>
+        <p
+          style={{
+            marginTop: "1.25rem",
+            fontSize: "0.9rem",
+            color: "#555",
+          }}
+        >
           Har du allerede konto?{" "}
           <Link href="/login" style={{ fontWeight: 600 }}>
             Logg inn
