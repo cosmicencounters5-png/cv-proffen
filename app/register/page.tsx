@@ -7,6 +7,7 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -15,14 +16,17 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     setLoading(true);
     setError(null);
 
+    // ✅ Opprett bruker
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -41,12 +45,13 @@ export default function RegisterPage() {
 
     const user = data.user;
 
-    // ✅ SJEKK GRATIS-TILGANG
-    const hasFreeTrial =
-      typeof window !== "undefined" &&
-      localStorage.getItem("cvproffen_free_trial") === "true";
+    // 🔥 GRATIS TRIAL FLOW
+    const freeTrial =
+      typeof window !== "undefined"
+        ? localStorage.getItem("cvproffen_free_trial")
+        : null;
 
-    if (hasFreeTrial) {
+    if (freeTrial === "true") {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
@@ -59,11 +64,12 @@ export default function RegisterPage() {
       });
 
       localStorage.removeItem("cvproffen_free_trial");
+
       router.push("/cv");
       return;
     }
 
-    // 🚫 Ingen gratis → pricing
+    // 🚫 Normal flow
     router.push("/pricing");
   }
 
@@ -90,6 +96,7 @@ export default function RegisterPage() {
         }}
       >
         <h1>Opprett konto</h1>
+
         <p style={{ color: "#555", marginBottom: "1.5rem" }}>
           Kom i gang med CV-Proffen
         </p>
@@ -127,7 +134,9 @@ export default function RegisterPage() {
         </label>
 
         {error && (
-          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>
+            {error}
+          </p>
         )}
 
         <button
@@ -141,15 +150,7 @@ export default function RegisterPage() {
             border: "none",
             borderRadius: "8px",
             fontWeight: 600,
+            cursor: "pointer",
           }}
         >
-          {loading ? "Oppretter konto…" : "Opprett konto"}
-        </button>
-
-        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem" }}>
-          Har du allerede konto? <Link href="/login">Logg inn</Link>
-        </p>
-      </form>
-    </main>
-  );
-}
+          {loading ?
