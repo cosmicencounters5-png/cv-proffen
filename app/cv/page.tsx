@@ -78,7 +78,6 @@ export default function CvPage() {
       setHasApplication(!!data.has_application);
       setHasAccess(true);
 
-      // ⏳ NEDTELLING
       if (data.expires_at) {
         const expires = new Date(data.expires_at);
         const diffMs = expires.getTime() - now.getTime();
@@ -88,9 +87,9 @@ export default function CvPage() {
           const days = Math.floor(hours / 24);
 
           if (days >= 1) {
-            setTimeLeft(`${days} dag${days > 1 ? "er" : ""} igjen`);
+            setTimeLeft(`${days} dag${days > 1 ? "er" : ""}`);
           } else {
-            setTimeLeft(`${hours} time${hours !== 1 ? "r" : ""} igjen`);
+            setTimeLeft(`${hours} time${hours !== 1 ? "r" : ""}`);
           }
         }
       }
@@ -131,10 +130,10 @@ export default function CvPage() {
   return (
     <main className="cv-page">
       <div className="cv-container">
-        {/* VENSTRE: FORM */}
+        {/* VENSTRE */}
         <form action={generate} className="cv-form">
           <h1 style={{ marginBottom: "0.25rem" }}>
-            {mode === "cv" ? "CV-generator" : "Søknadsgenerator"}
+            {mode === "cv" ? "Lag profesjonell CV" : "Skriv jobbsøknad"}
           </h1>
 
           {timeLeft && (
@@ -145,9 +144,14 @@ export default function CvPage() {
                 color: "#666",
               }}
             >
-              ⏳ {timeLeft}
+              ⏳ Tilgangen din varer i {timeLeft}
             </p>
           )}
+
+          <p style={{ marginBottom: "1.25rem", color: "#555" }}>
+            Fyll inn opplysningene dine nedenfor. Teksten genereres kun
+            basert på det du selv skriver inn.
+          </p>
 
           <div className="mode-toggle">
             <button
@@ -178,7 +182,7 @@ export default function CvPage() {
           </div>
 
           <label>
-            Navn
+            Fullt navn
             <input name="name" required />
           </label>
 
@@ -189,12 +193,21 @@ export default function CvPage() {
 
           <label>
             Arbeidserfaring
-            <textarea name="experience" rows={6} required />
+            <textarea
+              name="experience"
+              rows={6}
+              placeholder="Beskriv kort dine viktigste arbeidsoppgaver og resultater"
+              required
+            />
           </label>
 
           <label>
             Utdanning (valgfritt)
-            <textarea name="education" rows={4} />
+            <textarea
+              name="education"
+              rows={4}
+              placeholder="Utdanning, kurs eller sertifiseringer"
+            />
           </label>
 
           <button type="submit" className="primary" disabled={generating}>
@@ -206,10 +219,10 @@ export default function CvPage() {
           </button>
         </form>
 
-        {/* HØYRE: RESULTAT */}
+        {/* HØYRE */}
         <section className="cv-result">
           <div className="cv-result-header">
-            <h2>Resultat</h2>
+            <h2>Forhåndsvisning</h2>
             {result && (
               <button onClick={() => window.print()} className="secondary">
                 Last ned PDF
@@ -218,11 +231,13 @@ export default function CvPage() {
           </div>
 
           <div id="cv-print" className="cv-document">
-            {result
-              ? formatText(result)
-              : mode === "cv"
-              ? "CV-en vises her etter generering."
-              : "Søknaden vises her etter generering."}
+            {result ? (
+              formatText(result)
+            ) : (
+              <p style={{ color: "#666" }}>
+                Resultatet vises her etter at du har generert teksten.
+              </p>
+            )}
           </div>
         </section>
       </div>
