@@ -17,6 +17,7 @@ const supabase = createClient(
 // PRICES
 const PRICE_CV = "price_1SuqYw2Ly9NpxKWhPtgANnw2";
 const PRICE_CV_PLUS = "price_1SuqZW2Ly9NpxKWht4M2P6ZP";
+const PRICE_UPGRADE = "price_1Swe8d2Ly9NpxKWhXtP3o5pA"; // 🔥 NY
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -54,8 +55,24 @@ export async function POST(req: Request) {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 3);
 
-  const hasCv = true;
-  const hasApplication = priceId === PRICE_CV_PLUS;
+  let hasCv = false;
+  let hasApplication = false;
+
+  // 🎯 TOLK KJØPET
+  if (priceId === PRICE_CV) {
+    hasCv = true;
+    hasApplication = false;
+  }
+
+  if (priceId === PRICE_CV_PLUS) {
+    hasCv = true;
+    hasApplication = true;
+  }
+
+  if (priceId === PRICE_UPGRADE) {
+    hasCv = true;
+    hasApplication = true;
+  }
 
   await supabase
     .from("user_entitlements")
