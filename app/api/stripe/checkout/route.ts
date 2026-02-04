@@ -1,4 +1,3 @@
-// app/api/stripe/checkout/route.ts
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -29,31 +28,51 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new NextResponse("Not authenticated", { status: 401 });
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
     }
 
-    const formData = await req.formData();
-    const priceId = formData.get("price_id") as string | null;
+    // 📦 Hent price_id
+    let price_id: string | null = null;
+    const contentType = req.headers.get("content-type") || "";
 
-    if (!priceId) {
-      return new NextResponse("Missing price_id", { status: 400 });
+    if (contentType.includes("application/json")) {
+      const body = await req.json();
+      price_id = body.price_id;
+    } else {
+      const formData = await req.formData();
+      price_id = formData.get("price_id") as string | null;
     }
 
+    if (!price_id) {
+      return NextResponse.json(
+        { error: "Missing price_id" },
+        { status: 400 }
+      );
+    }
+
+    // 💳 Stripe checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: price_id, quantity: 1 }],
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing`,
       metadata: {
         user_id: user.id,
-        price_id: priceId,
+        price_id,
       },
     });
 
-    // 🔑 DETTE ER MAGIEN
     return NextResponse.redirect(session.url!, { status: 303 });
+
   } catch (err) {
-    console.error("Stripe checkout error:", err);
-    return new NextResponse("Internal server error", { status: 500 });
+    // ⬅️⬅️⬅️ HER SKAL DEN
+    console.error("STRIPE CHECKOUT ERROR:", err);
+    return new NextResponse(
+      JSON.stringify({ error: String(err) }),
+      { status: 500 }
+    );
   }
 }
