@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -17,6 +17,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const gratisToken =
+    searchParams.get("token") ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("gratis_token")
+      : null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,6 +50,28 @@ export default function LoginPage() {
       return;
     }
 
+    // 🔓 Gratis tilgang (24t)
+    if (gratisToken) {
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      await supabase.from("user_entitlements").upsert(
+        {
+          user_id: user.id,
+          has_cv: true,
+          has_application: true,
+          expires_at: expiresAt.toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+      localStorage.removeItem("gratis_token");
+      router.push("/cv");
+      return;
+    }
+
+    // 🔁 Normal flyt
     const { data } = await supabase
       .from("user_entitlements")
       .select("has_cv, expires_at")
@@ -79,16 +107,17 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         style={{
           background: "white",
-          padding: "2rem",
-          borderRadius: "10px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          padding: "2.25rem",
+          borderRadius: "12px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
           width: "100%",
-          maxWidth: "400px",
+          maxWidth: "420px",
         }}
       >
-        <h1 style={{ marginBottom: "0.5rem" }}>Velkommen tilbake</h1>
-        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
-          Logg inn for å fortsette der du slapp.
+        <h1 style={{ marginBottom: "0.5rem" }}>Logg inn</h1>
+
+        <p style={{ color: "#555", marginBottom: "1.5rem" }}>
+          Fortsett til CV-generatoren
         </p>
 
         <label>
@@ -114,7 +143,9 @@ export default function LoginPage() {
         </label>
 
         {error && (
-          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>
+            {error}
+          </p>
         )}
 
         <button
@@ -142,5 +173,13 @@ export default function LoginPage() {
         </p>
       </form>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   );
 }
