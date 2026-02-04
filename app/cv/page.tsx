@@ -42,6 +42,7 @@ export default function CvPage() {
 
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [hasApplication, setHasApplication] = useState(false);
   const [mode, setMode] = useState<Mode>("cv");
   const [result, setResult] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -73,16 +74,13 @@ export default function CvPage() {
         return;
       }
 
-      if (mode === "application" && !data.has_application) {
-        setMode("cv");
-      }
-
+      setHasApplication(!!data.has_application);
       setHasAccess(true);
       setLoading(false);
     }
 
     checkAccess();
-  }, [mode, router, supabase]);
+  }, [router, supabase]);
 
   async function generate(formData: FormData) {
     setGenerating(true);
@@ -129,10 +127,15 @@ export default function CvPage() {
             >
               CV
             </button>
+
             <button
               type="button"
               className={mode === "application" ? "active" : ""}
               onClick={() => {
+                if (!hasApplication) {
+                  router.push("/pricing");
+                  return;
+                }
                 setMode("application");
                 setResult(null);
               }}
