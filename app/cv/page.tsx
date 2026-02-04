@@ -73,8 +73,10 @@ export default function CvPage() {
         return;
       }
 
+      // 🔑 UPGRADE: bruker har CV, men ikke søknad
       if (mode === "application" && !data.has_application) {
-        setMode("cv");
+        router.push("/pricing");
+        return;
       }
 
       setHasAccess(true);
@@ -191,7 +193,6 @@ export default function CvPage() {
         </section>
       </div>
 
-      {/* PRINT */}
       <style>{`
         @media print {
           body * {
