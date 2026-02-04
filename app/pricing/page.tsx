@@ -57,7 +57,13 @@ export default function PricingPage() {
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <h1>Velg tilgang</h1>
 
-        <p style={{ marginTop: "0.5rem", color: "var(--muted)", maxWidth: "640px" }}>
+        <p
+          style={{
+            marginTop: "0.5rem",
+            color: "var(--muted)",
+            maxWidth: "640px",
+          }}
+        >
           Lag en profesjonell CV – og eventuelt en målrettet jobbsøknad –
           basert kun på dine egne opplysninger. Tilgangen varer i 3 dager.
         </p>
@@ -107,11 +113,11 @@ export default function PricingPage() {
                 margin: "1rem 0 0.25rem",
               }}
             >
-              100 kr
+              1 kr
             </p>
 
             <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-              Engangskjøp · ingen abonnement
+              Engangskjøp · testbetaling
             </p>
 
             <form
@@ -122,11 +128,9 @@ export default function PricingPage() {
               <input
                 type="hidden"
                 name="price_id"
-                value="price_1Swe8d2Ly9NpxKWhXtP3o5pA"
+                value="price_1Sx4W02Ly9NpxKWhA4idXSa2"
               />
-              <button className="primary">
-                Oppgrader nå
-              </button>
+              <button className="primary">Oppgrader nå</button>
             </form>
           </div>
         )}
@@ -145,8 +149,14 @@ export default function PricingPage() {
             <div className="card">
               <h3>CV</h3>
 
-              <p style={{ fontSize: "2rem", fontWeight: 700, margin: "0.5rem 0" }}>
-                149 kr
+              <p
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0.5rem 0",
+                }}
+              >
+                1 kr
               </p>
 
               <p>
@@ -167,7 +177,7 @@ export default function PricingPage() {
                 <input
                   type="hidden"
                   name="price_id"
-                  value="price_1SuqYw2Ly9NpxKWhPtgANnw2"
+                  value="price_1Sx4UG2Ly9NpxKWhFb4sWtIN"
                 />
                 <button className="primary" style={{ width: "100%" }}>
                   Kjøp CV
@@ -178,14 +188,18 @@ export default function PricingPage() {
             {/* CV + SØKNAD */}
             <div
               className="card"
-              style={{
-                border: "2px solid var(--primary)",
-              }}
+              style={{ border: "2px solid var(--primary)" }}
             >
               <h3>CV + Søknad</h3>
 
-              <p style={{ fontSize: "2rem", fontWeight: 700, margin: "0.5rem 0" }}>
-                249 kr
+              <p
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0.5rem 0",
+                }}
+              >
+                1 kr
               </p>
 
               <p>
@@ -207,7 +221,7 @@ export default function PricingPage() {
                 <input
                   type="hidden"
                   name="price_id"
-                  value="price_1SuqZW2Ly9NpxKWht4M2P6ZP"
+                  value="price_1Sx4VJ2Ly9NpxKWheBaclMvl"
                 />
                 <button className="primary" style={{ width: "100%" }}>
                   Kjøp komplett pakke
