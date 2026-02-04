@@ -1,27 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST() {
+export async function POST(req: Request) {
+
+  const body = await req.json();
+  const userId = body.user_id;
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Missing user_id" },
+      { status: 400 }
+    );
+  }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "No user" }, { status: 401 });
-  }
-
-  const expires = new Date();
-  expires.setHours(expires.getHours() + 24);
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 24);
 
   await supabase.from("user_entitlements").upsert({
-    user_id: user.id,
+    user_id: userId,
     has_cv: true,
     has_application: false,
-    expires_at: expires.toISOString(),
+    expires_at: expiresAt.toISOString(),
+    updated_at: new Date().toISOString(),
   });
 
   return NextResponse.json({ success: true });
