@@ -58,9 +58,14 @@ export default function RegisterPage() {
         className="card"
         style={{ width: "100%", maxWidth: "420px" }}
       >
-        <h1 style={{ marginBottom: "0.5rem" }}>Opprett konto</h1>
-        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
-          Tar under 10 sekunder. Ingen abonnement.
+        <h1 style={{ marginBottom: "0.4rem" }}>Opprett konto</h1>
+
+        {/* 👇 Pris + trygghet */}
+        <p style={{ marginBottom: "0.5rem", color: "#555" }}>
+          CV fra <strong>149 kr</strong> · ingen abonnement
+        </p>
+        <p style={{ marginBottom: "1.25rem", fontSize: "0.9rem" }}>
+          <Link href="/pricing">Se priser</Link>
         </p>
 
         <label>
