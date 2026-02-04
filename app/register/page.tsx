@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,7 +39,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Nye brukere skal velge pakke
     router.push("/pricing");
   }
 
@@ -58,10 +58,13 @@ export default function RegisterPage() {
         className="card"
         style={{ width: "100%", maxWidth: "420px" }}
       >
-        <h1 style={{ marginBottom: "1.5rem" }}>Opprett konto</h1>
+        <h1 style={{ marginBottom: "0.5rem" }}>Opprett konto</h1>
+        <p style={{ marginBottom: "1.5rem", color: "#555" }}>
+          Tar under 10 sekunder. Ingen abonnement.
+        </p>
 
         <label>
-          Navn
+          Fullt navn
           <input
             type="text"
             value={fullName}
@@ -91,7 +94,7 @@ export default function RegisterPage() {
         </label>
 
         {error && (
-          <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
+          <p style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</p>
         )}
 
         <button
@@ -102,6 +105,13 @@ export default function RegisterPage() {
         >
           {loading ? "Oppretter konto…" : "Opprett konto"}
         </button>
+
+        <p style={{ marginTop: "1.25rem", fontSize: "0.9rem", color: "#555" }}>
+          Har du allerede konto?{" "}
+          <Link href="/login" style={{ fontWeight: 600 }}>
+            Logg inn
+          </Link>
+        </p>
       </form>
     </main>
   );
