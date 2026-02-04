@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams } from "next/navigation";
 
 type AccessState = "loading" | "no-access" | "has-access";
 
-export default function PricingPage() {
+function PricingContent() {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -40,9 +40,7 @@ export default function PricingPage() {
         data?.has_cv &&
         (!data.expires_at || new Date(data.expires_at) > now);
 
-      // 🔑 VIKTIG:
-      // Hvis bruker er her for å oppgradere til søknad,
-      // skal vi ALLTID vise kjøpsvalg
+      // 🔑 Hvis bruker er her for å oppgradere, skal vi ALLTID vise kjøp
       if (upgradeTarget === "application") {
         setState("no-access");
         return;
@@ -69,7 +67,7 @@ export default function PricingPage() {
 
         {state === "loading" && <p>Laster…</p>}
 
-        {/* HAR TILGANG (kun når ikke upgrade) */}
+        {/* HAR TILGANG */}
         {state === "has-access" && (
           <div className="card" style={{ marginTop: "2rem" }}>
             <h2>Du har allerede aktiv tilgang ✅</h2>
@@ -211,5 +209,13 @@ export default function PricingPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<p style={{ padding: "4rem" }}>Laster…</p>}>
+      <PricingContent />
+    </Suspense>
   );
 }
