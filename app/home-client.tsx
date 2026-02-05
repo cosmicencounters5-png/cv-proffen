@@ -51,87 +51,97 @@ export default function HomeClient() {
 
     if (ctaState === "logged-out") {
       return (
-        <div style={{ marginTop: "1.75rem" }}>
-          <div style={{ display: "flex", gap: "0.75rem" }}>
-            <Link href="/register">
-              <button className="cta">Lag CV og søknad</button>
-            </Link>
-            <Link href="/login">
-              <button className="secondary">Logg inn</button>
-            </Link>
-          </div>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
-            Opprett konto for å komme i gang. Ingen binding.
-          </p>
+        <div className="hero-buttons">
+          <Link href="/register">
+            <button className="cta">Start gratis</button>
+          </Link>
+
+          <Link href="/login">
+            <button className="secondary">Logg inn</button>
+          </Link>
         </div>
       );
     }
 
     if (ctaState === "has-access") {
       return (
-        <div style={{ marginTop: "1.75rem" }}>
-          <Link href="/cv">
-            <button className="cta">Gå til CV-generator</button>
-          </Link>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
-            Fortsett der du slapp.
-          </p>
-        </div>
+        <Link href="/cv">
+          <button className="cta">Gå til CV-generator</button>
+        </Link>
       );
     }
 
     return (
-      <div style={{ marginTop: "1.75rem" }}>
-        <Link href="/pricing">
-          <button className="cta">Få tilgang til CV-verktøyet</button>
-        </Link>
-        <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "#555" }}>
-          Velg pakke og få full tilgang med én gang.
-        </p>
-      </div>
+      <Link href="/pricing">
+        <button className="cta">Få tilgang</button>
+      </Link>
     );
   }
 
   return (
     <main>
+
       {/* HERO */}
       <section className="hero">
-        <h1>Lag profesjonell CV og jobbsøknad – på norsk</h1>
+        <div className="hero-inner">
+
+          <span className="hero-badge">
+            Norsk CV-standard • Ingen AI-hallusinasjoner
+          </span>
+
+          <h1>
+            Lag en profesjonell CV og jobbsøknad
+            <br />
+            som faktisk fungerer i Norge
+          </h1>
+
+          <p className="hero-description">
+            CV-Proffen hjelper deg å skrive en strukturert og målrettet CV
+            basert kun på dine egne opplysninger. Ingen generiske tekster.
+            Ingen oppdiktede ferdigheter.
+          </p>
+
+          {renderCta()}
+
+        </div>
+      </section>
+
+      {/* TRUST BAR */}
+      <section className="trust">
         <p>
-          CV-Proffen hjelper deg å skrive en strukturert, korrekt og målrettet
-          CV og jobbsøknad basert utelukkende på dine egne opplysninger.
-          Ingen antagelser. Ingen automatisk fyll.
+          Designet for norsk arbeidsliv • Privat og offentlig sektor • ATS-vennlig struktur
         </p>
-        {renderCta()}
       </section>
 
       {/* FEATURES */}
       <section className="features">
+
         <div className="feature-card highlight">
-          <h3>Basert kun på dine faktiske opplysninger</h3>
+          <h3>Kun dine opplysninger</h3>
           <p>
-            Innholdet bygges utelukkende på det du selv legger inn.
-            Vi legger ikke til utdanning, erfaring eller ferdigheter.
-            Dette gir en korrekt og troverdig CV.
+            CV-Proffen legger aldri til informasjon du ikke har oppgitt.
+            Resultatet er en troverdig og profesjonell CV.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Strukturert for stillingen du søker</h3>
+          <h3>Tilpasset stillingen</h3>
           <p>
-            CV og søknad struktureres målrettet mot stillingen,
-            med tydelig prioritering, korrekt språk og profesjonell fremtoning.
+            Struktur og språk optimaliseres mot jobben du søker,
+            slik norske arbeidsgivere forventer.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Ferdig dokument i PDF-format</h3>
+          <h3>PDF klar på sekunder</h3>
           <p>
-            Last ned et ryddig og profesjonelt dokument klart til innsending.
-            Egnet for både privat og offentlig sektor.
+            Last ned ferdig dokument klart til innsending.
+            Ingen redigering nødvendig.
           </p>
         </div>
+
       </section>
+
     </main>
   );
 }
