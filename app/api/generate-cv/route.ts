@@ -22,57 +22,48 @@ export async function POST(req: Request) {
     }
 
     const prompt = `
-Du er en erfaren norsk rekrutterer med lang erfaring fra ansettelsesprosesser.
+Du er norsk karriereveileder med erfaring fra rekruttering.
 
-Målet er å lage en CV som føles skrevet av en profesjonell kandidat — ikke av AI.
+MÅL:
+Skriv en profesjonell norsk CV som faktisk ville blitt godkjent av en recruiter.
 
-ABSOLUTTE REGLER:
-
-- Ingen generiske formuleringer
-- Ingen klisjeer
-- Ingen tomme fraser
-- Ingen selvskryt uten konkret innhold
-- Ingen AI-typiske formuleringer
-- Skriv kort, konkret og profesjonelt
-- Bruk naturlig norsk arbeidsspråk
-
-STIL:
-
-nivå: ${level}
-tone: ${tone}
-sektor: ${sector}
+REGLER:
+- Bruk KUN brukerens informasjon
+- Ikke legg til fakta
+- Ikke skriv generiske AI-frase
+- Unngå tomme ord som "motivert", "dedikert" uten konkret innhold
+- Bruk konkrete beskrivelser av oppgaver
 
 STRUKTUR:
 
 NAVN
-${name}
 
 PROFIL
-- Maks 3 korte linjer
-- Basert kun på erfaring
+Kort profesjonell oppsummering (3-4 setninger).
+Skal være konkret og basert på erfaring.
 
-KOMPETANSE
-- Punktliste
-- Kun konkrete ferdigheter som faktisk fremgår
+NØKKELKOMPETANSE
+Punktliste basert på faktisk erfaring.
 
 ARBEIDSERFARING
-- Strukturert
-- Fokus på ansvar og hva kandidaten faktisk gjorde
-- Ingen oppdiktede resultater
+STILLING – FIRMA
+Periode
+- Hva ble gjort
+- Hvordan jobbet personen
+- Konkret kontekst
 
 UTDANNING
-- Kun hvis oppgitt
+Kun hvis oppgitt.
 
-VIKTIG:
-Bruk KUN informasjonen under.
-Ikke legg til noe som ikke står her.
+BRUKERDATA:
 
-DATA:
+Navn:
+${name}
 
-Stilling det søkes på:
+Stilling (kontekst):
 ${job}
 
-Arbeidserfaring:
+Erfaring:
 ${experience}
 
 Utdanning:
