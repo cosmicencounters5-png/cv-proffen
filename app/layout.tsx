@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -52,19 +51,13 @@ export default function RootLayout({
         .eq("user_id", user.id)
         .single();
 
-      if (!entitlement?.expires_at) {
-        setTimeLeft(null);
-        return;
-      }
+      if (!entitlement?.expires_at) return;
 
       const expires = new Date(entitlement.expires_at);
       const now = new Date();
       const diffMs = expires.getTime() - now.getTime();
 
-      if (diffMs <= 0) {
-        setTimeLeft(null);
-        return;
-      }
+      if (diffMs <= 0) return;
 
       const hours = Math.floor(diffMs / (1000 * 60 * 60));
       const days = Math.floor(hours / 24);
@@ -84,9 +77,7 @@ export default function RootLayout({
       loadUser();
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [supabase]);
 
   async function logout() {
@@ -98,19 +89,24 @@ export default function RootLayout({
 
   return (
     <html lang="no">
-      <body style={{ margin: 0, background: "#f8f9fb" }}>
-        {/* HEADER */}
+      <body>
+
+        {/* ================= HEADER ================= */}
         <header
           style={{
-            background: "white",
-            borderBottom: "1px solid #e6e8ec",
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            backdropFilter: "blur(12px)",
+            background: "rgba(255,255,255,0.8)",
+            borderBottom: "1px solid #e5e7eb",
           }}
         >
           <div
             style={{
               maxWidth: "1200px",
               margin: "0 auto",
-              padding: "1.25rem 1rem",
+              padding: "0.9rem 1rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -125,7 +121,7 @@ export default function RootLayout({
                 height={64}
                 priority
                 style={{
-                  height: "40px",
+                  height: "42px",
                   width: "auto",
                 }}
               />
@@ -137,30 +133,16 @@ export default function RootLayout({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "1.25rem",
+                  gap: "1.2rem",
                   fontSize: "0.95rem",
                 }}
               >
-                <span
-                  style={{
-                    color: "#444",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <span style={{ color: "#64748b" }}>
                   God dag{greetingName ? `, ${greetingName}` : ""}
                   {timeLeft ? ` · ${timeLeft}` : ""}
                 </span>
 
-                <Link
-                  href="/cv"
-                  style={{
-                    textDecoration: "none",
-                    color: "#111",
-                    fontWeight: 500,
-                  }}
-                >
-                  Gå til CV
-                </Link>
+                <Link href="/cv">CV</Link>
 
                 <button
                   onClick={logout}
@@ -168,9 +150,7 @@ export default function RootLayout({
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#b00020",
-                    fontWeight: 500,
-                    padding: 0,
+                    color: "#ef4444",
                   }}
                 >
                   Logg ut
@@ -179,48 +159,38 @@ export default function RootLayout({
             )}
 
             {loggedIn === false && (
-              <nav style={{ display: "flex", gap: "1rem" }}>
-                <Link
-                  href="/login"
-                  style={{
-                    textDecoration: "none",
-                    color: "#111",
-                    fontWeight: 500,
-                  }}
-                >
-                  Logg inn
-                </Link>
+              <nav style={{ display: "flex", gap: "0.75rem" }}>
+                <Link href="/login">Logg inn</Link>
 
                 <Link
                   href="/register"
                   style={{
-                    textDecoration: "none",
-                    background: "#111",
+                    background: "#2563eb",
                     color: "white",
-                    padding: "0.45rem 0.9rem",
-                    borderRadius: "6px",
+                    padding: "0.45rem 1rem",
+                    borderRadius: "999px",
                     fontWeight: 600,
+                    textDecoration: "none",
                   }}
                 >
-                  Registrer deg
+                  Kom i gang
                 </Link>
               </nav>
             )}
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
+        {/* ================= CONTENT ================= */}
         <main>{children}</main>
 
-        {/* FOOTER */}
+        {/* ================= FOOTER ================= */}
         <footer
           style={{
             marginTop: "4rem",
             padding: "3rem 1rem",
-            background: "#f1f3f7",
-            borderTop: "1px solid #e6e8ec",
+            background: "#f1f5f9",
+            borderTop: "1px solid #e5e7eb",
             fontSize: "0.9rem",
-            color: "#444",
           }}
         >
           <div
@@ -234,28 +204,17 @@ export default function RootLayout({
           >
             <div>
               <strong>CV-Proffen</strong>
-              <p style={{ marginTop: "0.75rem", lineHeight: 1.6 }}>
+              <p>
                 Profesjonell CV og jobbsøknad på norsk.
-                <br />
                 Basert kun på dine egne opplysninger.
               </p>
             </div>
 
             <div>
-<p>
-  <Link href="/personvern">Personvern</Link>
-</p>
-              <p>
-                <Link href="/lage-cv">Hvordan lage CV</Link>
-              </p>
-              <p>
-                <Link href="/jobbsoknad">Hvordan skrive jobbsøknad</Link>
-              </p>
-              <p>
-                <Link href="/cv-offentlig-sektor">
-                  CV i offentlig sektor
-                </Link>
-              </p>
+              <p><Link href="/personvern">Personvern</Link></p>
+              <p><Link href="/lage-cv">Hvordan lage CV</Link></p>
+              <p><Link href="/jobbsoknad">Hvordan skrive jobbsøknad</Link></p>
+              <p><Link href="/cv-offentlig-sektor">CV i offentlig sektor</Link></p>
             </div>
           </div>
 
@@ -264,27 +223,15 @@ export default function RootLayout({
               maxWidth: "1200px",
               margin: "2rem auto 0",
               paddingTop: "1rem",
-              borderTop: "1px solid #ddd",
+              borderTop: "1px solid #e5e7eb",
               fontSize: "0.8rem",
-              color: "#666",
+              color: "#64748b",
             }}
           >
             © {new Date().getFullYear()} CV-Proffen
           </div>
         </footer>
 
-        {/* Microsoft Clarity */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "vc2wf9kprn");
-            `,
-          }}
-        />
       </body>
     </html>
   );
