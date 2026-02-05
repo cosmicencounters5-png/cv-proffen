@@ -9,6 +9,11 @@ export async function POST(req: Request) {
     const experience = String(formData.get("experience") || "").trim();
     const education = String(formData.get("education") || "").trim();
 
+    // NEW — style controls (optional hvis ikke sendt enda)
+    const level = String(formData.get("level") || "erfaren");
+    const tone = String(formData.get("tone") || "direkte");
+    const sector = String(formData.get("sector") || "privat");
+
     if (!name || !job || !experience) {
       return NextResponse.json(
         { error: "Manglende påkrevde felt" },
@@ -17,37 +22,54 @@ export async function POST(req: Request) {
     }
 
     const prompt = `
-Du er en erfaren norsk karriereveileder.
+Du er en erfaren norsk rekrutterer med lang erfaring fra ansettelsesprosesser.
 
-OPPGAVE:
-Strukturer og språkvask teksten til en profesjonell og fyldig CV.
+Målet er å lage en CV som føles skrevet av en profesjonell kandidat — ikke av AI.
 
-VIKTIGE REGLER:
-- Bruk KUN informasjonen brukeren har gitt
-- IKKE legg til nye fakta, erfaringer, utdanninger eller ferdigheter
-- Du kan utdype, presisere og omformulere eksisterende informasjon
-- IKKE anta noe som ikke er eksplisitt skrevet
-- Unngå klisjeer og tomme fraser
-- Skriv profesjonelt, korrekt norsk
-- Hvis informasjon mangler, utelat seksjonen helt
+ABSOLUTTE REGLER:
 
-CV-EN SKAL INNEHOLDE:
-1. Navn (øverst)
-2. Profil (3–4 setninger, basert på erfaring og ønsket stilling)
-3. Arbeidserfaring (tydelig strukturert i avsnitt)
-4. Utdanning (kun hvis oppgitt)
+- Ingen generiske formuleringer
+- Ingen klisjeer
+- Ingen tomme fraser
+- Ingen selvskryt uten konkret innhold
+- Ingen AI-typiske formuleringer
+- Skriv kort, konkret og profesjonelt
+- Bruk naturlig norsk arbeidsspråk
 
-RETNING:
-- Bruk hele setninger
-- Forklar ansvar og erfaring litt mer utfyllende
-- Ikke gjør teksten kortere enn nødvendig
+STIL:
 
-BRUKERENS OPPLYSNINGER:
+nivå: ${level}
+tone: ${tone}
+sektor: ${sector}
 
-Navn:
+STRUKTUR:
+
+NAVN
 ${name}
 
-Stilling det søkes på (kun som kontekst):
+PROFIL
+- Maks 3 korte linjer
+- Basert kun på erfaring
+
+KOMPETANSE
+- Punktliste
+- Kun konkrete ferdigheter som faktisk fremgår
+
+ARBEIDSERFARING
+- Strukturert
+- Fokus på ansvar og hva kandidaten faktisk gjorde
+- Ingen oppdiktede resultater
+
+UTDANNING
+- Kun hvis oppgitt
+
+VIKTIG:
+Bruk KUN informasjonen under.
+Ikke legg til noe som ikke står her.
+
+DATA:
+
+Stilling det søkes på:
 ${job}
 
 Arbeidserfaring:
@@ -56,8 +78,7 @@ ${experience}
 Utdanning:
 ${education}
 
-LEVERANSEN:
-Returner kun ferdig CV-tekst. Ingen forklaringer.
+Returner kun ferdig CV.
 `;
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -68,7 +89,7 @@ Returner kun ferdig CV-tekst. Ingen forklaringer.
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.3,
+        temperature: 0.2, // lavere = mindre AI-vibes
         messages: [{ role: "user", content: prompt }],
       }),
     });
