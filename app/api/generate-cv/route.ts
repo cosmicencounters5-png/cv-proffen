@@ -9,11 +9,6 @@ export async function POST(req: Request) {
     const experience = String(formData.get("experience") || "").trim();
     const education = String(formData.get("education") || "").trim();
 
-    // NEW — style controls (optional hvis ikke sendt enda)
-    const level = String(formData.get("level") || "erfaren");
-    const tone = String(formData.get("tone") || "direkte");
-    const sector = String(formData.get("sector") || "privat");
-
     if (!name || !job || !experience) {
       return NextResponse.json(
         { error: "Manglende påkrevde felt" },
@@ -21,58 +16,57 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `
-Du er norsk karriereveileder og erfaren recruiter.
+    // 🚀 SYSTEM PROMPT = hemmelig sauce
+    const systemPrompt = `
+Du er en norsk senior recruiter med erfaring fra privat og offentlig sektor.
 
-MÅL:
-Lag en profesjonell norsk CV som føles skrevet av en menneskelig rådgiver.
+Du skriver CV slik norske arbeidsgivere forventer.
 
 KRITISKE REGLER:
 
-- Bruk KUN informasjon brukeren har gitt.
-- IKKE legg til ferdigheter, erfaringer eller fakta.
-- IKKE skriv generiske AI-setninger.
-- Unngå tomme ord som:
-  "motivert", "hardtarbeidende", "resultatorientert"
-  uten konkret kontekst.
+- Ingen AI-klisjeer.
+- Ingen generiske fraser.
+- Ingen tomme buzzwords.
+- Ingen oppdiktet informasjon.
+- Kun brukerens faktiske opplysninger.
 
-STIL:
+SKRIV SOM:
 
-- Profesjonell norsk tone.
-- Konkret språk.
-- Recruiter-perspektiv.
-- Ingen fluff.
+- profesjonell karriererådgiver
+- konkret
+- tydelig
+- norsk naturlig språk
+
+ALDRI skriv:
+
+"Motivert kandidat"
+"Resultatorientert person"
+"Hardtarbeidende"
+
+med mindre det vises gjennom konkret handling.
+`;
+
+    // 🚀 USER PROMPT
+    const userPrompt = `
+Lag en norsk CV.
 
 STRUKTUR:
 
-NAVN
+${name}
 
 PROFIL
-Kort, konkret oppsummering basert på erfaring og ønsket stilling.
-Fokus på hva kandidaten faktisk gjør.
+Kort profesjonell oppsummering basert på erfaring og ønsket stilling.
 
 KJERNEKOMPETANSE
-Punktliste basert kun på oppgitt erfaring.
+Kort punktliste basert på erfaring.
 
 ERFARING
-
-STILLING – ARBEIDSGIVER (hvis oppgitt)
-Periode (hvis oppgitt)
-
-Ansvar:
-- konkrete arbeidsoppgaver
-
-Resultat / verdi:
-- hvordan arbeidet bidro i praksis
-- konkret kontekst
+Bryt ned erfaring til konkrete ansvar og praktiske bidrag.
 
 UTDANNING
 Kun hvis oppgitt.
 
-BRUKERDATA:
-
-Navn:
-${name}
+DATA:
 
 Stilling:
 ${job}
@@ -82,8 +76,6 @@ ${experience}
 
 Utdanning:
 ${education}
-
-Returner kun ferdig CV.
 `;
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -94,8 +86,11 @@ Returner kun ferdig CV.
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.2, // lavere = mindre AI-vibes
-        messages: [{ role: "user", content: prompt }],
+        temperature: 0.15, // 🔥 ekstremt viktig (anti AI vibe)
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
       }),
     });
 
@@ -110,8 +105,10 @@ Returner kun ferdig CV.
     }
 
     return NextResponse.json({ cv });
+
   } catch (err) {
     console.error(err);
+
     return NextResponse.json(
       { error: "Serverfeil" },
       { status: 500 }
