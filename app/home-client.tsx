@@ -66,7 +66,7 @@ export default function HomeClient() {
     if (ctaState === "has-access") {
       return (
         <Link href="/cv">
-          <button className="cta">Gå til CV-generator</button>
+          <button className="cta">Fortsett der du slapp</button>
         </Link>
       );
     }
@@ -82,7 +82,7 @@ export default function HomeClient() {
     <main>
 
       {/* HERO */}
-      <section className="hero">
+      <section className="hero elite-hero">
         <div className="hero-inner">
 
           <span className="hero-badge">
@@ -90,18 +90,22 @@ export default function HomeClient() {
           </span>
 
           <h1>
-            Lag en profesjonell CV og jobbsøknad
+            CV som faktisk fungerer
             <br />
-            som faktisk fungerer i Norge
+            i norsk arbeidsliv
           </h1>
 
           <p className="hero-description">
-            CV-Proffen hjelper deg å skrive en strukturert og målrettet CV
-            basert kun på dine egne opplysninger. Ingen generiske tekster.
-            Ingen oppdiktede ferdigheter.
+            Slutt på generiske AI-CV-er. CV-Proffen lager strukturert,
+            profesjonell CV og jobbsøknad basert kun på dine egne
+            opplysninger — tilpasset norske arbeidsgivere.
           </p>
 
           {renderCta()}
+
+          <p className="hero-microtrust">
+            ✔ Ingen abonnement • ✔ Ferdig PDF • ✔ Norsk struktur
+          </p>
 
         </div>
       </section>
@@ -119,23 +123,23 @@ export default function HomeClient() {
         <div className="feature-card highlight">
           <h3>Kun dine opplysninger</h3>
           <p>
-            CV-Proffen legger aldri til informasjon du ikke har oppgitt.
-            Resultatet er en troverdig og profesjonell CV.
+            Ingen AI som finner på ting. CV-Proffen bruker kun det du
+            selv skriver — og gjør det profesjonelt.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>Tilpasset stillingen</h3>
+          <h3>Norsk struktur</h3>
           <p>
-            Struktur og språk optimaliseres mot jobben du søker,
-            slik norske arbeidsgivere forventer.
+            Optimalisert for norske arbeidsgivere og rekrutterere —
+            ikke amerikanske CV-mal-generatorer.
           </p>
         </div>
 
         <div className="feature-card">
-          <h3>PDF klar på sekunder</h3>
+          <h3>Ferdig dokument</h3>
           <p>
-            Last ned ferdig dokument klart til innsending.
+            Last ned profesjonell PDF klar til innsending.
             Ingen redigering nødvendig.
           </p>
         </div>
