@@ -242,6 +242,9 @@ export default function RootLayout({
             </div>
 
             <div>
+<p>
+  <Link href="/personvern">Personvern</Link>
+</p>
               <p>
                 <Link href="/lage-cv">Hvordan lage CV</Link>
               </p>
