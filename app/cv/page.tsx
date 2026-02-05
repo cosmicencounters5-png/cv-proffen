@@ -35,6 +35,7 @@ function formatText(text: string) {
 
 export default function CvPage() {
   const router = useRouter();
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -86,11 +87,7 @@ export default function CvPage() {
           const hours = Math.floor(diffMs / (1000 * 60 * 60));
           const days = Math.floor(hours / 24);
 
-          if (days >= 1) {
-            setTimeLeft(`${days} dag${days > 1 ? "er" : ""}`);
-          } else {
-            setTimeLeft(`${hours} time${hours !== 1 ? "r" : ""}`);
-          }
+          setTimeLeft(days >= 1 ? `${days} dager igjen` : `${hours} timer igjen`);
         }
       }
 
@@ -119,41 +116,32 @@ export default function CvPage() {
     setGenerating(false);
   }
 
-  if (loading) {
-    return <p style={{ padding: "2rem" }}>Laster…</p>;
-  }
-
-  if (!hasAccess) {
-    return null;
-  }
+  if (loading) return <p style={{ padding: "2rem" }}>Laster…</p>;
+  if (!hasAccess) return null;
 
   return (
     <main className="cv-page">
       <div className="cv-container">
-        {/* VENSTRE */}
+
+        {/* LEFT PANEL */}
         <form action={generate} className="cv-form">
-          <h1 style={{ marginBottom: "0.25rem" }}>
-            {mode === "cv" ? "Lag profesjonell CV" : "Skriv jobbsøknad"}
-          </h1>
 
-          {timeLeft && (
-            <p
-              style={{
-                marginBottom: "1.25rem",
-                fontSize: "0.9rem",
-                color: "#666",
-              }}
-            >
-              ⏳ Tilgangen din varer i {timeLeft}
-            </p>
-          )}
+          <div style={{ marginBottom: "1.25rem" }}>
+            <h1>
+              {mode === "cv"
+                ? "CV Generator"
+                : "Jobbsøknad Generator"}
+            </h1>
 
-          <p style={{ marginBottom: "1.25rem", color: "#555" }}>
-            Fyll inn opplysningene dine nedenfor. Teksten genereres kun
-            basert på det du selv skriver inn.
-          </p>
+            {timeLeft && (
+              <p className="access-badge">
+                ⏳ Tilgang aktiv — {timeLeft}
+              </p>
+            )}
+          </div>
 
           <div className="mode-toggle">
+
             <button
               type="button"
               className={mode === "cv" ? "active" : ""}
@@ -179,6 +167,7 @@ export default function CvPage() {
             >
               Søknad
             </button>
+
           </div>
 
           <label>
@@ -196,71 +185,52 @@ export default function CvPage() {
             <textarea
               name="experience"
               rows={6}
-              placeholder="Beskriv kort dine viktigste arbeidsoppgaver og resultater"
+              placeholder="Beskriv konkrete oppgaver og ansvar..."
               required
             />
           </label>
 
           <label>
             Utdanning (valgfritt)
-            <textarea
-              name="education"
-              rows={4}
-              placeholder="Utdanning, kurs eller sertifiseringer"
-            />
+            <textarea name="education" rows={4} />
           </label>
 
-          <button type="submit" className="primary" disabled={generating}>
-            {generating
-              ? "Genererer…"
-              : mode === "cv"
-              ? "Generer CV"
-              : "Generer søknad"}
+          <button className="primary" disabled={generating}>
+            {generating ? "AI skriver..." : "Generer"}
           </button>
+
         </form>
 
-        {/* HØYRE */}
+        {/* RIGHT PANEL */}
         <section className="cv-result">
+
           <div className="cv-result-header">
             <h2>Forhåndsvisning</h2>
+
             {result && (
-              <button onClick={() => window.print()} className="secondary">
+              <button
+                className="secondary"
+                onClick={() => window.print()}
+              >
                 Last ned PDF
               </button>
             )}
+
           </div>
 
           <div id="cv-print" className="cv-document">
             {result ? (
               formatText(result)
             ) : (
-              <p style={{ color: "#666" }}>
-                Resultatet vises her etter at du har generert teksten.
+              <p className="placeholder">
+                Resultatet vises her etter generering.
               </p>
             )}
           </div>
-        </section>
-      </div>
 
-      {/* PRINT */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #cv-print, #cv-print * {
-            visibility: visible;
-          }
-          #cv-print {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 2cm;
-            font-size: 12pt;
-          }
-        }
-      `}</style>
+        </section>
+
+      </div>
     </main>
   );
 }
