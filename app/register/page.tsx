@@ -148,6 +148,10 @@ export default function RegisterPage() {
             fontWeight: 600,
           }}
         >
+<p style={{ fontSize:"0.8rem", marginTop:"1rem" }}>
+  Ved registrering godtar du vår{" "}
+  <Link href="/personvern">personvernerklæring</Link>.
+</p>
           {loading ? "Oppretter konto…" : "Opprett konto"}
         </button>
 
