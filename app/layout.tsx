@@ -115,16 +115,16 @@ export default function RootLayout({
             {/* LOGO */}
             <Link href="/" style={{ display: "flex", alignItems: "center" }}>
               <Image
-                src="/A670EAF8-1A82-42CD-9CB9-687EA383339E.png"
-                alt="CV-Proffen"
-                width={240}
-                height={64}
-                priority
-                style={{
-                  height: "42px",
-                  width: "auto",
-                }}
-              />
+  src="/A670EAF8-1A82-42CD-9CB9-687EA383339E.png"
+  alt="CV-Proffen"
+  width={320}
+  height={80}
+  priority
+  style={{
+    height: "56px",
+    width: "auto",
+  }}
+/>
             </Link>
 
             {/* NAV */}
